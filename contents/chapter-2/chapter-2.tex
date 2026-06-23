@@ -1,35 +1,154 @@
 \chapter{Tinjauan Pustaka dan Dasar Teori}
 
 \section{Tinjauan Pustaka}
+\subsection{Penelitian Komputasional pada Jaringan Sanad Hadis}
+\subsubsection{Analisis Jaringan Sanad}
 
-\subsection{Analisis Jaringan Sanad}
+Penelitian komputasional pada sanad hadis berkembang dari sekadar pembangunan dataset menuju pemodelan jaringan berbasis graf dan penerapan Social Network Analysis (SNA) untuk mengukur posisi tiap perawi.
 
-Upaya komputasional untuk menganalisis sanad hadis secara sistematis telah berkembang dalam beberapa tahun terakhir, mencakup pembangunan dataset, pemodelan graf, hingga penerapan Social Network Analysis (SNA).
+Mghari \textit{et al} (2022) membangun Sanadset 650K, korpus hadis yang memuat 650.986 entri dari 926 kitab berbahasa Arab menggunakan \textit{web scraping} dan \textit{web crawling} berbasis Python (\textit{Beautiful Soup} dan \textit{Selenium}). Setiap entri menyertakan teks hadis lengkap, matan, daftar perawi, dan urutan rantai sanad. Dataset ini dipublikasikan di repositori Mendeley Data untuk mendukung klasifikasi hadis (sahih/lemah), pengenalan perawi, pemodelan linguistik Arabic NLP, dan pembangunan graf perawi \cite{MGHARI2022108540}. Skala dan cakupannya yang mencapai ratusan kitab menjadikan Sanadset 650K sumber data paling representatif untuk penelitian jaringan transmisi sanad.
 
-Salah satu kontribusi penting dalam bidang ini adalah pembangunan Sanadset 650K oleh Mghari \textit{et al} (2022). Dataset ini memuat lebih dari 650.986 entri yang dihimpun dari 926 kitab hadis berbahasa Arab historis menggunakan teknik \textit{web scraping} dan \textit{web crawling} berbasis Python (\textit{Beautiful Soup} dan \textit{Selenium}). Setiap entri menyertakan teks hadis lengkap, matan, daftar perawi, dan urutan rantai sanad. Dataset ini dipublikasikan secara terbuka di repositori Mendeley Data dan dirancang untuk mendukung berbagai penelitian lanjutan, termasuk klasifikasi hadis (sahih/lemah), pengenalan perawi, pemodelan linguistik Arabic NLP, hingga pembangunan graf perawi \cite{MGHARI2022108540}. Keunggulan utama Sanadset 650K terletak pada skala dan cakupannya yang luas dari ratusan kitab hadis, menjadikannya fondasi yang representatif bagi penelitian berbasis jaringan transmisi ilmu keagamaan Islam.
+\begin{sloppypar}
+Farooqi \textit{et al} (2024) memperkenalkan Multi-IsnadSet (MIS), dataset yang merepresentasikan jaringan transmisi Sahih Muslim sebagai graf berarah dengan 2.092 node (perawi) dan 77.797 edge \cite{FAROOQI2024110439}. Untuk membangun dan menganalisis jaringan tersebut, peneliti menggunakan NetworkX, Neo4j, Gephi, dan CytoScape. Studi ini menunjukkan bahwa jaringan sanad dapat dimodelkan sebagai knowledge graph di Neo4j dan dianalisis dengan metrik SNA (degree, betweenness, eigenvector centrality) untuk mengidentifikasi perawi berpengaruh \cite{FAROOQI2024110439}. Namun, visualisasi yang dihasilkan bersifat statis dan bergantung pada perangkat lunak desktop, sehingga pengguna umum tidak dapat mengaksesnya tanpa instalasi khusus.
+\end{sloppypar}
 
-Dalam konteks pemodelan graf yang lebih terstruktur, Farooqi \textit{et al} (2024) memperkenalkan Multi-IsnadSet (MIS), sebuah dataset yang merepresentasikan jaringan transmisi Sahih Muslim dengan struktur graf berarah. Dataset ini terdiri dari 2.092 node (perawi) dan 77.797 edge yang merepresentasikan hubungan transmisi hadis antar perawi \cite{FAROOQI2024110439}. Untuk membangun dan menganalisis jaringan tersebut, peneliti menggunakan empat perangkat: library Python NetworkX, basis data graf Neo4j, serta dua alat analisis jaringan, yaitu Gephi dan CytoScape. Pendekatan ini mendemonstrasikan bahwa jaringan sanad dapat dimodelkan secara komputasional sebagai knowledge graph dalam Neo4j, dan dianalisis menggunakan metrik SNA seperti degree centrality, betweenness centrality, dan eigenvector centrality untuk mengidentifikasi perawi yang paling berpengaruh \cite{FAROOQI2024110439}. Namun, visualisasi yang dihasilkan bersifat statis dan bergantung pada perangkat lunak desktop seperti Gephi dan CytoScape, sehingga tidak dapat diakses secara luas oleh pengguna umum tanpa instalasi khusus.
+Shuaib \textit{et al} (2022) menerapkan \textit{trophic analysis}, metode yang diadaptasi dari ekologi makanan, terhadap \textit{Hadith Social Network} dari corpus Gawāmi' al-Kalim yang memuat 447.205 hadis dan 49.309 perawi unik dengan 294.303 edge berarah, mencakup sembilan abad sejarah transmisi \cite{Shuaib2022}. Jaringan sanad diperlakukan sebagai sistem difusi informasi hierarkis, dengan Nabi Muhammad SAW sebagai node sumber (basal node) dan tiap lapisan transmisi mencerminkan jarak temporal dari sumber. Hasilnya menunjukkan bahwa jaringan sanad bersifat hierarkis dan sekuensial, dan analisis berbasis graf mengungkap informasi temporal yang tidak tercatat dalam teks historis \cite{Shuaib2022}. Shuaib \textit{et al} menyebutkan potensi penggabungan analisis trofik dengan metrik sentralitas SNA untuk mengidentifikasi perawi berpengaruh pada periode tertentu, sebuah arah yang belum diwujudkan dalam antarmuka yang dapat dieksplorasi pengguna.
 
-Shuaib \textit{et al} (2022) mengambil perspektif berbeda dengan menerapkan \textit{trophic analysis}, metode yang diadaptasi dari ekologi makanan terhadap \textit{Hadith Social Network} yang dibangun dari corpus Gawāmi' al-Kalim, yang memuat 447.205 hadis dan 49.309 perawi unik dengan 294.303 edge berarah, mencakup rentang sembilan abad sejarah transmisi \cite{Shuaib2022}. Penelitian ini memperlakukan jaringan sanad sebagai sistem difusi informasi hierarkis, di mana Nabi Muhammad SAW menjadi node sumber (basal node), dan setiap lapisan transmisi mencerminkan jarak temporal dari sumber. Studi ini membuktikan bahwa struktur jaringan sanad secara inheren hierarkis dan sekuensial, serta bahwa analisis kuantitatif berbasis graf mampu mengungkap informasi temporal yang tidak tersedia secara eksplisit dalam teks historis \cite{Shuaib2022}. Shuaib \textit{et al} juga secara eksplisit menyebutkan potensi penggabungan analisis trofik dengan metrik sentralitas SNA untuk mengidentifikasi perawi berpengaruh pada periode tertentu, sebuah arah yang belum diwujudkan dalam antarmuka yang dapat dieksplorasi pengguna.
+\subsubsection{Knowledge Graph untuk Representasi Jaringan Perawi}
 
-\subsection{Knowledge Graph untuk Representasi Jaringan Perawi}
+Mahmoud \textit{et al} (2024) memperkenalkan NarratorsKG sebagai knowledge graph pertama yang didedikasikan untuk perawi hadis \cite{Mahmoud2024}. KG ini dibangun sebagai graf berarah G = (V, E) dengan dua jenis node: node perawi (narrator nodes) dan node bentuk penampilan nama (appearance form nodes). NarratorsKG memuat 79.256 node, terdiri dari 18.298 node perawi dan 60.958 node bentuk penampilan, serta 197.183 edge yang mencakup 70.415 edge perawi--penampilan dan 126.768 edge hubungan "meriwayatkan dari" \cite{Mahmoud2024}.
 
-Representasi data relasional sanad dalam bentuk knowledge graph (KG) telah menjadi tren yang semakin kuat dalam penelitian hadis komputasional. Mahmoud \textit{et al} (2024) memperkenalkan NarratorsKG, yang diklaim sebagai knowledge graph pertama yang didedikasikan khusus untuk perawi hadis \cite{Mahmoud2024}. KG ini dibangun sebagai graf berarah G = (V, E) dengan dua jenis node: node perawi (narrator nodes) dan node bentuk penampilan nama (appearance form nodes). NarratorsKG memuat 79.256 node terdiri dari 18.298 node perawi dan 60.958 node bentuk penampilan serta 197.183 edge, yang terdiri dari 70.415 edge yang menghubungkan perawi dengan bentuk penampilan namanya, dan 126.768 edge yang merepresentasikan hubungan "meriwayatkan dari" antar perawi \cite{Mahmoud2024}.
+KG ini digunakan bersama pendekatan graph query embedding dua tahap: tahap pertama menghasilkan embedding dari struktur graf sanad, lalu tahap kedua menggunakan AraBERT sebagai reranker untuk mengidentifikasi perawi berdasarkan informasi biografis (nama lengkap, teknonym, tahun wafat, negara, dan silsilah). Diuji pada AR-Sanad 280K-v2, pendekatan ini mencapai akurasi 95,2\% pada validation set \cite{Mahmoud2024}. KG berstruktur ini meningkatkan akurasi identifikasi perawi dibanding pendekatan berbasis teks biasa, tetapi NarratorsKG dirancang sebagai sumber daya internal untuk tugas NLP, bukan sistem yang dapat dieksplorasi pengguna akhir.
 
-KG ini kemudian digunakan bersama pendekatan graph query embedding dua tahap: tahap pertama menghasilkan query embedding dari struktur graf sanad, lalu tahap kedua menggunakan AraBERT sebagai reranker untuk mengidentifikasi perawi yang paling sesuai berdasarkan informasi biografis (nama lengkap, teknonym, tahun wafat, negara, dan silsilah). Pendekatan ini diuji pada dataset AR-Sanad 280K-v2 dan mencapai akurasi 94,6\% pada validation set \cite{Mahmoud2024}. Penelitian ini membuktikan bahwa representasi semantik terstruktur dalam bentuk KG secara signifikan meningkatkan kemampuan komputasi untuk memahami relasi antar perawi dibandingkan pendekatan berbasis teks biasa. Kendati demikian, NarratorsKG dirancang sebagai sumber daya internal untuk tugas NLP, bukan sebagai sistem yang dapat diakses dan dieksplorasi secara interaktif oleh pengguna akhir.
+\subsubsection{Social Network Analysis dan Metrik Sentralitas}
 
-\subsection{Social Network Analysis dan Metrik Sentralitas}
+\begin{sloppypar}
+Studi SNA pada jaringan perawi hadis menunjukkan pola yang berulang pada berbagai korpus. Pada Sahih Bukhari dan Sahih Muslim, degree centrality mengidentifikasi perawi paling aktif seperti Abu Hurayra dan Anas bin Malik, betweenness centrality mengungkap posisi "jembatan" tokoh seperti Imam Malik ibn Anas, dan PageRank menempatkan Az-Zuhri serta Sufyan bin Uyaynah sebagai perawi paling berpengaruh secara struktural \cite{Mghari2024Narrator2Vec}. Tiap metrik menangkap dimensi pengaruh yang berbeda, sehingga penggunaannya bersama memberikan gambaran posisi perawi yang lebih lengkap.
 
-Penerapan Social Network Analysis (SNA) pada jaringan perawi hadis telah menghasilkan temuan yang konsisten. Sebagaimana dirangkum Mghari et al. (2024), studi-studi terdahulu pada Sahih Bukhari dan Sahih Muslim menunjukkan bahwa degree centrality mengidentifikasi perawi paling aktif seperti Abu Hurayra dan Anas bin Malik, betweenness centrality mengungkap posisi "jembatan" tokoh seperti Imam Malik ibn Anas, dan PageRank menempatkan Az-Zuhri serta Sufyan bin Uyaynah sebagai perawi paling berpengaruh secara struktural (Mghari et al., 2024).
+Mghari \textit{et al} (2024) menawarkan alternatif melalui Narrator2Vec, adaptasi Skip-Gram Word2Vec yang melatih representasi vektor 100 dimensi dari nama perawi pada lebih dari 650.000 hadis. Model ini mengidentifikasi nama-nama berbeda dari perawi yang sama dan memprediksi perawi yang hilang dalam rantai terputus \cite{Mghari2024Narrator2Vec}. Narrator2Vec tidak menghasilkan skor kuantitatif per perawi yang dapat ditampilkan dan dibandingkan pengguna, sehingga metrik sentralitas lebih sesuai untuk eksplorasi interaktif jaringan perawi.
+\end{sloppypar}
 
+\subsubsection{Otomatisasi Analisis Sanad dengan Pendekatan Machine Learning}
 
-Mghari et al. (2024) sendiri menawarkan pendekatan berbeda melalui Narrator2Vec, adaptasi Skip-Gram Word2Vec yang melatih representasi vektor 100 dimensi dari nama perawi pada lebih dari 650.000 hadis. Model ini mampu mengidentifikasi nama-nama berbeda dari perawi yang sama dan memprediksi perawi yang hilang dalam rantai terputus, namun tidak menghasilkan skor kuantitatif per perawi yang dapat ditampilkan dan dibandingkan langsung oleh pengguna seperti yang dimungkinkan metrik sentralitas (Mghari et al., 2024).
+Hendawi \textit{et al} (2024) mengusulkan metode berbasis machine learning untuk memverifikasi kesinambungan sanad pada hadis terputus (disconnected hadith), dengan memanfaatkan data biografis perawi, meliputi tanggal lahir dan wafat, pergerakan geografis, serta penilaian ulama dari ilmu Jarh wa Ta'dil sebagai fitur prediksi \cite{10974901}. Random Forest Classifier dan HistGradientBoosting Classifier mencapai akurasi tertinggi, masing-masing 96,55\% dan 93,16\%, melampaui AraBERT (underfitting karena dataset kecil) dan ChatGPT yang hanya mencapai 77,23\% \cite{10974901}. Hasil ini menunjukkan bahwa tugas verifikasi sanad lebih bergantung pada data biografis spesifik daripada kemampuan pemahaman bahasa umum, dan memperkuat kebutuhan representasi data perawi yang terstruktur sebagai landasan pembangunan knowledge graph.
 
-Landasan teoritis mengapa diperlukan beragam metrik dikemukakan López Werner (2025): setiap metrik menangkap dimensi pengaruh yang berbeda dan tidak saling menggantikan — betweenness menandai aktor perantara antar kelompok (gatekeeper), closeness mengungkap aktor efisien dengan jangkauan terpendek ke seluruh jaringan, dan eigenvector mencerminkan pengaruh berbasis kualitas koneksi, di mana seorang aktor dianggap berpengaruh jika terhubung dengan aktor lain yang juga berpengaruh (López Werner, 2025). Kerangka ini relevan untuk memahami ragam peran perawi dalam jaringan sanad: pengaruh tidak hanya datang dari jumlah riwayat, tetapi juga dari posisi sebagai penghubung antar generasi dan wilayah.
+\begin{table}[H]
+\centering
+\caption{Perbandingan Studi Dataset Hadis}
+\label{tab:ringkasan-pustaka}
+\renewcommand{\arraystretch}{1.3}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Peneliti (Tahun)}} & \multicolumn{1}{c|}{\textbf{Dataset Utama}} & \multicolumn{1}{c|}{\textbf{Tujuan}} & \multicolumn{1}{c|}{\textbf{Metode}} & \multicolumn{1}{c|}{\textbf{Alat/Platform}} & \multicolumn{1}{c|}{\textbf{Hasil Utama}} & \multicolumn{1}{c|}{\textbf{Keterbatasan}} \\
+\hline
+Mghari, Bouras \& El Hibaoui (2022) \cite{MGHARI2022108540} &
+Sanadset 650K (926 kitab) &
+Membangun dataset sanad skala besar terbuka &
+\textit{Web scraping} \& \textit{crawling} + \textit{tagging} NLP (SANAD/MATN/NAR) &
+Python (\textit{BeautifulSoup}, \textit{Selenium}) &
+Korpus 650.986 entri dengan matan, sanad, dan perawi terpisah; fondasi penelitian sanad komputasional &
+Hanya dataset mentah; tanpa visualisasi graf maupun analisis jaringan \\
+\hline
+Mghari, Bouras \& El Hibaoui (2024) \cite{Mghari2024Narrator2Vec} &
+Sanadset 650K ($\pm$650 rb hadis) &
+Membangun representasi vektor perawi &
+Word embedding Skip-Gram Word2Vec (Narrator2Vec, 100 dimensi) &
+Python (Gensim), t-SNE &
+Mampu mengidentifikasi nama berbeda dari perawi yang sama \& memprediksi perawi hilang; akurasi top-1 tinggi &
+Tidak menghasilkan skor sentralitas kuantitatif per perawi yang dapat dibandingkan pengguna \\
+\hline
+Farooqi, Malick, Shaikh \& Akhunzada (2024) \cite{FAROOQI2024110439} &
+Multi-IsnadSet (Sahih Muslim, 2.092 perawi) &
+Menyediakan dataset graf multi-isnad \& knowledge graph &
+Graf berarah + knowledge graph; menyarankan SNA &
+Neo4j, Gephi, CytoScape, NetworkX &
+2.092 node \& 77.797 edge; KG dibangun di Neo4j; sediakan basis untuk SNA &
+Visualisasi statis; bergantung perangkat desktop (Gephi/CytoScape); tidak interaktif/berbasis web \\
+\hline
+Shuaib, Syed, Halawi \& Saquib (2022) \cite{Shuaib2022} &
+Gaw\={a}mi' al-Kalim (447.205 hadis, 49.309 perawi) &
+Merekonstruksi informasi temporal dari jaringan &
+\textit{Trophic analysis} (adaptasi ekologi) &
+Python, NetworkX &
+\textit{Trophic level} berkorelasi dengan tahun wafat perawi; jaringan terbukti hierarkis \& sekuensial &
+Tidak memakai metrik sentralitas; tanpa antarmuka eksplorasi interaktif \\
+\hline
+Mahmoud, Nabil, Saif \& Torki (2024) \cite{Mahmoud2024} &
+AR-Sanad 280K-v2 (279.625 sanad) &
+Disambiguasi perawi dalam sanad &
+Knowledge graph (NarratorsKG) + graph query embedding + AraBERT &
+NarratorsKG, AraBERT, Python &
+KG perawi pertama (79.256 node, 197.183 edge); akurasi disambiguasi 95,2\% &
+KG untuk NLP internal; tidak tersedia sebagai antarmuka publik yang dapat dieksplorasi \\
+\hline
+Hendawi, Torki, Elmasry \& Khalafallah (2024) \cite{10974901} &
+Data biografis perawi (Mousoua al-Hadith) &
+Verifikasi kesinambungan sanad terputus &
+Machine learning (TF-IDF + RF, HistGradBoost) &
+Python (Scikit-learn), AraBERT &
+Random Forest 96,55\% \& HistGradBoost 93,16\%; ungguli ChatGPT (77,23\%) &
+Dataset kecil (503 paragraf); tidak mencakup semua alasan terputusnya sanad \\
+\hline
+\end{tabular}%
+}
+\end{table}
 
-\subsection{ Otomatisasi Analisis Sanad dengan Pendekatan Machine Learning}
+Sanadset 650K \cite{MGHARI2022108540} dipilih sebagai data utama penelitian ini. Dengan 650.986 entri dari 926 kitab, dataset ini lebih besar dari Multi-IsnadSet maupun AR-Sanad 280K, bersifat terbuka, dan telah terbukti digunakan dalam berbagai penelitian lanjutan. Strukturnya memisahkan komponen matan, sanad, dan perawi, sehingga memudahkan transformasi ke knowledge graph. Penelitian ini mengintegrasikan knowledge graph perawi dengan analisis sentralitas SNA ke dalam front-end berbasis web yang dapat dijelajahi tanpa perangkat lunak khusus.
 
-Di luar pemodelan graf dan SNA, sejumlah penelitian mengeksplorasi otomatisasi analisis kesinambungan sanad. Hendawi \textit{et al} (2024) mengusulkan metode berbasis machine learning untuk memverifikasi kesinambungan sanad pada hadis yang terputus (disconnected hadith), dengan memanfaatkan data biografis perawi — meliputi tanggal lahir dan wafat, pergerakan geografis, serta penilaian ulama dari ilmu Jarh wa Ta'dil — sebagai fitur prediksi \cite{10974901}. Di antara berbagai model yang diuji, Random Forest Classifier dan HistGradientBoosting Classifier mencapai akurasi tertinggi, masing-masing sebesar 96,55\% dan 93,16\%, melampaui model deep learning berbasis transformer seperti AraBERT (yang mengalami underfitting karena keterbatasan ukuran data) maupun model generatif seperti ChatGPT yang hanya mencapai 77,23\% \cite{10974901}. Temuan ini menegaskan bahwa metode machine learning konvensional lebih sesuai dibanding model bahasa besar untuk tugas hadis yang memerlukan data historis dan kontekstual yang sangat spesifik. Hal ini sekaligus memperkuat pentingnya membangun representasi data perawi yang terstruktur dan terstandar, sebuah kebutuhan yang juga menjadi landasan pembangunan knowledge graph dalam penelitian ini.
+\subsection{Visualisasi Perawi Dalam Bentuk Graf}
+
+Beberapa penelitian merepresentasikan rantai perawi (isnad/sanad) sebagai graf berarah, dengan tiap perawi sebagai simpul (node) dan tiap relasi periwayatan sebagai sisi (directed edge). Model ini memungkinkan isnād yang dibaca linear dievaluasi sebagai jaringan berlapis yang mencerminkan hubungan historis antar perawi \cite{ahmad2025hadith}. Saraçoğlu menerapkan analisis jaringan sosial terhadap isnād dalam kitab Kit\={a}bu't-\d{T}abaqa\={a}ti'l-Kab\={i}r karya Ibn Sa'd, dengan mengonversi 2.258 rantai isnād dari hampir 2.000 perawi menjadi data terstruktur berbasis pasangan source--target \cite{saraccougluvisualization}. Visualisasi dilakukan menggunakan perangkat lunak seperti Pajek, Gephi, dan Isnalyser, di mana perawi berperan sebagai aktor dan relasi periwayatan melalui lafaz seperti akhbaran\={a}, \d{h}addathan\={a}, dan 'an berperan sebagai ikatan. Penelitian tersebut juga menyoroti tantangan visualisasi jaringan historis jangka panjang, khususnya dalam menata kronologi aliran informasi dan menangani panjangnya nama-nama perawi dalam bahasa Arab \cite{saraccougluvisualization}.
+
+Pendekatan serupa dikembangkan melalui sistem berbasis web bernama HadithNet, yang mengotomatisasi identifikasi nama perawi dan menghasilkan rantai perawi kronologis pada teks hadis terjemahan Melayu menggunakan Django, MySQL, dan pustaka Graphviz \cite{alias2024hadithnet}. Sistem ini memanfaatkan teknik preprocessing, POS tagging, dan Named Entity Recognition (NER), serta mencapai akurasi tinggi dalam identifikasi nama perawi dengan presisi 99,37\%, meskipun masih menghadapi kendala dalam memvisualisasikan rantai perawi yang kompleks dan bercabang banyak. Penelitian ini juga merangkum beberapa pendekatan visualisasi terdahulu, seperti graf jaringan jarang (sparse network graph) untuk menghubungkan sepuluh perawi paling berpengaruh, serta jaringan berskala besar yang dibangun menggunakan pustaka Python seperti NetworkX, yang menunjukkan bahwa kompleksitas keterhubungan menjadi tantangan utama dalam interpretasi visual \cite{alias2024hadithnet}.
+
+Ahmad dkk.\ \cite{ahmad2025hadith} menunjukkan bahwa transformasi isnād menjadi graf berarah memungkinkan penerapan metrik analisis jaringan, seperti connectivity, chain depth, deteksi cluster, bridge narrators, dan sentralitas (betweenness, eigenvector, closeness), untuk mengidentifikasi pola, klaster regional, dan anomali struktural dalam rantai periwayatan. Representasi ini memungkinkan sarjana melihat keseluruhan jaringan isnād sekaligus, membandingkan jalur kanonik dan non-kanonik, serta menemukan titik lemah struktural yang tidak terdeteksi melalui pembacaan manual \cite{ahmad2025hadith}. Sementara itu, sistem KASHAF memperkenalkan visualisasi alir (flow-visualization) berbasis diagram Sankey untuk menganalisis lebih dari 60.000 hadis dari koleksi Sembilan Kitab, dengan menampilkan grade perawi, hubungan jalur periwayatan, serta inkonsistensi dalam rantai sanad secara interaktif \cite{shafie2021kashaf}.
+
+Tabel~\ref{tab:visualisasi-perawi} merangkum perbandingan keempat studi di atas berdasarkan sistem yang digunakan, metode dan teknologi, dataset, hasil evaluasi, serta keterbatasannya.
+
+\begin{table}[H]
+\centering
+\caption{Perbandingan Studi Visualisasi Perawi Hadis}
+\label{tab:visualisasi-perawi}
+\renewcommand{\arraystretch}{1.3}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{3.5cm}|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Studi}} & \multicolumn{1}{c|}{\textbf{Sistem/Alat}} & \multicolumn{1}{c|}{\textbf{Metode \& Teknologi}} & \multicolumn{1}{c|}{\textbf{Dataset/Uji Coba}} & \multicolumn{1}{c|}{\textbf{Hasil Evaluasi}} & \multicolumn{1}{c|}{\textbf{Keterbatasan}} \\
+\hline
+Sara\c{c}o\u{g}lu (2024) \cite{saraccougluvisualization} &
+Pajek, Gephi, Isnalyser &
+Analisis jaringan sosial; konversi isnād ke pasangan \textit{source--target}; jaringan berarah &
+2.258 rantai isnād, $\pm$2.000 perawi dari Kit\={a}bu't-\d{T}abaqa\={a}ti'l-Kab\={i}r (Ibn Sa'd) &
+Visualisasi jaringan kronologis (contoh: 162 isnād, 30 node, 28 edge) &
+Sulit menata kronologi \& panjang nama Arab pada jaringan jangka panjang \\
+\hline
+Alias \textit{et al}\ (2024) \cite{alias2024hadithnet} &
+Sistem web (Django, MySQL, Graphviz) &
+NER berbasis aturan, POS tagging, \textit{preprocessing}; visualisasi graf Graphviz &
+1.000 teks hadis Sahih Bukhari terjemahan Melayu &
+Presisi 99,37\% (nama); F1 rantai tunggal 96,21\%, rantai ganda 53,33\% &
+Lemah pada rantai perawi kompleks/bercabang banyak \\
+\hline
+Ahmad \textit{et al}\ (2025) \cite{ahmad2025hadith} &
+Model ML (GNN, \textit{transformer}, klasifikasi hibrida) &
+Representasi graf \& sekuens; metrik sentralitas, \textit{clustering}, \textit{bridge}; disambiguasi perawi &
+AR-Sanad 280K, SanadSet 650K, Multi-IsnadSet (Sahih Muslim) + verifikasi rijal &
+Akurasi disambiguasi $>$85\% (terdokumentasi), $<$60\% (langka); selaras penilaian klasik &
+Tak menilai aspek moral; bergantung kekayaan data; perlu pengawasan ahli \\
+\hline
+KASHAF -- Shafie (2021) \cite{shafie2021kashaf} &
+Mesin pencari hadis berbasis \textit{knowledge graph} &
+\textit{Querying knowledge graph}; klasifikasi \textit{takhreej} dengan AraBERT; visualisasi alir Sankey &
+60.000+ hadis koleksi Sembilan Kitab; 200K pasangan untuk klasifikasi &
+\textit{Recall} \& presisi 0,9 pada klasifikasi \textit{takhreej}; visualisasi Sankey interaktif &
+Fokus pada \textit{retrieval} \& visualisasi, bukan penilaian \textit{grade} hadis otomatis \\
+\hline
+\end{tabular}%
+}
+\end{table}
+
+Keempat studi bertumpu pada perangkat desktop (Pajek, Gephi) atau sistem web yang terbatas pada rantai perawi tunggal. Ahmad dkk.\ \cite{ahmad2025hadith} menggunakan metrik sentralitas dan graf, tetapi hasilnya berupa model analitik, bukan antarmuka eksplorasi. KASHAF \cite{shafie2021kashaf} menyediakan antarmuka web, tetapi fokusnya pada pencarian dan klasifikasi takhreej, bukan pada eksplorasi posisi sentralitas perawi. Penelitian ini merespons celah tersebut dengan membangun \textit{front-end} berbasis web yang menyajikan knowledge graph perawi beserta skor sentralitas SNA yang dapat dijelajahi pengguna tanpa perangkat lunak khusus.
 
 \section{Dasar Teori}
 
