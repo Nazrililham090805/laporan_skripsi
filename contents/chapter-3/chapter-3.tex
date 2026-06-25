@@ -12,24 +12,25 @@ Alat-alat yang digunakan pada tugas akhir ini berupa perangkat keras maupun pera
 	\item Visual Studio Code versi 1.125.1 digunakan sebagai lingkungan pengembangan terintegrasi (Integrated Development Environment/IDE) dalam penelitian ini. Visual Studio Code digunakan untuk menulis, menjalankan, dan mengelola kode Python berbasis \textit{Jupyter Notebook (.ipynb)} yang mencakup proses pra-pemrosesan data, pembangunan graf jaringan sanad, perhitungan sentralitas perawi, dan pengembangan front-end. 
 	\item Python versi 3.13.13 digunakan sebagai bahasa pemrograman utama dalam pembersihan dan pengolahan data.
 	\item Pustaka NetworkX versi 3.6.1 digunakan untuk membangun graf dan menghitung sentralitas jaringan perawi.
-	\item    
+	\item JavaScript yang merupakan bahasa pemrograman yang digunakan untuk membuat halaman web menjadi dinamis, interaktif, dan responsif.
+	\item React versi 18.3.1 merupakan library JavaScript yang digunakan untuk pembuatan komponen UI yang reusable dan efisien dalam merender ulang data yang berubah, cocok untuk dashboard yang menampilkan data dinamis.
+	\item Supabase digunakan sebagai backend dan database aplikasi, menyediakan penyimpanan data, autentikasi pengguna, dan API secara otomatis.
 \end{enumerate}
 
 \subsection{Bahan Tugas akhir}
+Bahan yang digunakan pada tugas akhir ini berupa data hadis. Data ini didapatkan dari studi Mghari \textit{et al} \cite{MGHARI2022108540}. Data tersebut bersifat statis dalam format CSV (\textit{Comma-Separated Values}) yaitu diantaranya:
 
-Bahan tugas akhir adalah segala sesuatu yang bersifat fisik atau digital yang digunakan untuk kebutuhan tugas akhir. Bahan tugas akhir dapat berupa:
+\begin{itemize}
+	\item \textbf{sanadset.csv} memuat lebih dari 650.986 rekaman hadis yang bersumber dari 926 kitab hadis Arab klasik, dengan masing-masing rekaman terdiri atas 6 variabel yang mencakup informasi kitab asal, nomor hadis, teks hadis, Matn, daftar perawi, dan jumlah perawi.
 
-\begin{enumerate}
-	\item Bahan habis pakai. Bahan yang digunakan untuk tugas akhir. Sebagai contoh 
-	mungkin dibutuhkan kertas transparansi, baterai, atau yang lain 
-	\item Bahan yang berupa data atau informasi yang menjadi dataset tugas akhir. Dataset tugas akhir dapat berupa:
-	\begin{itemize}
-		\item Dataset pihak lain yang diperoleh dengan izin atau dalam lisensi yang diizinkan untuk digunakan secara langsung 
-		\item Dataset pihak pertama yang disusun sendiri melalui quisioner, observasi, atau interview 
-		\item Dokumen panduan yang mengacu pada standar, hasil tugas akhir, atau artikel yang disitasi dan digunakan.
-	\end{itemize}
-	
-\end{enumerate}
+	\item \textbf{hadith\_samples.csv} berisi sepuluh contoh hadis dalam bahasa Arab. File ini digunakan untuk membantu memahami format dan struktur data sebelum dilakukan pengolahan terhadap keseluruhan korpus.
+
+	\item \textbf{translated\_samples.csv} memuat versi terjemahan bahasa Inggris dari sampel hadis yang tersedia. File ini memudahkan pemahaman isi hadis serta pembedaan komponen Sanad dan Matn, khususnya bagi peneliti yang tidak menggunakan bahasa Arab.
+
+	\item \textbf{books.csv} mendokumentasikan daftar kitab-kitab klasik yang menjadi sumber pengumpulan data. File ini berperan menjaga ketertelusuran data sehingga setiap hadis dapat dirujuk kembali ke sumber kitab asalnya.
+\end{itemize}
+
+Dari keempat file tersebut, dataset yang digunakan secara langsung dalam penelitian ini adalah \textbf{sanadset.csv}. Dataset ini dipilih karena memiliki cakupan data yang paling lengkap dan relevan, yakni memuat informasi perawi beserta rantai sanad secara keseluruhan yang dibutuhkan dalam pembangunan graf jaringan sanad dan perhitungan sentralitas perawi.
 
 
 
@@ -47,7 +48,7 @@ Bagian ini juga membahas bagaimana data [akan] dianalisis, apakah dengan memband
 Menguraikan prosedur yang akan digunakan dan jadwal atau alur penyelesaian setiap 
 tahap. Alur penelian ini dapat disajikan dalam bentuk diagram. Diagram dapat disusun dengan aturan yang baik semisal menggunakan \textit{flowchart}. Aturan dan tutorial pembuatan \textit{flowchart} dapat dilihat di \textcolor{blue}{http://ugm.id/flowcharttutorial}. Setelah menggambarkannya, penulis wajib menjelaskan langkah-langkah setiap alur tugas akhir dalam sub bab tersendiri sesuai dengan kebutuhan.
 
-\section{Etika, Masalah, dan Keterbatasan Penelitian (Opsional))}
+\section{Etika, Masalah, dan Keterbatasan Penelitian (Opsional)}
 
 Bagian ini membahas pertimbangan etis penelitian dan [potensi] masalah serta
 keterbatasannya. Jika menyangkut penelitian dengan makhluk hidup, maka dibutuhkan adanya \textit{ethical clearance}, di bagian ini hal itu akan dibahas. Demikian juga tentang keterbatasan ataupun masalah yang akan timbul.
