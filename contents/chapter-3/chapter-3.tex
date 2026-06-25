@@ -52,11 +52,65 @@ Hadis-hadis demikian tidak dapat dimodelkan sebagai relasi dalam graf jaringan s
 
 \subsubsection{Penghapusan Harakat (Tanda Baca Arab)}
 \begin{sloppypar}
-Tahap kedua adalah penghapusan harakat dari seluruh nama perawi dalam kolom \texttt{Sanad}. Harakat merupakan tanda baca diakritik dalam tulisan Arab yang berfungsi sebagai penanda vokal, meliputi fathah, kasrah, dhammah, tanwin, sukun, dan tasydid. Dalam korpus hadis, penulisan harakat tidak seragam sehingga nama perawi yang sama dapat muncul dalam berbagai bentuk penulisan. Apabila tidak dinormalisasi, kondisi ini akan menyebabkan satu perawi direpresentasikan sebagai beberapa node berbeda dalam graf jaringan, sehingga menghasilkan perhitungan sentralitas yang tidak akurat. Penghapusan harakat dilakukan menggunakan ekspresi reguler (\textit{regex}) yang menargetkan rentang karakter Unicode diakritik Arab, yaitu \texttt{\textbackslash u064B}--\texttt{\textbackslash u065F}, \texttt{\textbackslash u0670}, dan \texttt{\textbackslash u06D6}--\texttt{\textbackslash u06ED}. Fungsi ini diterapkan pada setiap elemen dalam daftar nama perawi, dan hasilnya disimpan pada kolom baru \texttt{Sanad\_no\_harakat} agar kolom \texttt{Sanad} asli tetap tersedia sebagai referensi.
+Tahap kedua adalah penghapusan harakat dari seluruh nama perawi dalam kolom \texttt{Sanad}. Teks Arab dalam dataset memuat harakat, yaitu tanda baca diakritik yang berfungsi sebagai penanda vokal dalam tulisan Arab, meliputi fathah, kasrah, dhammah, tanwin, sukun, dan tasydid. Dalam penulisan kitab hadis klasik, penggunaan harakat tidak seragam---nama perawi yang sama dapat muncul dengan harakat lengkap, sebagian, atau tanpa harakat sama sekali. Ketidakseragaman ini menyebabkan satu perawi yang sama diperlakukan sebagai entitas berbeda oleh sistem, sehingga memecah node yang seharusnya merepresentasikan satu perawi menjadi beberapa node terpisah dalam graf. Sebagai contoh, nama \textit{J\={a}bir ibn Zayd} yang ditulis dengan harakat lengkap dan tanpa harakat merujuk pada perawi yang sama, namun secara komputasional dianggap sebagai dua string berbeda apabila tidak dinormalisasi terlebih dahulu. Kondisi ini akan menghasilkan perhitungan sentralitas yang tidak akurat apabila dibiarkan.
+
+Penghapusan harakat dilakukan dengan mengidentifikasi dan menghapus seluruh karakter Unicode yang termasuk dalam rentang diakritik Arab, yaitu \texttt{\textbackslash u064B} hingga \texttt{\textbackslash u065F}, \texttt{\textbackslash u0670}, serta \texttt{\textbackslash u06D6} hingga \texttt{\textbackslash u06ED}, menggunakan ekspresi reguler (\textit{regex}). Fungsi yang diimplementasikan mampu menangani input berupa string maupun \textit{list of string}, mengingat kolom \texttt{Sanad} menyimpan data dalam format daftar nama perawi. Hasil pembersihan disimpan pada kolom baru bernama \texttt{Sanad\_no\_harakat}, sementara kolom \texttt{Sanad} asli tetap dipertahankan sebagai referensi data mentah.
 \end{sloppypar}
 
 \subsubsection{Normalisasi Huruf Arab}
-Tahap ketiga adalah normalisasi variasi huruf Arab. Meskipun harakat telah dihapus pada tahap sebelumnya, penulisan nama perawi masih mengandung ketidakseragaman akibat penggunaan bentuk Unicode yang berbeda untuk huruf yang secara fonetis sama. Tiga kelompok huruf yang dinormalisasi adalah: (1) variasi alif, yaitu alif dengan hamzah di atas, alif dengan hamzah di bawah, dan alif dengan madda diseragamkan menjadi alif biasa; (2) variasi ya, yaitu alif maqsura beserta karakter serupa diseragamkan menjadi ya standar; dan (3) ta marbuta yang dikonversi menjadi ha untuk menyatukan penulisan formal dan informal dari nama perawi yang sama. Normalisasi ini dilakukan menggunakan fungsi substitusi berbasis \textit{regex} dan penggantian karakter langsung, sehingga nama-nama perawi yang secara semantik identik dapat dikenali sebagai entitas yang sama dalam proses pembangunan graf.
+Tahap ketiga adalah normalisasi variasi huruf Arab. Meskipun harakat telah dihapus pada tahap sebelumnya, penulisan nama perawi masih mengandung ketidakseragaman akibat penggunaan bentuk Unicode yang berbeda untuk huruf yang secara fonetis sama. Tiga kelompok huruf yang dinormalisasi adalah sebagai berikut.
+
+\begin{enumerate}
+	\item \textbf{Variasi alif}. Huruf alif dalam bahasa Arab memiliki beberapa bentuk Unicode yang berbeda bergantung pada posisi hamzah atau tanda panjang yang menyertainya. Tiga varian alif, yaitu \arab{arab-alif-hamzah-atas}, \arab{arab-alif-hamzah-bawah}, dan \arab{arab-alif-madda}, secara fonetis merepresentasikan bunyi yang sama dalam konteks nama perawi, namun diperlakukan sebagai karakter berbeda oleh sistem komputasional. Ketiga varian tersebut dinormalisasi menjadi alif biasa \arab{arab-alif-biasa} sehingga penulisan nama yang berbeda karena perbedaan posisi hamzah dapat dikenali sebagai satu entitas yang sama.
+
+	\item \textbf{Variasi ya}. Bahasa Arab mengenal dua karakter yang secara visual serupa namun memiliki kode Unicode berbeda, yaitu ya standar \arab{arab-ya} dan alif maqsura \arab{arab-alif-maqsura}. Alif maqsura lazim digunakan di akhir kata dalam penulisan Arab klasik dan sering muncul pada nama-nama perawi dari tradisi Mesir dan Hijaz, sementara ya standar digunakan dalam konteks yang lebih umum. Karena keduanya merepresentasikan bunyi yang sama dalam nama perawi, alif maqsura beserta karakter serupa dinormalisasi menjadi ya standar agar tidak terjadi duplikasi node dalam graf.
+
+	\item \textbf{Ta marbuta}. Ta marbuta \arab{arab-ta-marbuta} merupakan karakter khas bahasa Arab yang digunakan pada akhir kata, umumnya untuk menandai bentuk feminin atau beberapa jenis isim. Dalam penulisan yang tidak formal atau tidak konsisten, ta marbuta sering ditulis sebagai ha \arab{arab-ha}, terutama ketika teks tidak diberi harakat. Perbedaan ini menyebabkan nama perawi yang mengandung ta marbuta muncul dalam dua bentuk berbeda secara komputasional. Untuk mengatasi hal tersebut, seluruh kemunculan ta marbuta dikonversi menjadi ha sehingga kedua bentuk penulisan tersebut diperlakukan sebagai entitas yang sama dalam graf jaringan sanad.
+\end{enumerate}
+
+Normalisasi ini dilakukan menggunakan fungsi substitusi berbasis \textit{regex} dan penggantian karakter langsung, sehingga nama-nama perawi yang secara semantik identik dapat dikenali sebagai entitas yang sama dalam proses pembangunan graf.
+
+\subsubsection{Resolusi kata kekerabatan}
+Dalam tradisi periwayatan hadis, tidak jarang seorang perawi dalam rantai sanad disebutkan bukan dengan namanya sendiri, melainkan dengan relasi kekerabatannya terhadap perawi yang mendahuluinya, seperti \arab{arab-abih} (ayahnya), \arab{arab-ummih} (ibunya), atau \arab{arab-jaddihi} (kakeknya). Kata-kata ini bersifat kontekstual dan maknanya bergantung pada perawi yang disebutkan sebelumnya dalam rantai. Apabila dibiarkan tanpa resolusi, kata kekerabatan tersebut akan membentuk node generik yang menyatukan perawi-perawi berbeda secara keliru dalam satu entitas, sehingga merusak topologi graf.
+
+Untuk mengatasi hal ini, diterapkan algoritma sekuensial yang menelusuri setiap elemen rantai sanad sambil menyimpan referensi nama perawi terakhir. Ketika dijumpai kata kekerabatan, kata tersebut diganti dengan konstruksi eksplisit berupa prefiks kekerabatan diikuti nama perawi rujukannya. Kelompok kata kekerabatan yang ditangani ditunjukkan pada Tabel~\ref{tab:kekerabatan}.
+
+\begin{table}[H]
+\centering
+\caption{Kata kekerabatan dan pola penggantinya}
+\label{tab:kekerabatan}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Kata Kekerabatan} & \textbf{Makna} & \textbf{Diganti Menjadi} \\
+\hline
+\includegraphics[height=1.1em]{contents/chapter-3/arab-tbl-ayah.png} & ayahnya &
+\includegraphics[height=1.1em]{contents/chapter-3/arab-pfx-abu.png}\ \texttt{[nama sebelumnya]} \\
+\hline
+\includegraphics[height=1.1em]{contents/chapter-3/arab-tbl-ibu.png} & ibunya &
+\includegraphics[height=1.1em]{contents/chapter-3/arab-pfx-um.png}\ \texttt{[nama sebelumnya]} \\
+\hline
+\includegraphics[height=1.1em]{contents/chapter-3/arab-tbl-kakek.png} & kakeknya &
+\includegraphics[height=1.1em]{contents/chapter-3/arab-pfx-jad.png}\ \texttt{[nama sebelumnya]} \\
+\hline
+\includegraphics[height=1.1em]{contents/chapter-3/arab-tbl-nenek.png} & neneknya &
+\includegraphics[height=1.1em]{contents/chapter-3/arab-pfx-jaddat.png}\ \texttt{[nama sebelumnya]} \\
+\hline
+\end{tabular}
+\end{table}
+
+Sebagai ilustrasi, rantai sanad [\arab{arab-muhammad}, \arab{arab-abih}, \arab{arab-jaddihi}] setelah resolusi menjadi [\arab{arab-muhammad}, \arab{arab-abu-muhammad}, \arab{arab-jad-muhammad}], sehingga setiap elemen memiliki identitas yang unik dan dapat dimodelkan sebagai \textit{node} tersendiri dalam graf jaringan sanad.
+
+\subsubsection{Penghapusan lafal periwayatan}
+Dalam teks hadis, rantai sanad tidak hanya memuat nama-nama perawi, tetapi juga diselingi oleh lafal periwayatan (sighat al-tahammul wa al-ada'), yaitu formula yang menunjukkan cara seorang perawi menerima dan menyampaikan hadis. Lafal-lafal seperti \arab{arab-haddatsana} (\textit{haddatsana}), \arab{arab-akhbarana} (\textit{akhbarana}), \arab{arab-an} (\textit{'an}), \arab{arab-samiitu} (\textit{sami'tu}), dan \arab{arab-tsana} (\textit{tsana}) merupakan penanda metode transmisi, bukan nama perawi, sehingga tidak boleh dimodelkan sebagai node dalam graf. Apabila dibiarkan, lafal tersebut akan membentuk node palsu yang tidak merepresentasikan perawi manapun dan berpotensi menghasilkan edge yang tidak valid. Penghapusan lafal periwayatan dilakukan dalam tiga tahap bertingkat: pertama, menghapus lafal yang berdiri sendiri sebagai elemen list; kedua, menghapus lafal yang melekat dalam string nama menggunakan ekspresi reguler berbasis word-boundary; dan ketiga, melakukan pemindaian ulang untuk memverifikasi bahwa tidak ada lafal yang tersisa. Dari keseluruhan data, ditemukan 185 sanad yang masih mengandung lafal periwayatan dan berhasil dibersihkan pada tahap lanjutan.
+
+\subsubsection{Normalisasi Variasi \textit{Abu}}
+Dalam bahasa Arab, kata \arab{arab-pfx-abu} (\textit{Abu}) yang umum digunakan sebagai bagian dari nama kunya perawi mengalami perubahan bentuk sesuai kedudukan gramatikal dalam kalimat, yaitu \arab{arab-pfx-abu} pada posisi nominatif, \arab{arab-aba} pada posisi akusatif, dan \arab{arab-abi} pada posisi genitif. Ketiga bentuk tersebut merujuk pada nama yang sama, namun secara komputasional diperlakukan sebagai string yang berbeda sehingga berpotensi memecah satu perawi menjadi beberapa node terpisah dalam graf. Untuk mengatasi hal ini, seluruh variasi bentuk diseragamkan menjadi bentuk nominatif \arab{arab-pfx-abu} menggunakan ekspresi reguler berbasis \textit{word-boundary}, sehingga hanya kata yang berdiri sendiri yang diubah tanpa memengaruhi kata-kata lain yang mengandung rangkaian huruf serupa. Selain itu, baris-baris yang mengandung elemen \arab{arab-pfx-abu} berdiri sendiri tanpa nama yang mengikutinya turut dihapus, karena keberadaan elemen tersebut mengindikasikan kegagalan resolusi nama pada tahap sebelumnya. Sebanyak 3.233 baris dihapus pada tahap ini.
+
+\subsubsection{Menghapus karakter non arab}
+Tahap terakhir pra-pemrosesan adalah validasi karakter untuk memastikan bahwa seluruh nama perawi dalam dataset hanya mengandung huruf Arab. Karakter non-Arab dapat masuk ke dalam data melalui berbagai sumber, antara lain sisa tag anotasi, karakter tersembunyi hasil konversi encoding, angka Latin, maupun simbol tanda baca yang tidak tersaring pada tahap sebelumnya. Keberadaan karakter-karakter tersebut berpotensi menyebabkan dua nama perawi yang secara Arab identik diperlakukan sebagai entitas yang berbeda oleh sistem. Validasi dilakukan menggunakan ekspresi reguler yang mendeteksi karakter di luar rentang Unicode Arab (\texttt{\textbackslash u0600}--\texttt{\textbackslash u06FF}), diikuti penghapusan otomatis terhadap seluruh karakter yang tidak sesuai. Hasil pemeriksaan menunjukkan tidak ditemukan karakter non-Arab pada kolom \texttt{Sanad\_no\_harakat}, yang mengonfirmasi bahwa seluruh tahap pembersihan sebelumnya telah menghasilkan data yang bersih dan siap digunakan pada tahap pembangunan jaringan sanad.
+
+Setelah seluruh tahap pra-pemrosesan selesai dijalankan secara berurutan, diperoleh dataset akhir yang bersih sebanyak 487.451 sanad. Dataset ini kemudian disimpan ke dalam file \texttt{sanadset\_cleaned.csv} sebagai basis data utama yang digunakan pada tahap selanjutnya, yaitu pembangunan graf jaringan sanad dan perhitungan sentralitas perawi.
 
 \section{Alur Tugas Akhir}
 
