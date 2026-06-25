@@ -1,4 +1,4 @@
-\chapter{Metode Penelitian}
+﻿\chapter{Metode Penelitian}
 
 \section{Alat dan Bahan Tugas akhir}
 
@@ -21,27 +21,42 @@ Alat-alat yang digunakan pada tugas akhir ini berupa perangkat keras maupun pera
 Bahan yang digunakan pada tugas akhir ini berupa data hadis. Data ini didapatkan dari studi Mghari \textit{et al} \cite{MGHARI2022108540}. Data tersebut bersifat statis dalam format CSV (\textit{Comma-Separated Values}) yaitu diantaranya:
 
 \begin{itemize}
-	\item \textbf{sanadset.csv} memuat lebih dari 650.986 rekaman hadis yang bersumber dari 926 kitab hadis Arab klasik, dengan masing-masing rekaman terdiri atas 6 variabel yang mencakup informasi kitab asal, nomor hadis, teks hadis, Matn, daftar perawi, dan jumlah perawi.
+	\item \texttt{sanadset.csv} memuat lebih dari 650.986 rekaman hadis yang bersumber dari 926 kitab hadis Arab klasik, dengan masing-masing rekaman terdiri atas 6 variabel yang mencakup informasi kitab asal, nomor hadis, teks hadis, Matn, daftar perawi, dan jumlah perawi.
 
-	\item \textbf{hadith\_samples.csv} berisi sepuluh contoh hadis dalam bahasa Arab. File ini digunakan untuk membantu memahami format dan struktur data sebelum dilakukan pengolahan terhadap keseluruhan korpus.
+	\item \texttt{hadith\_samples.csv} berisi sepuluh contoh hadis dalam bahasa Arab. File ini digunakan untuk membantu memahami format dan struktur data sebelum dilakukan pengolahan terhadap keseluruhan korpus.
 
-	\item \textbf{translated\_samples.csv} memuat versi terjemahan bahasa Inggris dari sampel hadis yang tersedia. File ini memudahkan pemahaman isi hadis serta pembedaan komponen Sanad dan Matn, khususnya bagi peneliti yang tidak menggunakan bahasa Arab.
+	\item \texttt{translated\_samples.csv} memuat versi terjemahan bahasa Inggris dari sampel hadis yang tersedia. File ini memudahkan pemahaman isi hadis serta pembedaan komponen Sanad dan Matn, khususnya bagi peneliti yang tidak menggunakan bahasa Arab.
 
-	\item \textbf{books.csv} mendokumentasikan daftar kitab-kitab klasik yang menjadi sumber pengumpulan data. File ini berperan menjaga ketertelusuran data sehingga setiap hadis dapat dirujuk kembali ke sumber kitab asalnya.
+	\item \texttt{books.csv} mendokumentasikan daftar kitab-kitab klasik yang menjadi sumber pengumpulan data. File ini berperan menjaga ketertelusuran data sehingga setiap hadis dapat dirujuk kembali ke sumber kitab asalnya.
 \end{itemize}
 
-Dari keempat file tersebut, dataset yang digunakan secara langsung dalam penelitian ini adalah \textbf{sanadset.csv}. Dataset ini dipilih karena memiliki cakupan data yang paling lengkap dan relevan, yakni memuat informasi perawi beserta rantai sanad secara keseluruhan yang dibutuhkan dalam pembangunan graf jaringan sanad dan perhitungan sentralitas perawi.
+Dari keempat file tersebut, dataset yang digunakan secara langsung dalam penelitian ini adalah \texttt{sanadset.csv}. Dataset ini dipilih karena memiliki cakupan data yang paling lengkap dan relevan, yakni memuat informasi perawi beserta rantai sanad secara keseluruhan yang dibutuhkan dalam pembangunan graf jaringan sanad dan perhitungan sentralitas perawi.
 
 
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{contents/chapter-3/gambar_sanadset.png}
+	\caption{Contoh data pada \textit{sanadset.csv}}
+	\label{fig:sanadset-preview}
+\end{figure}
 
 \section{Metode yang Digunakan}
+\subsection{Pra Pemrosesan Data}
+\subsubsection{Penghapusan baris tanpa sanad}
+\begin{sloppypar}
+Dataset mentah \texttt{sanadset.csv} yang digunakan dalam penelitian ini memuat 650.986 baris data hadis dari berbagai kitab hadis. Setiap baris merepresentasikan satu hadis dengan kolom-kolom: \texttt{Hadith}, \texttt{Book}, \texttt{Num\_hadith}, \texttt{Matn}, \texttt{Sanad}, dan \texttt{Sanad\_Length}.
+Dalam proses pengumpulan data, tidak semua hadis dalam korpus memiliki rantai sanad yang teridentifikasi. Hadis-hadis tersebut ditandai dengan nilai \texttt{'No SANAD'} pada kolom \texttt{Sanad} dan nilai \texttt{0} pada kolom \texttt{Sanad\_Length}. Kondisi ini dapat disebabkan oleh beberapa hal, seperti hadis yang hanya memuat teks matn tanpa mencantumkan jalur periwayatan, atau hadis yang sanadnya tidak berhasil diekstraksi pada tahap anotasi dataset.
+Hadis-hadis demikian tidak dapat dimodelkan sebagai relasi dalam graf jaringan sanad karena tidak memuat informasi perawi maupun hubungan antar-perawi. Oleh karena itu, seluruh baris dengan nilai \texttt{'No SANAD'} dihapus dari dataset menggunakan filter kondisional. Setelah proses ini, dataset yang tersisa berjumlah 491.428 baris, berkurang sebesar 159.558 baris atau sekitar 24,5\% dari total data awal. Seluruh data yang tersisa dipastikan memiliki rantai sanad yang dapat diproses pada tahap-tahap selanjutnya.
+\end{sloppypar}
 
-Bagian ini membahas metode atau cara yang akan digunakan dalam penelitian, tahapan 
-penerapan metode, dan desain penelitian (misalnya apakah penelitian akan menggunakan 
-eksperimen di Laboratorium atau di lapangan, misalkan saja penelitian biomedis atau 
-penelitian alat ukur hama yang dapat dilakukan di laboratorium ataupun di lapangan, atau menggunakan metode survei (misalnya untuk teknologi Informasi), studi kasus, atau analisis dengan perangkat lunak (ETAP, LTSpice, dst), atau \textit{prototyping} (pembuatan perangkat keras).
+\subsubsection{Penghapusan Harakat (Tanda Baca Arab)}
+\begin{sloppypar}
+Tahap kedua adalah penghapusan harakat dari seluruh nama perawi dalam kolom \texttt{Sanad}. Harakat merupakan tanda baca diakritik dalam tulisan Arab yang berfungsi sebagai penanda vokal, meliputi fathah, kasrah, dhammah, tanwin, sukun, dan tasydid. Dalam korpus hadis, penulisan harakat tidak seragam sehingga nama perawi yang sama dapat muncul dalam berbagai bentuk penulisan. Apabila tidak dinormalisasi, kondisi ini akan menyebabkan satu perawi direpresentasikan sebagai beberapa node berbeda dalam graf jaringan, sehingga menghasilkan perhitungan sentralitas yang tidak akurat. Penghapusan harakat dilakukan menggunakan ekspresi reguler (\textit{regex}) yang menargetkan rentang karakter Unicode diakritik Arab, yaitu \texttt{\textbackslash u064B}--\texttt{\textbackslash u065F}, \texttt{\textbackslash u0670}, dan \texttt{\textbackslash u06D6}--\texttt{\textbackslash u06ED}. Fungsi ini diterapkan pada setiap elemen dalam daftar nama perawi, dan hasilnya disimpan pada kolom baru \texttt{Sanad\_no\_harakat} agar kolom \texttt{Sanad} asli tetap tersedia sebagai referensi.
+\end{sloppypar}
 
-Bagian ini juga membahas bagaimana data [akan] dianalisis, apakah dengan membandingkan keluaran beberapa alat ukur, membandingkan dengan standar atau bagaimana.
+\subsubsection{Normalisasi Huruf Arab}
+Tahap ketiga adalah normalisasi variasi huruf Arab. Meskipun harakat telah dihapus pada tahap sebelumnya, penulisan nama perawi masih mengandung ketidakseragaman akibat penggunaan bentuk Unicode yang berbeda untuk huruf yang secara fonetis sama. Tiga kelompok huruf yang dinormalisasi adalah: (1) variasi alif, yaitu alif dengan hamzah di atas, alif dengan hamzah di bawah, dan alif dengan madda diseragamkan menjadi alif biasa; (2) variasi ya, yaitu alif maqsura beserta karakter serupa diseragamkan menjadi ya standar; dan (3) ta marbuta yang dikonversi menjadi ha untuk menyatukan penulisan formal dan informal dari nama perawi yang sama. Normalisasi ini dilakukan menggunakan fungsi substitusi berbasis \textit{regex} dan penggantian karakter langsung, sehingga nama-nama perawi yang secara semantik identik dapat dikenali sebagai entitas yang sama dalam proses pembangunan graf.
 
 \section{Alur Tugas Akhir}
 
