@@ -60,6 +60,9 @@
 
 \usepackage{float}
 \usepackage{array}
+% Buat paragraf di dalam item daftar (enumerate/itemize) ikut menjorok seperti paragraf biasa
+\setlist[enumerate,1]{listparindent=\parindent}
+\setlist[itemize,1]{listparindent=\parindent}
 \newcommand{\arab}[1]{\raisebox{-0.2ex}{\includegraphics[height=1em]{contents/chapter-3/#1.png}}}
 
 \begin{document}
