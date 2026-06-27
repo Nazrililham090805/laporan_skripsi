@@ -280,7 +280,9 @@ Setelah seluruh tripel relasi terbentuk, graf jaringan sanad dikonstruksi secara
 Kelima persamaan di atas merupakan definisi matematis dari masing-masing metrik sentralitas, yaitu bentuk perhitungan apabila nilai sentralitas dihitung secara manual. Dalam penelitian ini, perhitungan tersebut tidak dilakukan secara manual, melainkan menggunakan pustaka NetworkX yang telah menyediakan implementasi baku untuk setiap metrik, masing-masing melalui fungsi \textit{in-degree centrality}, \textit{out-degree centrality}, \textit{eigenvector centrality}, \textit{closeness centrality}, dan \textit{betweenness centrality}. Pencantuman persamaan matematis ini bertujuan untuk menjelaskan dasar teori dan logika perhitungan di balik setiap metrik, sehingga nilai yang dihasilkan oleh NetworkX dapat dipahami maknanya secara konseptual, bukan sekadar diperoleh sebagai keluaran pustaka.
 \end{sloppypar}
 
+\begin{sloppypar}
 Kelima metrik tersebut dihitung untuk seluruh simpul, sehingga setiap perawi memperoleh lima nilai sentralitas. Seluruh nilai itu kemudian dikumpulkan ke dalam satu tabel pada tingkat perawi (simpul), di mana setiap baris merepresentasikan satu perawi unik dalam jaringan. Nama perawi dalam aksara Arab diambil dari kolom \texttt{Sanad\_no\_harakat}, sedangkan padanan Latinnya diperoleh dari hasil transliterasi pada Subbab~\ref{subsubsec:transliterasi}, lalu digabungkan dengan kelima nilai metrik sentralitas masing-masing perawi. Tabel pada tingkat perawi inilah yang menjadi keluaran akhir tahap analisis dan membentuk berkas \texttt{sentralitas.csv}, yang nantinya menjadi masukan bagi tahap penyimpanan ke basis data.
+\end{sloppypar}
 
 \subsubsection{Penyimpanan Hasil Analisis ke Basis Data (Supabase)}
 \label{subsubsec:penyimpanan-basis-data}
@@ -288,7 +290,9 @@ Kelima metrik tersebut dihitung untuk seluruh simpul, sehingga setiap perawi mem
 Setelah seluruh metrik sentralitas dihitung menggunakan pustaka NetworkX sebagaimana dijelaskan pada Subbab~\ref{subsubsec:metrik-sentralitas}, tahap berikutnya adalah menyimpan hasil analisis ke dalam basis data agar dapat diakses secara terpusat oleh sistem \textit{dashboard}. Basis data yang digunakan pada penelitian ini adalah Supabase, yaitu layanan \textit{Backend as a Service} (BaaS) berbasis PostgreSQL. Supabase dipilih karena menyediakan basis data relasional yang andal sekaligus antarmuka pemrograman, yaitu \textit{REST API} dan klien JavaScript \texttt{@supabase/supabase-js}, sehingga data hasil analisis dapat langsung dikueri oleh \textit{dashboard} tanpa perlu membangun \textit{back-end} tersendiri.
 \end{sloppypar}
 
+\begin{sloppypar}
 Proses perhitungan sentralitas dilakukan secara \textit{offline} di lingkungan Python, sehingga \textit{dashboard} tidak perlu menghitung ulang nilai sentralitas, melainkan hanya menampilkan hasil akhir yang telah tersimpan. Untuk itu, keluaran dari proses analisis terlebih dahulu diekspor menjadi dua berkas CSV, yaitu berkas \texttt{sentralitas.csv} yang memuat data perawi beserta kelima nilai metrik sentralitasnya dan berkas \texttt{edge\_slim.csv} yang memuat data relasi periwayatan antar-perawi beserta bobotnya. Format CSV dipilih karena bersifat ringan, universal, dan didukung secara langsung oleh fitur impor data Supabase.
+\end{sloppypar}
 
 \begin{sloppypar}
 Kedua berkas CSV tersebut kemudian diunggah ke Supabase melalui fitur \textit{Import data from CSV} pada \textit{Table Editor}. Pada proses impor ini, Supabase secara otomatis memetakan setiap kolom (\textit{header}) pada berkas CSV menjadi kolom pada tabel basis data, serta menyimpan setiap baris CSV menjadi satu \textit{record}. Berkas \texttt{sentralitas.csv} disimpan ke dalam tabel Sentralitas, sedangkan berkas \texttt{edge\_slim.csv} disimpan ke dalam tabel Edge, sehingga kedua data tersusun ke dalam dua tabel yang saling berelasi.
@@ -336,7 +340,9 @@ Hasil analisis jaringan sanad yang telah disimpan ke Supabase dirancang dalam be
 
 \noindent\textbf{a. Tabel Sentralitas (Data Node / Perawi)}
 
+\begin{sloppypar}
 Tabel ini menyimpan data setiap perawi sebagai node dalam jaringan, lengkap dengan kelima nilai metrik sentralitasnya. Data pada tabel ini berasal dari berkas \texttt{sentralitas.csv} yang dibentuk pada Subbab~\ref{subsubsec:metrik-sentralitas}. Struktur kolom tabel Sentralitas ditunjukkan pada Tabel~\ref{tab:struktur-sentralitas}.
+\end{sloppypar}
 
 \begin{table}[H]
 \centering
@@ -368,7 +374,9 @@ Betweenness\_Centrality & float & Skor sentralitas keperantaraan \\
 
 \noindent\textbf{b. Tabel Edge (Data Relasi / Sanad)}
 
+\begin{sloppypar}
 Tabel ini menyimpan data relasi periwayatan (guru--murid) sebagai edge yang menghubungkan dua node. Data pada tabel ini berasal dari berkas \texttt{edge\_slim.csv} yang dibentuk pada Subbab~\ref{subsubsec:bobot-edge}. Struktur kolom tabel Edge ditunjukkan pada Tabel~\ref{tab:struktur-edge}.
+\end{sloppypar}
 
 \begin{table}[H]
 \centering
@@ -533,10 +541,27 @@ Pengujian difokuskan pada fitur-fitur utama \textit{dashboard}, yaitu navigasi a
 
 \section{Alur Tugas Akhir}
 
-Menguraikan prosedur yang akan digunakan dan jadwal atau alur penyelesaian setiap 
-tahap. Alur penelian ini dapat disajikan dalam bentuk diagram. Diagram dapat disusun dengan aturan yang baik semisal menggunakan \textit{flowchart}. Aturan dan tutorial pembuatan \textit{flowchart} dapat dilihat di \textcolor{blue}{http://ugm.id/flowcharttutorial}. Setelah menggambarkannya, penulis wajib menjelaskan langkah-langkah setiap alur tugas akhir dalam sub bab tersendiri sesuai dengan kebutuhan.
+Secara keseluruhan, pelaksanaan tugas akhir ini mengikuti serangkaian tahapan yang saling berurutan, mulai dari studi literatur hingga penulisan laporan. Keseluruhan tahapan tersebut disajikan dalam bentuk diagram alir (\textit{flowchart}) pada Gambar~\ref{fig:alur-tugas-akhir}.
 
-\section{Etika, Masalah, dan Keterbatasan Penelitian (Opsional)}
+\begin{figure}[H]
+	\centering
+	\includegraphics[height=0.85\textheight]{contents/chapter-3/AlurTugasAkhir.png}
+	\caption{Diagram alir pelaksanaan tugas akhir}
+	\label{fig:alur-tugas-akhir}
+\end{figure}
 
-Bagian ini membahas pertimbangan etis penelitian dan [potensi] masalah serta
-keterbatasannya. Jika menyangkut penelitian dengan makhluk hidup, maka dibutuhkan adanya \textit{ethical clearance}, di bagian ini hal itu akan dibahas. Demikian juga tentang keterbatasan ataupun masalah yang akan timbul.
+Penjelasan masing-masing tahapan pada diagram alir tersebut adalah sebagai berikut.
+
+\begin{enumerate}
+	\item \textbf{Studi Literatur.} Tahap awal berupa pengkajian referensi yang berkaitan dengan \textit{Knowledge Graph}, analisis jaringan sanad hadis, metrik sentralitas pada \textit{Social Network Analysis}, serta teknologi pengembangan \textit{front-end}, sebagai landasan teori penelitian.
+	\item \textbf{Persiapan Dataset.} Pengumpulan dan penyiapan data hadis dari studi Mghari \textit{et al}, khususnya berkas \texttt{sanadset.csv} yang memuat rantai sanad, sebagaimana dijelaskan pada Subbab~\ref{subsec:pra-pemrosesan}.
+	\item \textbf{Pra-Pemrosesan Data.} Pembersihan dan normalisasi nama perawi, meliputi penghapusan baris tanpa sanad, penghapusan harakat, normalisasi huruf dan kata, hingga validasi karakter, sebagaimana diuraikan pada Subbab~\ref{subsec:pra-pemrosesan}.
+	\item \textbf{Pembangunan \textit{Knowledge Graph}.} Pemodelan rantai sanad menjadi graf berarah berisi simpul perawi dan sisi relasi periwayatan guru--murid, sebagaimana dijelaskan pada Subbab~\ref{subsec:pembangunan-kg}.
+	\item \textbf{Analisis Jaringan Sanad.} Perhitungan kelima metrik sentralitas menggunakan pustaka NetworkX untuk mengidentifikasi peran tiap perawi dalam jaringan, sebagaimana dijelaskan pada Subbab~\ref{subsec:analisis-jaringan}.
+	\item \textbf{Penyimpanan ke Basis Data.} Hasil analisis diekspor menjadi berkas CSV lalu disimpan ke basis data Supabase agar dapat diakses secara terpusat oleh \textit{dashboard}, sebagaimana dijelaskan pada Subbab~\ref{subsubsec:penyimpanan-basis-data}.
+	\item \textbf{Perancangan dan Pembangunan \textit{Dashboard}.} Perancangan arsitektur, basis data, dan antarmuka, kemudian implementasi \textit{dashboard} berbasis web untuk memvisualisasikan jaringan sanad dan hasil analisisnya.
+	\item \textbf{Pengujian Sistem (Sistem Valid?).} Pengujian \textit{black-box} terhadap fungsi-fungsi \textit{dashboard}. Apabila masih terdapat fungsi yang belum sesuai (tidak valid), proses kembali ke tahap perancangan dan pembangunan \textit{dashboard} untuk diperbaiki; apabila seluruh fungsi telah berjalan sesuai rancangan (valid), proses berlanjut ke tahap berikutnya.
+	\item \textbf{Analisis dan Pembahasan Hasil.} Penyajian dan interpretasi hasil pembangunan \textit{Knowledge Graph}, nilai sentralitas perawi, serta \textit{dashboard} yang dihasilkan, yang dibahas pada Bab IV.
+	\item \textbf{Penulisan Laporan.} Penyusunan laporan tugas akhir yang mendokumentasikan seluruh tahapan beserta hasil dan pembahasannya.
+\end{enumerate}
+
