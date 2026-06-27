@@ -13,6 +13,7 @@ Alat-alat yang digunakan dalam tugas akhir ini terdiri atas perangkat keras dan 
 	\item Python versi 3.13.13 digunakan sebagai bahasa pemrograman utama dalam pembersihan dan pengolahan data.
 	\item Pustaka NetworkX versi 3.6.1 digunakan untuk membangun graf dan menghitung sentralitas jaringan perawi.
 	\item JavaScript adalah bahasa pemrograman yang digunakan untuk membuat halaman web menjadi dinamis, interaktif, dan responsif.
+	\item Figma digunakan sebagai alat perancangan antarmuka (\textit{user interface design}) untuk menyusun rancangan tata letak dan tampilan \textit{dashboard} dalam bentuk \textit{mockup} sebelum tahap implementasi.
 	\item React versi 18.3.1 adalah \textit{library} JavaScript untuk membangun komponen UI yang dapat digunakan ulang (\textit{reusable}) dan efisien dalam merender ulang tampilan saat data berubah, cocok untuk \textit{dashboard} dengan data dinamis.
 	\item Supabase digunakan sebagai backend dan database aplikasi, menyediakan penyimpanan data, autentikasi pengguna, dan API secara otomatis.
 \end{enumerate}
@@ -202,6 +203,7 @@ Setelah seluruh tripel relasi terbentuk, graf jaringan sanad dikonstruksi secara
 \end{sloppypar}
 
 \subsubsection{Perhitungan Metrik Sentralitas}
+\label{subsubsec:metrik-sentralitas}
 
 \begin{enumerate}
 	\item \textbf{\textit{In-Degree Centrality} (Peran Perawi sebagai guru dalam jaringan)}
@@ -266,6 +268,227 @@ Setelah seluruh tripel relasi terbentuk, graf jaringan sanad dikonstruksi secara
 	\end{itemize}
 
 \end{enumerate}
+
+\begin{sloppypar}
+Kelima persamaan di atas merupakan definisi matematis dari masing-masing metrik sentralitas, yaitu bentuk perhitungan apabila nilai sentralitas dihitung secara manual. Dalam penelitian ini, perhitungan tersebut tidak dilakukan secara manual, melainkan menggunakan pustaka NetworkX yang telah menyediakan implementasi baku untuk setiap metrik, masing-masing melalui fungsi \textit{in-degree centrality}, \textit{out-degree centrality}, \textit{eigenvector centrality}, \textit{closeness centrality}, dan \textit{betweenness centrality}. Pencantuman persamaan matematis ini bertujuan untuk menjelaskan dasar teori dan logika perhitungan di balik setiap metrik, sehingga nilai yang dihasilkan oleh NetworkX dapat dipahami maknanya secara konseptual, bukan sekadar diperoleh sebagai keluaran pustaka.
+\end{sloppypar}
+
+\subsubsection{Penyimpanan Hasil Analisis ke Basis Data (Supabase)}
+\label{subsubsec:penyimpanan-basis-data}
+\begin{sloppypar}
+Setelah seluruh metrik sentralitas dihitung menggunakan pustaka NetworkX sebagaimana dijelaskan pada Subbab~\ref{subsubsec:metrik-sentralitas}, tahap berikutnya adalah menyimpan hasil analisis ke dalam basis data agar dapat diakses secara terpusat oleh sistem \textit{dashboard}. Basis data yang digunakan pada penelitian ini adalah Supabase, yaitu layanan \textit{Backend as a Service} (BaaS) berbasis PostgreSQL. Supabase dipilih karena menyediakan basis data relasional yang andal sekaligus antarmuka pemrograman, yaitu \textit{REST API} dan klien JavaScript \texttt{@supabase/supabase-js}, sehingga data hasil analisis dapat langsung dikueri oleh \textit{dashboard} tanpa perlu membangun \textit{back-end} tersendiri.
+\end{sloppypar}
+
+Proses perhitungan sentralitas dilakukan secara \textit{offline} di lingkungan Python, sehingga \textit{dashboard} tidak perlu menghitung ulang nilai sentralitas, melainkan hanya menampilkan hasil akhir yang telah tersimpan. Untuk itu, keluaran dari proses analisis terlebih dahulu diekspor menjadi dua berkas CSV, yaitu berkas yang memuat data perawi beserta nilai sentralitasnya dan berkas yang memuat data relasi antar-perawi. Format CSV dipilih karena bersifat ringan, universal, dan didukung secara langsung oleh fitur impor data Supabase.
+
+\begin{sloppypar}
+Kedua berkas CSV tersebut kemudian diunggah ke Supabase melalui fitur \textit{Import data from CSV} pada \textit{Table Editor}. Pada proses impor ini, Supabase secara otomatis memetakan setiap kolom (\textit{header}) pada berkas CSV menjadi kolom pada tabel basis data, serta menyimpan setiap baris CSV menjadi satu \textit{record}. Data hasil analisis disusun ke dalam dua tabel yang saling berelasi, yaitu tabel Sentralitas dan tabel Edge.
+\end{sloppypar}
+
+Dengan demikian, hasil analisis tersimpan secara terpusat di Supabase dan siap diakses oleh \textit{dashboard}. Adapun rancangan rinci kedua tabel, yang mencakup struktur kolom serta diagram relasi antar-tabelnya (ERD), dijelaskan secara tersendiri pada Subbab~\ref{subsubsec:perancangan-basis-data}.
+
+
+\subsection{Perancangan dan Pembangunan Dashboard}
+\subsubsection{Arsitektur Sistem}
+Sistem yang dibangun pada penelitian ini menggunakan arsitektur tiga lapis (three-tier architecture) yang terdiri atas lapisan pemrosesan data (data processing layer), lapisan penyimpanan data (data storage layer), dan lapisan presentasi (presentation layer). Pemisahan menjadi tiga lapisan ini bertujuan agar proses analisis yang berat secara komputasi dipisahkan dari proses penyajian data, sehingga dashboard dapat berjalan ringan dan responsif. Gambaran umum arsitektur sistem ditunjukkan pada Gambar~\ref{fig:arsitektur-sistem}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.6\textwidth]{contents/chapter-3/Arsitektur-sistem.png}
+	\caption{Arsitektur sistem tiga lapis (\textit{three-tier architecture})}
+	\label{fig:arsitektur-sistem}
+\end{figure}
+
+Penjelasan masing-masing lapisan adalah sebagai berikut.
+
+1. Lapisan Pemrosesan Data (Data Processing Layer)
+
+Lapisan ini merupakan tahap yang dilakukan secara offline menggunakan bahasa pemrograman Python. Pada lapisan inilah seluruh proses inti analisis dijalankan, mulai dari pra-pemrosesan data (subbab 3.2.1), pembangunan knowledge graph (subbab 3.2.2), hingga perhitungan metrik sentralitas dengan pustaka NetworkX (subbab 3.2.3). Hasil akhir dari lapisan ini diekspor menjadi berkas CSV untuk kemudian disimpan ke basis data. Penempatan seluruh komputasi berat pada lapisan ini memastikan bahwa nilai sentralitas dihitung satu kali di sisi backend, bukan di sisi pengguna.
+
+2. Lapisan Penyimpanan Data (Data Storage Layer)
+
+Lapisan ini menggunakan Supabase sebagai basis data berbasis PostgreSQL yang menyimpan hasil analisis dalam dua tabel relasional, yaitu tabel Sentralitas (data perawi beserta nilai sentralitasnya) dan tabel Edge (data relasi sanad antar perawi), sebagaimana dijelaskan pada subbab 3.2.3.3. Lapisan ini berperan sebagai sumber data terpusat yang menjembatani hasil pemrosesan dengan dashboard. Supabase menyediakan REST API yang memungkinkan lapisan presentasi mengambil data secara langsung dan efisien.
+
+3. Lapisan Presentasi (Presentation Layer)
+
+Lapisan ini berupa aplikasi dashboard berbentuk Single Page Application (SPA) yang dibangun menggunakan pustaka React dengan bahasa TypeScript dan build tool Vite. Antarmuka ditata menggunakan TailwindCSS, sedangkan navigasi antarhalaman dikelola dengan React Router. Dashboard berkomunikasi dengan Supabase melalui pustaka klien @supabase/supabase-js untuk mengambil data, lalu menyajikannya dalam empat halaman utama, yaitu halaman Graf Relasi Perawi, Statistik Perawi, Tabel Relasi, dan Tabel Sentralitas. Visualisasi grafik statistik dibuat menggunakan pustaka Recharts, sementara visualisasi graf jaringan sanad yang interaktif dirender menggunakan HTML5 Canvas. Lapisan ini bersifat read-only terhadap data analisis; artinya dashboard hanya menampilkan hasil yang telah tersimpan tanpa melakukan perhitungan ulang.
+
+Dengan arsitektur tersebut, beban komputasi analisis jaringan ditempatkan sepenuhnya pada lapisan pemrosesan, sedangkan dashboard cukup berfokus pada pengambilan dan penyajian data secara interaktif kepada pengguna.
+\subsubsection{Perancangan Basis Data}
+\label{subsubsec:perancangan-basis-data}
+Hasil analisis jaringan sanad yang telah disimpan ke Supabase (sebagaimana dijelaskan pada Subbab~\ref{subsubsec:penyimpanan-basis-data}) dirancang dalam bentuk basis data relasional yang terdiri atas dua tabel yang saling berelasi. Tabel Sentralitas berperan sebagai tabel utama yang menyimpan data setiap perawi beserta kelima nilai metrik sentralitasnya, sedangkan tabel Edge menyimpan relasi periwayatan antar-perawi. Model relasi antar kedua tabel tersebut digambarkan dalam bentuk \textit{Entity Relationship Diagram} (ERD) sebagaimana ditunjukkan pada Gambar~\ref{fig:erd-database}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.9\textwidth]{contents/chapter-3/ERD-Database.png}
+	\caption{Rancangan \textit{Entity Relationship Diagram} (ERD) basis data hasil analisis}
+	\label{fig:erd-database}
+\end{figure}
+
+\noindent\textbf{a. Tabel Sentralitas (Data Node / Perawi)}
+
+Tabel ini menyimpan data setiap perawi sebagai node dalam jaringan, lengkap dengan kelima nilai metrik sentralitasnya. Struktur kolom tabel Sentralitas ditunjukkan pada Tabel~\ref{tab:struktur-sentralitas}.
+
+\begin{table}[H]
+\centering
+\caption{Struktur kolom tabel Sentralitas}
+\label{tab:struktur-sentralitas}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|c|p{6.5cm}|}
+\hline
+\textbf{Kolom} & \textbf{Tipe Data} & \textbf{Keterangan} \\
+\hline
+Perawi\_ID & integer & Kunci primer, pengenal unik tiap perawi \\
+\hline
+Nama\_Perawi & text & Nama perawi hasil transliterasi (Latin) \\
+\hline
+Perawi & text & Nama perawi dalam aksara Arab \\
+\hline
+In\_Degree\_Centrality & float & Skor sentralitas derajat masuk (peran sebagai guru) \\
+\hline
+Out\_Degree\_Centrality & float & Skor sentralitas derajat keluar (peran sebagai murid) \\
+\hline
+Eigenvector\_Centrality & float & Skor sentralitas eigenvector (pengaruh) \\
+\hline
+Closeness\_Centrality & float & Skor sentralitas kedekatan \\
+\hline
+Betweenness\_Centrality & float & Skor sentralitas keperantaraan \\
+\hline
+\end{tabular}
+\end{table}
+
+\noindent\textbf{b. Tabel Edge (Data Relasi / Sanad)}
+
+Tabel ini menyimpan data relasi periwayatan (guru--murid) sebagai edge yang menghubungkan dua node. Struktur kolom tabel Edge ditunjukkan pada Tabel~\ref{tab:struktur-edge}.
+
+\begin{table}[H]
+\centering
+\caption{Struktur kolom tabel Edge}
+\label{tab:struktur-edge}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|c|p{6.5cm}|}
+\hline
+\textbf{Kolom} & \textbf{Tipe Data} & \textbf{Keterangan} \\
+\hline
+Edge\_id & integer & Kunci primer, pengenal unik tiap relasi \\
+\hline
+Guru\_Id & integer & Perawi\_ID perawi yang berperan sebagai guru \\
+\hline
+Murid\_Id & integer & Perawi\_ID perawi yang berperan sebagai murid \\
+\hline
+Weight & integer & Bobot relasi, yaitu jumlah periwayatan antara guru dan murid tersebut \\
+\hline
+\end{tabular}
+\end{table}
+
+Kolom Guru\_Id dan Murid\_Id pada tabel Edge merujuk pada kolom Perawi\_ID di tabel Sentralitas, sehingga kedua tabel membentuk relasi yang memungkinkan sistem menelusuri jaringan sanad secara utuh.
+
+\subsubsection{Perancangan Antarmuka}
+Perancangan antarmuka (\textit{user interface}) bertujuan menggambarkan tata letak dan komponen visual \textit{dashboard} sebelum tahap implementasi. Antarmuka dirancang dalam bentuk \textit{Single Page Application} dengan satu bilah navigasi atas (\textit{header}) yang bersifat tetap, memuat nama aplikasi ``Knowledge Graph Hadith'' dan empat menu utama, yaitu Graf Relasi Perawi, Statistik Perawi, Tabel Relasi, dan Tabel Sentralitas. Setiap menu mengarahkan pengguna ke satu halaman tanpa memuat ulang seluruh laman (\textit{reload}). Rancangan masing-masing halaman dijelaskan sebagai berikut.
+
+\noindent\textbf{1. Halaman Graf Relasi Perawi}
+
+Halaman ini merupakan halaman utama sekaligus inti dari \textit{dashboard}, yang menampilkan visualisasi graf jaringan sanad secara interaktif sehingga pengguna dapat menelusuri pola hubungan periwayatan antar-perawi secara langsung. Melalui halaman ini, keterhubungan antar-perawi yang pada data mentah hanya berupa daftar nama dapat disajikan sebagai jaringan visual yang utuh, lengkap dengan peran dan tingkat pengaruh masing-masing perawi yang tercermin dari ukuran dan warna node. Untuk mendukung eksplorasi tersebut, tata letak halaman dirancang menjadi tiga bagian utama yang saling melengkapi, yaitu panel filter di sisi kiri, area graf di bagian tengah, dan panel detail perawi di sisi kanan, sebagai berikut:
+
+\begin{itemize}
+	\item \textbf{Panel filter (kiri)} --- berfungsi sebagai pusat kendali tampilan graf. Panel ini menyediakan kolom pencarian untuk menemukan perawi tertentu secara cepat, serta pilihan lima metrik sentralitas (In Degree, Out Degree, Eigenvector, Closeness, dan Betweenness). Dengan memilih salah satu metrik, pengguna dapat menyoroti perawi-perawi yang paling berpengaruh menurut metrik tersebut, karena node dengan nilai lebih tinggi akan ditampilkan lebih besar dan lebih mencolok dibandingkan node lainnya.
+	\item \textbf{Area graf (tengah)} --- merupakan bagian terbesar yang menampilkan node sebagai representasi perawi dan edge sebagai representasi relasi periwayatan guru--murid. Ketika salah satu node dipilih, informasi rinci perawi yang bersangkutan dirancang untuk ditampilkan pada panel detail di sisi kanan. Di bagian bawah area ini terdapat kartu ringkasan yang menampilkan jumlah node dan jumlah relasi yang sedang ditampilkan, sehingga pengguna memperoleh gambaran skala jaringan yang sedang dieksplorasi.
+	\item \textbf{Panel detail perawi (kanan)} --- disediakan untuk menampilkan informasi lengkap mengenai perawi yang dipilih. Informasi tersebut mencakup identitas perawi berupa nama dalam aksara Latin dan Arab, nilai kelima metrik sentralitasnya yang divisualisasikan dalam bentuk \textit{bar} agar mudah dibandingkan, serta daftar guru dan murid yang terhubung dengan perawi tersebut. Dengan demikian, panel ini memudahkan pengguna memahami posisi dan peran seorang perawi dalam jaringan tanpa harus menelusuri keseluruhan graf.
+\end{itemize}
+
+Rancangan tampilan halaman Graf Relasi Perawi ditunjukkan pada Gambar~\ref{fig:hal-graf}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{contents/chapter-3/tampilanhal1.png}
+	\caption{Rancangan tampilan halaman Graf Relasi Perawi}
+	\label{fig:hal-graf}
+\end{figure}
+
+\noindent\textbf{2. Halaman Statistik Perawi}
+
+Halaman ini dirancang untuk menyajikan ringkasan statistik jaringan sanad secara menyeluruh dalam bentuk visual, sehingga pengguna dapat memperoleh gambaran umum mengenai skala jaringan dan perawi-perawi yang paling menonjol tanpa harus menelusuri graf satu per satu. Di bagian atas halaman terdapat dua kartu indikator (\textit{summary card}) yang menampilkan Total Perawi dan Total Relasi, yaitu jumlah keseluruhan node dan edge yang terbentuk dari hasil analisis. Kedua indikator ini memberikan konteks awal mengenai besarnya jaringan yang dianalisis sebelum pengguna menelaah statistik yang lebih rinci.
+
+Di bawah kedua kartu indikator tersebut ditampilkan lima diagram batang (\textit{bar chart}), masing-masing untuk satu metrik sentralitas, yaitu In Degree, Out Degree, Eigenvector, Closeness, dan Betweenness. Setiap diagram dirancang untuk memperlihatkan perawi-perawi dengan nilai tertinggi pada metrik yang bersangkutan. Penyajian dalam lima diagram terpisah ini bertujuan agar perbedaan peran perawi pada tiap metrik dapat terlihat secara jelas dan tidak saling tertukar, yaitu In Degree sebagai peran perawi sebagai guru, Out Degree sebagai peran perawi sebagai murid, Eigenvector sebagai tokoh berpengaruh, Closeness sebagai tokoh paling terjangkau, dan Betweenness sebagai penghubung antar-kelompok perawi. Rancangan tampilan halaman Statistik Perawi ditunjukkan pada Gambar~\ref{fig:hal-statistik}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{contents/chapter-3/tampilanhal2.png}
+	\caption{Rancangan tampilan halaman Statistik Perawi}
+	\label{fig:hal-statistik}
+\end{figure}
+
+\noindent\textbf{3. Halaman Tabel Relasi}
+
+Halaman ini dirancang untuk menampilkan seluruh data relasi periwayatan dari tabel Edge dalam bentuk tabel, sebagai pelengkap visualisasi graf yang menyajikan data yang sama secara grafis. Penyajian dalam bentuk tabel ini bertujuan memudahkan pengguna menelaah relasi guru--murid secara tekstual dan terstruktur, terutama ketika ingin memeriksa pasangan perawi tertentu yang sulit diamati langsung pada graf yang padat. Setiap baris tabel merepresentasikan satu relasi periwayatan, dengan kolom yang memuat nama guru, nama murid, serta bobot relasi (\textit{weight}) yang menunjukkan jumlah kemunculan relasi tersebut di seluruh jaringan.
+
+Mengingat jumlah relasi dalam jaringan sanad sangat banyak, halaman ini dilengkapi fitur pencarian (\textit{search}) untuk menyaring relasi berdasarkan nama perawi tertentu. Rancangan tampilan halaman Tabel Relasi ditunjukkan pada Gambar~\ref{fig:hal-tabel-relasi}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{contents/chapter-3/tampilanhal3.png}
+	\caption{Rancangan tampilan halaman Tabel Relasi}
+	\label{fig:hal-tabel-relasi}
+\end{figure}
+
+\noindent\textbf{4. Halaman Tabel Sentralitas}
+
+Halaman ini dirancang untuk menampilkan data seluruh perawi dari tabel Sentralitas beserta kelima nilai metrik sentralitasnya dalam bentuk tabel. Berbeda dengan halaman Statistik Perawi yang hanya menonjolkan perawi dengan nilai tertinggi pada tiap metrik, halaman ini menyajikan data sentralitas seluruh perawi secara lengkap, sehingga pengguna dapat menelaah dan membandingkan nilai metrik antar-perawi secara menyeluruh. Setiap baris tabel merepresentasikan satu perawi beserta nilai In Degree, Out Degree, Eigenvector, Closeness, dan Betweenness miliknya, sehingga peran dan tingkat pengaruh tiap perawi dalam jaringan dapat ditinjau dari satu tempat.
+
+Untuk memudahkan penelusuran data yang berjumlah besar, halaman ini dilengkapi fitur pencarian (\textit{search}) berdasarkan nama perawi, sehingga pengguna dapat dengan cepat menemukan dan mengidentifikasi perawi tertentu beserta nilai sentralitasnya. Rancangan tampilan halaman Tabel Sentralitas ditunjukkan pada Gambar~\ref{fig:hal-tabel-sentralitas}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{contents/chapter-3/tampilanhal4.png}
+	\caption{Rancangan tampilan halaman Tabel Sentralitas}
+	\label{fig:hal-tabel-sentralitas}
+\end{figure}
+
+\subsubsection{Teknologi yang Digunakan}
+Pembangunan \textit{dashboard} pada penelitian ini menggunakan sejumlah teknologi dan pustaka (\textit{library}) perangkat lunak yang dipilih berdasarkan kebutuhan visualisasi data, kemudahan pengembangan, dan kemampuan integrasi dengan basis data. Secara umum, teknologi yang digunakan dapat dikelompokkan menjadi teknologi sisi \textit{front-end} (antarmuka), teknologi visualisasi data, serta teknologi basis data dan integrasinya. Rincian teknologi beserta fungsinya disajikan pada Tabel~\ref{tab:teknologi}.
+
+\begin{table}[H]
+\centering
+\caption{Teknologi yang digunakan dalam pembangunan \textit{dashboard}}
+\label{tab:teknologi}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|p{3.7cm}|c|p{8.4cm}|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Teknologi / Pustaka}} & \multicolumn{1}{c|}{\textbf{Versi}} & \multicolumn{1}{c|}{\textbf{Fungsi}} \\
+\hline
+React & 18.3.1 & Pustaka utama front-end untuk membangun antarmuka berbasis komponen dalam bentuk Single Page Application (SPA) \\
+\hline
+TypeScript & 6.0.3 & Bahasa pemrograman (superset JavaScript) yang menambahkan penulisan tipe data statis sehingga kode lebih aman dan mudah dipelihara \\
+\hline
+Vite & 6.3.5 & Build tool dan development server yang mempercepat proses pengembangan dan pemaketan aplikasi \\
+\hline
+TailwindCSS & 4.1.12 & Framework CSS berbasis utility class untuk menata tampilan antarmuka secara konsisten dan responsif \\
+\hline
+React Router & 7.13.0 & Pustaka pengelola navigasi antarhalaman tanpa memuat ulang seluruh laman \\
+\hline
+Recharts & 2.15.2 & Pustaka visualisasi data untuk membuat diagram batang pada halaman statistik \\
+\hline
+HTML5 Canvas & -- & Teknologi peramban (native browser API) untuk merender visualisasi graf jaringan sanad yang interaktif \\
+\hline
+Lucide React & 0.487.0 & Pustaka ikon yang digunakan pada elemen antarmuka \\
+\hline
+Supabase JS Client & 2.108.1 & Pustaka klien untuk menghubungkan dashboard dengan basis data Supabase melalui REST API \\
+\hline
+Supabase (PostgreSQL) & -- & Layanan Backend as a Service berbasis PostgreSQL sebagai basis data penyimpanan hasil analisis \\
+\hline
+\end{tabular}
+\end{table}
+
+Pemilihan React dengan TypeScript sebagai dasar pengembangan bertujuan agar antarmuka dapat dibangun secara modular dalam bentuk komponen yang dapat digunakan kembali (\textit{reusable}), sekaligus mengurangi potensi kesalahan melalui pemeriksaan tipe data. Vite digunakan sebagai \textit{build tool} karena menawarkan proses kompilasi yang cepat selama pengembangan. Untuk kebutuhan tampilan, TailwindCSS dipilih agar penataan antarmuka lebih efisien tanpa menulis berkas CSS terpisah dalam jumlah besar.
+
+Pada aspek visualisasi, penelitian ini menggunakan dua pendekatan yang berbeda sesuai kebutuhan. Recharts dimanfaatkan untuk menampilkan grafik statistik (diagram batang) secara cepat, sedangkan visualisasi graf jaringan sanad yang interaktif dirender menggunakan HTML5 Canvas secara langsung. Penggunaan Canvas dipilih karena mampu menggambar dan memperbarui ratusan node serta edge secara efisien, sekaligus memberikan keleluasaan dalam menerapkan algoritma tata letak graf secara mandiri, sebagaimana dijelaskan pada Subbab~\ref{subsubsec:implementasi-graf}.
+
+\begin{sloppypar}
+Adapun pada sisi penyimpanan dan integrasi data, Supabase yang berbasis PostgreSQL digunakan sebagai basis data, dan \textit{dashboard} mengakses datanya melalui pustaka klien \texttt{@supabase/supabase-js}. Dengan kombinasi teknologi tersebut, \textit{dashboard} dapat berjalan sebagai aplikasi web yang ringan, interaktif, dan terhubung langsung dengan hasil analisis jaringan sanad.
+\end{sloppypar}
+
+\subsubsection{Implementasi Visualisasi Graf}
+\label{subsubsec:implementasi-graf}
 
 \section{Alur Tugas Akhir}
 
