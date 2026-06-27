@@ -44,11 +44,12 @@ Dari keempat file tersebut, \texttt{sanadset.csv} dipilih sebagai dataset utama 
 
 \section{Metode yang Digunakan}
 \subsection{Pra Pemrosesan Data}
+\label{subsec:pra-pemrosesan}
 \subsubsection{Penghapusan baris tanpa sanad}
 \begin{sloppypar}
 Dataset mentah \texttt{sanadset.csv} yang digunakan dalam penelitian ini memuat 650.986 baris data hadis dari berbagai kitab hadis. Setiap baris merepresentasikan satu hadis dengan kolom-kolom: \texttt{Hadith}, \texttt{Book}, \texttt{Num\_hadith}, \texttt{Matn}, \texttt{Sanad}, dan \texttt{Sanad\_Length}.
 Dalam proses pengumpulan data, tidak semua hadis dalam korpus memiliki rantai sanad yang teridentifikasi. Hadis-hadis tersebut ditandai dengan nilai \texttt{'No SANAD'} pada kolom \texttt{Sanad} dan nilai \texttt{0} pada kolom \texttt{Sanad\_Length}. Kondisi ini dapat disebabkan oleh beberapa hal, seperti hadis yang hanya memuat teks matn tanpa mencantumkan jalur periwayatan, atau hadis yang sanadnya tidak berhasil diekstraksi pada tahap anotasi dataset.
-Hadis-hadis demikian tidak dapat dimodelkan sebagai relasi dalam graf jaringan sanad karena tidak memuat informasi perawi maupun hubungan antar-perawi. Oleh karena itu, seluruh baris dengan nilai \texttt{'No SANAD'} dihapus dari dataset menggunakan filter kondisional. Setelah proses ini, dataset yang tersisa berjumlah 491.428 baris, berkurang sebesar 159.558 baris atau sekitar 24,5\% dari total data awal. Seluruh data yang tersisa dipastikan memiliki rantai sanad yang dapat diproses pada tahap-tahap selanjutnya.
+Hadis-hadis demikian tidak dapat dimodelkan sebagai relasi dalam graf jaringan sanad karena tidak memuat informasi perawi maupun hubungan antar-perawi. Oleh karena itu, seluruh baris dengan nilai \texttt{'No SANAD'} dihapus dari dataset menggunakan filter kondisional. Setelah proses ini, dataset yang tersisa berjumlah 491.428 baris, berkurang sebesar 159.558 baris atau sekitar 24,5\% dari total data awal. Selain itu, karena pembangunan graf memerlukan minimal dua perawi untuk membentuk satu relasi guru--murid, rantai sanad yang hanya memuat satu nama perawi dihapus karena tidak dapat membentuk pasangan periwayatan. Dengan demikian, jumlah rantai sanad yang benar-benar digunakan pada tahap pembangunan graf adalah 487.451 rantai, dan seluruhnya dipastikan memiliki rantai sanad yang dapat diproses pada tahap-tahap selanjutnya.
 \end{sloppypar}
 
 \subsubsection{Penghapusan Harakat (Tanda Baca Arab)}
@@ -109,6 +110,7 @@ Dalam bahasa Arab, kata \textit{Abu} yang umum digunakan sebagai bagian dari nam
 Tahap terakhir pra-pemrosesan adalah validasi karakter untuk memastikan bahwa seluruh nama perawi dalam dataset hanya mengandung huruf Arab. Karakter non-Arab dapat masuk ke dalam data melalui berbagai sumber, antara lain sisa tag anotasi, karakter tersembunyi hasil konversi encoding, angka Latin, maupun simbol tanda baca yang tidak tersaring pada tahap sebelumnya. Keberadaan karakter-karakter tersebut berpotensi menyebabkan dua nama perawi yang secara Arab identik diperlakukan sebagai entitas yang berbeda oleh sistem. Validasi dilakukan menggunakan ekspresi reguler yang mendeteksi karakter di luar rentang Unicode Arab (\texttt{\textbackslash u0600}--\texttt{\textbackslash u06FF}), diikuti penghapusan otomatis terhadap seluruh karakter yang tidak sesuai. Hasil pemeriksaan menunjukkan tidak ditemukan karakter non-Arab pada kolom \texttt{Sanad\_no\_harakat}, yang mengonfirmasi bahwa seluruh tahap pembersihan sebelumnya telah menghasilkan data yang bersih dan siap digunakan pada tahap pembangunan jaringan sanad.
 
 \subsection{Pembangunan Knowledge Graph Jaringan Sanad}
+\label{subsec:pembangunan-kg}
 Jaringan sanad hadis dalam penelitian ini direpresentasikan menggunakan pendekatan Knowledge Graph (KG), yaitu sebuah struktur graf yang mampu merepresentasikan entitas dan hubungan antar-entitas secara semantik. Pendekatan ini dipilih karena sanad hadis secara alami membentuk jaringan relasi berantai antar-perawi yang dapat dimodelkan dalam format tripel terstruktur berupa pasangan (Entitas–Relasi–Entitas). Dalam penelitian ini, entitas yang dimaksud adalah perawi hadis, sedangkan relasi yang menghubungkan antar-entitas adalah hubungan periwayatan dari murid kepada gurunya.
 
 \subsubsection{Komponen Graf}
@@ -161,6 +163,7 @@ Tripel-tripel tersebut kemudian disimpan dalam struktur \textit{DataFrame} denga
 Setiap tripel kemudian dimasukkan ke dalam graf sebagai satu sisi berarah dari simpul murid menuju simpul guru, sehingga seluruh rantai sanad dalam dataset terkonversi menjadi kumpulan sisi yang membentuk struktur jaringan periwayatan secara keseluruhan. Seluruh tripel yang diekstraksi dari 487.451 rantai sanad menghasilkan 776.798 pasangan relasi unik yang menjadi masukan pada tahap pembangunan graf.
 
 \subsubsection{Penghitungan Bobot \textit{Edge}}
+\label{subsubsec:bobot-edge}
 Tidak semua relasi guru-murid dalam jaringan sanad memiliki tingkat kekuatan yang sama. Beberapa pasangan perawi muncul berulang kali dalam ribuan rantai sanad yang berbeda, sementara pasangan lainnya hanya muncul satu kali. 
 Untuk merepresentasikan perbedaan kekuatan relasi tersebut, setiap \textit{edge} dalam graf dilengkapi dengan dua atribut bobot, yaitu \textit{Weight} dan \textit{Inverse Weight}.
 Atribut \textit{Weight} merepresentasikan frekuensi kemunculan suatu pasangan guru-murid di seluruh \textit{dataset}, di mana semakin tinggi nilai \textit{Weight}, semakin sering relasi periwayatan tersebut muncul.
@@ -192,11 +195,15 @@ Sebaliknya, relasi yang jarang muncul dianggap memiliki jarak yang lebih jauh (\
 \end{tabular}
 \end{table}
 
+Daftar relasi guru--murid beserta bobotnya inilah yang merepresentasikan seluruh sisi (\textit{edge}) dalam jaringan sanad. Untuk keperluan penyimpanan ke basis data, daftar relasi tersebut diringkas menjadi berkas \texttt{edge\_slim.csv} yang hanya memuat kolom Edge\_id, Guru\_Id, Murid\_Id, dan Weight, dengan identitas setiap perawi direpresentasikan menggunakan Perawi\_ID. Atribut \textit{Inverse Weight} tidak disertakan dalam berkas ini karena hanya diperlukan pada saat perhitungan sentralitas berbasis jarak secara \textit{offline}. Berkas \texttt{edge\_slim.csv} inilah yang nantinya diunggah ke basis data, dengan struktur kolom sebagaimana dijelaskan pada tabel Edge di Subbab~\ref{subsubsec:perancangan-basis-data}.
+
 \subsubsection{Transliterasi Nama Perawi}
+\label{subsubsec:transliterasi}
 Untuk memudahkan pembacaan hasil analisis, seluruh nama perawi dalam aksara Arab ditransliterasi ke dalam sistem penulisan Latin sesuai pedoman transliterasi yang berlaku di Indonesia. Proses transliterasi menggunakan dua mekanisme secara bertingkat: pertama, pencocokan dengan kamus nama (\texttt{NAMA\_KAMUS}) yang menyimpan padanan transliterasi untuk nama-nama perawi yang sudah dikenal luas; dan kedua, konversi karakter per karakter (\texttt{CHAR\_MAP}) untuk nama-nama yang tidak ditemukan dalam kamus. Pencocokan dilakukan secara hierarkis mulai dari nama lengkap, kombinasi dua kata, hingga kata per kata, sehingga hasil transliterasi seakurat mungkin. Kata yang diawali dengan prefiks \textit{Al-} ditangani secara khusus dengan mengekstrak inti kata dan menambahkan prefiks \textit{Al-} secara otomatis. Hasil transliterasi disimpan pada kolom \texttt{Nama\_Guru} dan \texttt{Nama\_Murid} sebagai padanan Latin dari kolom \texttt{Guru} dan \texttt{Murid}.
 
 
 \subsection{Analisis Jaringan Sanad}
+\label{subsec:analisis-jaringan}
 \subsubsection{Konstruksi Graf dengan NetworkX}
 \begin{sloppypar}
 Setelah seluruh tripel relasi terbentuk, graf jaringan sanad dikonstruksi secara komputasional menggunakan pustaka NetworkX melalui fungsi \texttt{from\_pandas\_edgelist}. Kolom \texttt{Murid} ditetapkan sebagai simpul sumber dan kolom \texttt{Guru} sebagai simpul tujuan, sesuai dengan arah transmisi sanad dari murid kepada gurunya, sementara atribut \textit{Weight} dan \textit{Inverse\_Weight} disertakan sebagai properti setiap sisi. Graf dibangun sebagai graf berarah (\textit{directed graph}) menggunakan parameter \texttt{nx.DiGraph()}. Selanjutnya, dilakukan penghapusan \textit{self-loop}, yaitu sisi yang menghubungkan suatu simpul dengan dirinya sendiri, karena relasi semacam itu tidak merepresentasikan periwayatan yang valid. Graf akhir yang terbentuk terdiri dari 177.047 simpul perawi dan 776.798 sisi relasi periwayatan.
@@ -273,16 +280,18 @@ Setelah seluruh tripel relasi terbentuk, graf jaringan sanad dikonstruksi secara
 Kelima persamaan di atas merupakan definisi matematis dari masing-masing metrik sentralitas, yaitu bentuk perhitungan apabila nilai sentralitas dihitung secara manual. Dalam penelitian ini, perhitungan tersebut tidak dilakukan secara manual, melainkan menggunakan pustaka NetworkX yang telah menyediakan implementasi baku untuk setiap metrik, masing-masing melalui fungsi \textit{in-degree centrality}, \textit{out-degree centrality}, \textit{eigenvector centrality}, \textit{closeness centrality}, dan \textit{betweenness centrality}. Pencantuman persamaan matematis ini bertujuan untuk menjelaskan dasar teori dan logika perhitungan di balik setiap metrik, sehingga nilai yang dihasilkan oleh NetworkX dapat dipahami maknanya secara konseptual, bukan sekadar diperoleh sebagai keluaran pustaka.
 \end{sloppypar}
 
+Kelima metrik tersebut dihitung untuk seluruh simpul, sehingga setiap perawi memperoleh lima nilai sentralitas. Seluruh nilai itu kemudian dikumpulkan ke dalam satu tabel pada tingkat perawi (simpul), di mana setiap baris merepresentasikan satu perawi unik dalam jaringan. Nama perawi dalam aksara Arab diambil dari kolom \texttt{Sanad\_no\_harakat}, sedangkan padanan Latinnya diperoleh dari hasil transliterasi pada Subbab~\ref{subsubsec:transliterasi}, lalu digabungkan dengan kelima nilai metrik sentralitas masing-masing perawi. Tabel pada tingkat perawi inilah yang menjadi keluaran akhir tahap analisis dan membentuk berkas \texttt{sentralitas.csv}, yang nantinya menjadi masukan bagi tahap penyimpanan ke basis data.
+
 \subsubsection{Penyimpanan Hasil Analisis ke Basis Data (Supabase)}
 \label{subsubsec:penyimpanan-basis-data}
 \begin{sloppypar}
 Setelah seluruh metrik sentralitas dihitung menggunakan pustaka NetworkX sebagaimana dijelaskan pada Subbab~\ref{subsubsec:metrik-sentralitas}, tahap berikutnya adalah menyimpan hasil analisis ke dalam basis data agar dapat diakses secara terpusat oleh sistem \textit{dashboard}. Basis data yang digunakan pada penelitian ini adalah Supabase, yaitu layanan \textit{Backend as a Service} (BaaS) berbasis PostgreSQL. Supabase dipilih karena menyediakan basis data relasional yang andal sekaligus antarmuka pemrograman, yaitu \textit{REST API} dan klien JavaScript \texttt{@supabase/supabase-js}, sehingga data hasil analisis dapat langsung dikueri oleh \textit{dashboard} tanpa perlu membangun \textit{back-end} tersendiri.
 \end{sloppypar}
 
-Proses perhitungan sentralitas dilakukan secara \textit{offline} di lingkungan Python, sehingga \textit{dashboard} tidak perlu menghitung ulang nilai sentralitas, melainkan hanya menampilkan hasil akhir yang telah tersimpan. Untuk itu, keluaran dari proses analisis terlebih dahulu diekspor menjadi dua berkas CSV, yaitu berkas yang memuat data perawi beserta nilai sentralitasnya dan berkas yang memuat data relasi antar-perawi. Format CSV dipilih karena bersifat ringan, universal, dan didukung secara langsung oleh fitur impor data Supabase.
+Proses perhitungan sentralitas dilakukan secara \textit{offline} di lingkungan Python, sehingga \textit{dashboard} tidak perlu menghitung ulang nilai sentralitas, melainkan hanya menampilkan hasil akhir yang telah tersimpan. Untuk itu, keluaran dari proses analisis terlebih dahulu diekspor menjadi dua berkas CSV, yaitu berkas \texttt{sentralitas.csv} yang memuat data perawi beserta kelima nilai metrik sentralitasnya dan berkas \texttt{edge\_slim.csv} yang memuat data relasi periwayatan antar-perawi beserta bobotnya. Format CSV dipilih karena bersifat ringan, universal, dan didukung secara langsung oleh fitur impor data Supabase.
 
 \begin{sloppypar}
-Kedua berkas CSV tersebut kemudian diunggah ke Supabase melalui fitur \textit{Import data from CSV} pada \textit{Table Editor}. Pada proses impor ini, Supabase secara otomatis memetakan setiap kolom (\textit{header}) pada berkas CSV menjadi kolom pada tabel basis data, serta menyimpan setiap baris CSV menjadi satu \textit{record}. Data hasil analisis disusun ke dalam dua tabel yang saling berelasi, yaitu tabel Sentralitas dan tabel Edge.
+Kedua berkas CSV tersebut kemudian diunggah ke Supabase melalui fitur \textit{Import data from CSV} pada \textit{Table Editor}. Pada proses impor ini, Supabase secara otomatis memetakan setiap kolom (\textit{header}) pada berkas CSV menjadi kolom pada tabel basis data, serta menyimpan setiap baris CSV menjadi satu \textit{record}. Berkas \texttt{sentralitas.csv} disimpan ke dalam tabel Sentralitas, sedangkan berkas \texttt{edge\_slim.csv} disimpan ke dalam tabel Edge, sehingga kedua data tersusun ke dalam dua tabel yang saling berelasi.
 \end{sloppypar}
 
 Dengan demikian, hasil analisis tersimpan secara terpusat di Supabase dan siap diakses oleh \textit{dashboard}. Adapun rancangan rinci kedua tabel, yang mencakup struktur kolom serta diagram relasi antar-tabelnya (ERD), dijelaskan secara tersendiri pada Subbab~\ref{subsubsec:perancangan-basis-data}.
@@ -301,22 +310,22 @@ Sistem yang dibangun pada penelitian ini menggunakan arsitektur tiga lapis (thre
 
 Penjelasan masing-masing lapisan adalah sebagai berikut.
 
-1. Lapisan Pemrosesan Data (Data Processing Layer)
+\noindent\textbf{1. Lapisan Pemrosesan Data (\textit{Data Processing Layer})}
 
-Lapisan ini merupakan tahap yang dilakukan secara offline menggunakan bahasa pemrograman Python. Pada lapisan inilah seluruh proses inti analisis dijalankan, mulai dari pra-pemrosesan data (subbab 3.2.1), pembangunan knowledge graph (subbab 3.2.2), hingga perhitungan metrik sentralitas dengan pustaka NetworkX (subbab 3.2.3). Hasil akhir dari lapisan ini diekspor menjadi berkas CSV untuk kemudian disimpan ke basis data. Penempatan seluruh komputasi berat pada lapisan ini memastikan bahwa nilai sentralitas dihitung satu kali di sisi backend, bukan di sisi pengguna.
+Lapisan ini merupakan tahap yang dilakukan secara offline menggunakan bahasa pemrograman Python. Pada lapisan inilah seluruh proses inti analisis dijalankan, mulai dari pra-pemrosesan data (Subbab~\ref{subsec:pra-pemrosesan}), pembangunan knowledge graph (Subbab~\ref{subsec:pembangunan-kg}), hingga perhitungan metrik sentralitas dengan pustaka NetworkX (Subbab~\ref{subsec:analisis-jaringan}). Hasil akhir dari lapisan ini diekspor menjadi berkas CSV untuk kemudian disimpan ke basis data. Penempatan seluruh komputasi berat pada lapisan ini memastikan bahwa nilai sentralitas dihitung satu kali di sisi backend, bukan di sisi pengguna.
 
-2. Lapisan Penyimpanan Data (Data Storage Layer)
+\noindent\textbf{2. Lapisan Penyimpanan Data (\textit{Data Storage Layer})}
 
-Lapisan ini menggunakan Supabase sebagai basis data berbasis PostgreSQL yang menyimpan hasil analisis dalam dua tabel relasional, yaitu tabel Sentralitas (data perawi beserta nilai sentralitasnya) dan tabel Edge (data relasi sanad antar perawi), sebagaimana dijelaskan pada subbab 3.2.3.3. Lapisan ini berperan sebagai sumber data terpusat yang menjembatani hasil pemrosesan dengan dashboard. Supabase menyediakan REST API yang memungkinkan lapisan presentasi mengambil data secara langsung dan efisien.
+Lapisan ini menggunakan Supabase sebagai basis data berbasis PostgreSQL yang menyimpan hasil analisis dalam dua tabel relasional, yaitu tabel Sentralitas (data perawi beserta nilai sentralitasnya) dan tabel Edge (data relasi sanad antar perawi). Lapisan ini berperan sebagai sumber data terpusat yang menjembatani hasil pemrosesan dengan dashboard. Supabase menyediakan REST API yang memungkinkan lapisan presentasi mengambil data secara langsung dan efisien.
 
-3. Lapisan Presentasi (Presentation Layer)
+\noindent\textbf{3. Lapisan Presentasi (\textit{Presentation Layer})}
 
 Lapisan ini berupa aplikasi dashboard berbentuk Single Page Application (SPA) yang dibangun menggunakan pustaka React dengan bahasa TypeScript dan build tool Vite. Antarmuka ditata menggunakan TailwindCSS, sedangkan navigasi antarhalaman dikelola dengan React Router. Dashboard berkomunikasi dengan Supabase melalui pustaka klien @supabase/supabase-js untuk mengambil data, lalu menyajikannya dalam empat halaman utama, yaitu halaman Graf Relasi Perawi, Statistik Perawi, Tabel Relasi, dan Tabel Sentralitas. Visualisasi grafik statistik dibuat menggunakan pustaka Recharts, sementara visualisasi graf jaringan sanad yang interaktif dirender menggunakan HTML5 Canvas. Lapisan ini bersifat read-only terhadap data analisis; artinya dashboard hanya menampilkan hasil yang telah tersimpan tanpa melakukan perhitungan ulang.
 
 Dengan arsitektur tersebut, beban komputasi analisis jaringan ditempatkan sepenuhnya pada lapisan pemrosesan, sedangkan dashboard cukup berfokus pada pengambilan dan penyajian data secara interaktif kepada pengguna.
 \subsubsection{Perancangan Basis Data}
 \label{subsubsec:perancangan-basis-data}
-Hasil analisis jaringan sanad yang telah disimpan ke Supabase (sebagaimana dijelaskan pada Subbab~\ref{subsubsec:penyimpanan-basis-data}) dirancang dalam bentuk basis data relasional yang terdiri atas dua tabel yang saling berelasi. Tabel Sentralitas berperan sebagai tabel utama yang menyimpan data setiap perawi beserta kelima nilai metrik sentralitasnya, sedangkan tabel Edge menyimpan relasi periwayatan antar-perawi. Model relasi antar kedua tabel tersebut digambarkan dalam bentuk \textit{Entity Relationship Diagram} (ERD) sebagaimana ditunjukkan pada Gambar~\ref{fig:erd-database}.
+Hasil analisis jaringan sanad yang telah disimpan ke Supabase dirancang dalam bentuk basis data relasional yang terdiri atas dua tabel yang saling berelasi. Tabel Sentralitas berperan sebagai tabel utama yang menyimpan data setiap perawi beserta kelima nilai metrik sentralitasnya, sedangkan tabel Edge menyimpan relasi periwayatan antar-perawi. Model relasi antar kedua tabel tersebut digambarkan dalam bentuk \textit{Entity Relationship Diagram} (ERD) sebagaimana ditunjukkan pada Gambar~\ref{fig:erd-database}.
 
 \begin{figure}[H]
 	\centering
@@ -327,7 +336,7 @@ Hasil analisis jaringan sanad yang telah disimpan ke Supabase (sebagaimana dijel
 
 \noindent\textbf{a. Tabel Sentralitas (Data Node / Perawi)}
 
-Tabel ini menyimpan data setiap perawi sebagai node dalam jaringan, lengkap dengan kelima nilai metrik sentralitasnya. Struktur kolom tabel Sentralitas ditunjukkan pada Tabel~\ref{tab:struktur-sentralitas}.
+Tabel ini menyimpan data setiap perawi sebagai node dalam jaringan, lengkap dengan kelima nilai metrik sentralitasnya. Data pada tabel ini berasal dari berkas \texttt{sentralitas.csv} yang dibentuk pada Subbab~\ref{subsubsec:metrik-sentralitas}. Struktur kolom tabel Sentralitas ditunjukkan pada Tabel~\ref{tab:struktur-sentralitas}.
 
 \begin{table}[H]
 \centering
@@ -359,7 +368,7 @@ Betweenness\_Centrality & float & Skor sentralitas keperantaraan \\
 
 \noindent\textbf{b. Tabel Edge (Data Relasi / Sanad)}
 
-Tabel ini menyimpan data relasi periwayatan (guru--murid) sebagai edge yang menghubungkan dua node. Struktur kolom tabel Edge ditunjukkan pada Tabel~\ref{tab:struktur-edge}.
+Tabel ini menyimpan data relasi periwayatan (guru--murid) sebagai edge yang menghubungkan dua node. Data pada tabel ini berasal dari berkas \texttt{edge\_slim.csv} yang dibentuk pada Subbab~\ref{subsubsec:bobot-edge}. Struktur kolom tabel Edge ditunjukkan pada Tabel~\ref{tab:struktur-edge}.
 
 \begin{table}[H]
 \centering
@@ -481,14 +490,46 @@ Supabase (PostgreSQL) & -- & Layanan Backend as a Service berbasis PostgreSQL se
 
 Pemilihan React dengan TypeScript sebagai dasar pengembangan bertujuan agar antarmuka dapat dibangun secara modular dalam bentuk komponen yang dapat digunakan kembali (\textit{reusable}), sekaligus mengurangi potensi kesalahan melalui pemeriksaan tipe data. Vite digunakan sebagai \textit{build tool} karena menawarkan proses kompilasi yang cepat selama pengembangan. Untuk kebutuhan tampilan, TailwindCSS dipilih agar penataan antarmuka lebih efisien tanpa menulis berkas CSS terpisah dalam jumlah besar.
 
-Pada aspek visualisasi, penelitian ini menggunakan dua pendekatan yang berbeda sesuai kebutuhan. Recharts dimanfaatkan untuk menampilkan grafik statistik (diagram batang) secara cepat, sedangkan visualisasi graf jaringan sanad yang interaktif dirender menggunakan HTML5 Canvas secara langsung. Penggunaan Canvas dipilih karena mampu menggambar dan memperbarui ratusan node serta edge secara efisien, sekaligus memberikan keleluasaan dalam menerapkan algoritma tata letak graf secara mandiri, sebagaimana dijelaskan pada Subbab~\ref{subsubsec:implementasi-graf}.
+Pada aspek visualisasi, penelitian ini menggunakan dua pendekatan yang berbeda sesuai kebutuhan. Recharts dimanfaatkan untuk menampilkan grafik statistik (diagram batang) secara cepat, sedangkan visualisasi graf jaringan sanad yang interaktif dirender menggunakan HTML5 Canvas secara langsung. Penggunaan Canvas dipilih karena mampu menggambar dan memperbarui ratusan node serta edge secara efisien, sekaligus memberikan keleluasaan dalam menerapkan algoritma tata letak graf secara mandiri.
 
 \begin{sloppypar}
 Adapun pada sisi penyimpanan dan integrasi data, Supabase yang berbasis PostgreSQL digunakan sebagai basis data, dan \textit{dashboard} mengakses datanya melalui pustaka klien \texttt{@supabase/supabase-js}. Dengan kombinasi teknologi tersebut, \textit{dashboard} dapat berjalan sebagai aplikasi web yang ringan, interaktif, dan terhubung langsung dengan hasil analisis jaringan sanad.
 \end{sloppypar}
 
-\subsubsection{Implementasi Visualisasi Graf}
-\label{subsubsec:implementasi-graf}
+\subsection{Pengujian Sistem}
+Pengujian sistem dilakukan untuk memastikan setiap fungsi pada \textit{dashboard} berjalan sesuai dengan yang dirancang. Metode pengujian yang digunakan pada penelitian ini adalah \textit{black-box testing}, yaitu pengujian yang berfokus pada fungsionalitas sistem tanpa memeriksa struktur kode internalnya. Pengujian ini dilakukan dengan memberikan masukan (\textit{input}) tertentu pada setiap fitur, lalu membandingkan keluaran (\textit{output}) yang dihasilkan dengan keluaran yang diharapkan. Sebuah fitur dinyatakan valid apabila keluaran yang dihasilkan sesuai dengan keluaran yang diharapkan.
+
+Pengujian difokuskan pada fitur-fitur utama \textit{dashboard}, yaitu navigasi antarhalaman, visualisasi graf jaringan sanad, penyajian statistik, serta penyajian data pada tabel relasi dan tabel sentralitas. Rancangan skenario pengujian (\textit{test case}) ditunjukkan pada Tabel~\ref{tab:pengujian}.
+
+\begin{table}[H]
+\centering
+\caption{Rancangan skenario pengujian \textit{black-box} pada \textit{dashboard}}
+\label{tab:pengujian}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|c|p{2.6cm}|p{4.7cm}|p{4.7cm}|}
+\hline
+\multicolumn{1}{|c|}{\textbf{No}} & \multicolumn{1}{c|}{\textbf{Fitur yang Diuji}} & \multicolumn{1}{c|}{\textbf{Skenario / Masukan}} & \multicolumn{1}{c|}{\textbf{Hasil yang Diharapkan}} \\
+\hline
+1 & Navigasi menu & Menekan setiap menu (Graf Relasi, Statistik, Tabel Relasi, Tabel Sentralitas) & Sistem menampilkan halaman sesuai menu yang dipilih \\
+\hline
+2 & Pemuatan data & Membuka halaman yang mengambil data dari Supabase & Data perawi dan relasi berhasil dimuat dan ditampilkan \\
+\hline
+3 & Visualisasi graf & Membuka halaman Graf Relasi Perawi & Graf jaringan sanad (node dan edge) tampil dengan benar \\
+\hline
+4 & Pemilihan node & Mengklik salah satu node perawi & Panel detail perawi (nilai sentralitas, daftar guru \& murid) muncul \\
+\hline
+5 & Filter metrik sentralitas & Memilih salah satu metrik sentralitas & Ukuran/warna node berubah sesuai metrik yang dipilih \\
+\hline
+6 & Pencarian perawi & Memasukkan nama perawi pada kolom pencarian & Sistem menampilkan perawi sesuai kata kunci \\
+\hline
+7 & Halaman statistik & Membuka halaman Statistik Perawi & Kartu total perawi/relasi dan diagram Top sentralitas tampil dengan benar \\
+\hline
+8 & Tabel relasi & Membuka halaman Tabel Relasi & Data relasi guru--murid tampil dalam tabel \\
+\hline
+9 & Tabel sentralitas & Membuka halaman Tabel Sentralitas & Data perawi dan nilai sentralitas tampil dalam tabel \\
+\hline
+\end{tabular}
+\end{table}
 
 \section{Alur Tugas Akhir}
 
