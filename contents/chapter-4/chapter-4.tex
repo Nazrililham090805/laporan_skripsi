@@ -245,8 +245,7 @@ Proses impor berlangsung dengan benar, ditandai oleh keberhasilan pemetaan setia
 \section{Implementasi Sistem Dashboard}
 Setelah data hasil analisis tersimpan di Supabase, tahap berikutnya adalah implementasi sistem \textit{dashboard} berdasarkan rancangan yang telah disusun sebelumnya. \textit{Dashboard} dibangun sebagai aplikasi web berbentuk \textit{Single Page Application} menggunakan React, yang mengambil data dari Supabase lalu menyajikannya secara interaktif kepada pengguna. Sistem terdiri atas empat halaman utama, yaitu halaman Graf Relasi Perawi, Statistik Perawi, Tabel Relasi, dan Tabel Sentralitas, yang masing-masing dijelaskan sebagai berikut.
 
-\begin{enumerate}
-	\item \textbf{Halaman Graf Relasi Perawi}
+\subsection{Halaman Graf Relasi Perawi}
 
 	Halaman ini menampilkan visualisasi graf jaringan sanad secara interaktif yang dirender menggunakan HTML5 Canvas dengan tata letak \textit{force-directed}. Pada contoh berikut, metrik yang dipilih adalah \textit{In Degree Centrality}, yang menjadi dasar pewarnaan dan ukuran node. Tampilan awal halaman ditunjukkan pada Gambar~\ref{fig:graf-utama}.
 
@@ -292,7 +291,7 @@ Setelah data hasil analisis tersimpan di Supabase, tahap berikutnya adalah imple
 
 	Visualisasi yang sama juga berlaku untuk keempat metrik sentralitas lainnya, yaitu \textit{Out Degree}, \textit{Eigenvector}, \textit{Closeness}, dan \textit{Betweenness Centrality}. Pengguna cukup memilih metrik yang diinginkan pada panel filter, dan pewarnaan serta ukuran node akan menyesuaikan dengan nilai metrik yang dipilih.
 
-	\item \textbf{Halaman Statistik Perawi}
+\subsection{Halaman Statistik Perawi}
 
 	Halaman ini menyajikan ringkasan statistik jaringan sanad dalam bentuk visual. Tampilan halaman Statistik Perawi ditunjukkan pada Gambar~\ref{fig:halaman-statistik}.
 
@@ -305,7 +304,7 @@ Setelah data hasil analisis tersimpan di Supabase, tahap berikutnya adalah imple
 
 	Pada bagian atas halaman terdapat dua kartu indikator yang menampilkan Total Perawi sebanyak 177.047 dan Total Relasi guru--murid sebanyak 776.798, yang memberikan gambaran umum mengenai skala jaringan. Di bawahnya ditampilkan lima diagram batang, masing-masing untuk satu metrik sentralitas, yaitu In Degree, Out Degree, Eigenvector, Closeness, dan Betweenness Centrality. Setiap diagram memperlihatkan sepuluh perawi dengan nilai tertinggi pada metrik yang bersangkutan. Warna batang pada tiap diagram digunakan untuk membedakan kelompok peringkat, yaitu hijau untuk perawi peringkat teratas, biru untuk peringkat menengah, dan abu-abu untuk peringkat yang lebih rendah dalam sepuluh besar, sehingga urutan pengaruh perawi dapat dikenali dengan cepat secara visual. Penyajian dalam lima diagram terpisah memudahkan pengguna membandingkan perawi paling berpengaruh dari sudut pandang tiap metrik secara sekaligus dalam satu halaman.
 
-	\item \textbf{Halaman Tabel Relasi}
+\subsection{Halaman Tabel Relasi}
 
 	Halaman ini menampilkan seluruh data relasi periwayatan guru--murid dalam bentuk tabel. Tampilan halaman Tabel Relasi ditunjukkan pada Gambar~\ref{fig:tabel-relasi}.
 
@@ -329,7 +328,7 @@ Setelah data hasil analisis tersimpan di Supabase, tahap berikutnya adalah imple
 
 	Pada Gambar~\ref{fig:tabel-relasi-cari}, pencarian dengan kata kunci ``Ibnu Abbas'' menyaring tabel sehingga hanya menampilkan relasi yang melibatkan perawi tersebut, yaitu sebanyak 3.785 relasi. Dengan fitur ini, pengguna dapat dengan cepat menelaah seluruh relasi periwayatan dari atau menuju seorang perawi tertentu.
 
-	\item \textbf{Halaman Tabel Sentralitas}
+\subsection{Halaman Tabel Sentralitas}
 
 	Halaman ini menampilkan data seluruh perawi beserta kelima nilai metrik sentralitasnya dalam bentuk tabel. Tampilan halaman Tabel Sentralitas ditunjukkan pada Gambar~\ref{fig:tabel-sentralitas}.
 
@@ -352,7 +351,32 @@ Setelah data hasil analisis tersimpan di Supabase, tahap berikutnya adalah imple
 	\end{figure}
 
 	Pada Gambar~\ref{fig:tabel-sentralitas-cari}, pencarian dengan kata kunci ``Ibnu Abbas'' menyaring tabel sehingga hanya menampilkan perawi yang namanya mengandung kata kunci tersebut, yaitu sebanyak 65 perawi beserta nilai sentralitas masing-masing. Dengan fitur ini, pengguna dapat dengan cepat menemukan dan membandingkan nilai sentralitas perawi tertentu.
-\end{enumerate}
+\subsection{Implementasi Visualisasi Graf}
+Visualisasi graf jaringan sanad merupakan komponen inti \textit{dashboard} yang menampilkan perawi sebagai node dan relasi periwayatan sebagai edge. Berbeda dengan grafik statistik yang dibuat menggunakan pustaka siap pakai, visualisasi graf pada penelitian ini diimplementasikan secara mandiri di atas HTML5 Canvas dengan menerapkan algoritma tata letak berarah-gaya (\textit{force-directed layout}) yang dirancang sendiri. Pendekatan ini dipilih agar tata letak node tidak hanya rapi secara visual, tetapi juga mencerminkan tingkat sentralitas tiap perawi dalam jaringan.
+
+\noindent\textbf{a. Penentuan Posisi Awal}
+
+Sebelum simulasi dijalankan, setiap node diberi posisi awal berdasarkan peringkat (\textit{rank}) nilai sentralitasnya. Node dikelompokkan ke dalam beberapa cincin (\textit{ring}) konsentris, di mana perawi dengan sentralitas tertinggi ditempatkan pada cincin terdalam (dekat pusat) dan perawi dengan sentralitas lebih rendah pada cincin terluar. Pembagian cincin diatur sebagai berikut: peringkat 1--5 pada cincin berjari-jari 180, peringkat 6--15 pada jari-jari 320, peringkat 16--30 pada jari-jari 460, dan sisanya pada jari-jari 600. Posisi awal ini membuat struktur jaringan langsung terbaca sejak awal animasi.
+
+\noindent\textbf{b. Algoritma Simulasi Gaya}
+
+Tata letak akhir node ditentukan melalui simulasi fisika yang dijalankan secara berulang pada setiap \textit{frame} animasi (menggunakan \texttt{requestAnimationFrame}). Pada setiap iterasi, posisi node diperbarui berdasarkan resultan dari tiga jenis gaya. Pertama, \textbf{gaya tolak} (\textit{repulsion}) yang bekerja antar pasangan node agar tidak saling menumpuk; gaya ini hanya berlaku ketika jarak antar node cukup dekat, dengan besar gaya berbanding terbalik terhadap kuadrat jarak, mengikuti analogi gaya Coulomb. Kedua, \textbf{gaya pegas} (\textit{spring}) yang bekerja pada setiap edge untuk menjaga jarak ideal antar perawi yang berelasi, mengikuti analogi hukum Hooke; gaya ini menarik node yang terlalu jauh dan mendorong node yang terlalu dekat menuju jarak ideal. Ketiga, \textbf{gaya radial} (\textit{radial constraint}) yang merupakan komponen utama pembeda visualisasi ini, yaitu menarik setiap node menuju jari-jari cincin targetnya sesuai peringkat sentralitas, sehingga perawi paling berpengaruh selalu cenderung berada di pusat jaringan.
+
+Setelah ketiga gaya dijumlahkan, kecepatan tiap node diperbarui lalu diredam dengan faktor peredam (\textit{damping}) agar simulasi konvergen dan stabil, serta dibatasi pada nilai maksimum tertentu untuk mencegah pergerakan yang tidak terkendali. Proses ini berulang pada setiap \textit{frame}, yaitu menghitung ketiga gaya untuk seluruh node dan edge, memperbarui kecepatan dan posisi tiap node, lalu merender ulang seluruh node dan edge ke Canvas hingga tata letak jaringan stabil. Persamaan matematis ketiga gaya beserta nilai parameternya disajikan pada Lampiran.
+
+\noindent\textbf{c. Pemetaan Visual (\textit{Visual Encoding})}
+
+Selain posisi, informasi sentralitas juga dipetakan ke dalam atribut visual node agar lebih mudah diinterpretasikan, yaitu:
+
+\begin{itemize}
+	\item \textbf{Ukuran node}, semakin besar nilai sentralitas perawi, semakin besar jari-jari node-nya (28, 20, 14, 10, dan 7 piksel untuk tiap kelompok peringkat).
+	\item \textbf{Warna node}, kelompok peringkat dibedakan dengan warna (peringkat 1--10 amber, 11--20 hijau, 21--30 biru, 31--40 ungu, dan 41--50 abu-abu), disertai keterangan (\textit{legend}) pada sudut tampilan.
+	\item \textbf{Arah edge}, relasi digambar dengan tanda panah berarah dari murid menuju guru untuk menunjukkan arah periwayatan.
+\end{itemize}
+
+\noindent\textbf{d. Interaktivitas}
+
+Visualisasi dilengkapi sejumlah fitur interaktif untuk eksplorasi jaringan, yaitu memilih node (klik untuk menampilkan panel detail perawi), menggeser node (\textit{drag}), menggeser tampilan (\textit{pan}), serta memperbesar dan memperkecil (\textit{zoom} melalui \textit{scroll} maupun tombol). Ketika sebuah node dipilih, node beserta seluruh relasi langsungnya disorot, sedangkan node lain diredupkan sehingga fokus pengguna terarah pada perawi yang sedang ditelusuri. Sistem juga menyediakan fitur penyesuaian tampilan otomatis (\textit{auto-fit}) yang mengatur tingkat \textit{zoom} agar seluruh graf tampak proporsional di layar.
 
 \section{Pengujian Sistem}
 Pengujian dilakukan dengan metode \textit{black-box} terhadap seluruh fitur \textit{dashboard} yang telah diimplementasikan. Selain fitur utama, terdapat pula beberapa fitur tambahan yang juga diuji, yaitu fitur interaksi pada graf, seperti \textit{zoom}, \textit{drag}, dan \textit{reset} tampilan, serta fitur paginasi dan pengurutan pada tabel, sehingga diperoleh 14 skenario pengujian. Hasil pengujian terhadap seluruh fitur tersebut disajikan pada Tabel~\ref{tab:hasil-pengujian}.

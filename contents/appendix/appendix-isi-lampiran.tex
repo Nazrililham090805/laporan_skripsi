@@ -17,9 +17,28 @@ screenshot aplikasi.
 memungkinkan untuk ditayangkan di bagian utama skripsi.
 \item Gambar-gambar pendukung yang tidak terlalu penting untuk ditampilkan di 
 bagian utama. Akan tetapi, mendukung argumentasi/pengamatan/analisis.
-\item Penurunan rumus-rumus atau pembuktian suatu teorema yang terlalu 
-panjang dan terlalu teknis sehingga Anda berasumsi bahwa pembaca biasa 
-tidak akan menelaah lebih lanjut. Hal ini digunakan untuk memberikan 
-kesempatan bagi pembaca tingkat lanjut untuk melihat proses penurunan 
+\item Penurunan rumus-rumus atau pembuktian suatu teorema yang terlalu
+panjang dan terlalu teknis sehingga Anda berasumsi bahwa pembaca biasa
+tidak akan menelaah lebih lanjut. Hal ini digunakan untuk memberikan
+kesempatan bagi pembaca tingkat lanjut untuk melihat proses penurunan
 rumus-rumus ini.
 \end{enumerate}
+
+\section{Rumus Algoritma Tata Letak Graf \textit{Force-Directed}}
+\label{lamp:rumus-graf}
+Bagian ini memuat persamaan matematis dari ketiga gaya yang digunakan pada algoritma tata letak graf \textit{force-directed} pada visualisasi jaringan sanad, beserta nilai parameternya.
+
+\begin{enumerate}
+\item \textbf{Gaya tolak (\textit{repulsion})}, bekerja antar pasangan node dan hanya diterapkan jika jarak antar node kurang dari 320 piksel:
+$$ F_{tolak} = \frac{k_r}{d^2}, \quad k_r = 2000 $$
+dengan $d$ adalah jarak Euclidean antara dua node.
+
+\item \textbf{Gaya pegas (\textit{spring})}, bekerja pada setiap edge dengan panjang ideal 200 piksel:
+$$ F_{pegas} = (d - L_0)\cdot k_s, \quad L_0 = 200,\ k_s = 0{,}003 $$
+
+\item \textbf{Gaya radial (\textit{radial constraint})}, menarik setiap node menuju jari-jari cincin targetnya ($r_{target}$) sesuai peringkat sentralitas:
+$$ F_{radial} = (r - r_{target})\cdot k_c, \quad k_c = 0{,}014 $$
+dengan $r$ adalah jarak node saat ini dari titik pusat.
+\end{enumerate}
+
+Setelah ketiga gaya dijumlahkan, kecepatan tiap node diperbarui lalu dikalikan dengan faktor peredam (\textit{damping}) sebesar 0,78. Posisi awal node ditentukan berdasarkan peringkat sentralitasnya pada cincin konsentris dengan jari-jari 180 (peringkat 1--5), 320 (peringkat 6--15), 460 (peringkat 16--30), dan 600 (sisanya).
