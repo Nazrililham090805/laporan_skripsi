@@ -83,7 +83,7 @@ Jumlah sisi (\textit{edge} / relasi) & 776.798 \\
 
 Graf jaringan sanad yang terbentuk terdiri dari 177.047 simpul yang merepresentasikan perawi dan 776.798 sisi yang merepresentasikan relasi periwayatan guru--murid. Jumlah simpul dan sisi ini menunjukkan bahwa jaringan sanad yang berhasil dimodelkan berskala besar dan mencakup ratusan ribu jalur periwayatan. Graf inilah yang menjadi dasar bagi perhitungan metrik sentralitas pada tahap analisis berikutnya.
 
-Jumlah simpul tersebut sedikit lebih kecil dibandingkan 177.289 nama perawi unik yang teridentifikasi pada tahap normalisasi nama perawi (Subbab~\ref{subsec:transformasi-nama}). Selisih sebanyak 242 perawi muncul karena perawi-perawi tersebut tidak membentuk relasi apa pun dalam graf, sehingga tidak tercatat sebagai simpul. Kondisi ini terjadi antara lain pada rantai sanad yang hanya memuat satu nama perawi sehingga tidak dapat membentuk pasangan guru--murid, serta pada perawi yang gugur saat pembersihan tahap penyusunan sisi, seperti penghapusan \textit{self-loop} (relasi dengan guru dan murid yang sama) dan penghapusan nama kosong. Dengan demikian, 177.289 menunjukkan jumlah perawi yang teridentifikasi, sedangkan 177.047 menunjukkan jumlah perawi yang benar-benar terlibat dalam minimal satu relasi periwayatan.
+Jumlah simpul tersebut sedikit lebih kecil dibandingkan 177.289 nama perawi unik yang teridentifikasi pada tahap normalisasi nama perawi. Selisih sebanyak 242 perawi muncul karena perawi-perawi tersebut tidak membentuk relasi apa pun dalam graf, sehingga tidak tercatat sebagai simpul. Kondisi ini terjadi antara lain pada rantai sanad yang hanya memuat satu nama perawi sehingga tidak dapat membentuk pasangan guru--murid, serta pada perawi yang gugur saat pembersihan tahap penyusunan sisi, seperti penghapusan \textit{self-loop} (relasi dengan guru dan murid yang sama) dan penghapusan nama kosong. Dengan demikian, 177.289 menunjukkan jumlah perawi yang teridentifikasi, sedangkan 177.047 menunjukkan jumlah perawi yang benar-benar terlibat dalam minimal satu relasi periwayatan.
 
 \subsection{Hubungan Guru - Murid}
 Setiap relasi dalam graf direpresentasikan sebagai tripel (Murid, meriwayatkan-dari, Guru) yang dilengkapi atribut bobot, yaitu \textit{Weight} (frekuensi relasi) dan \textit{Inverse Weight} (kebalikan bobot untuk perhitungan jarak). Relasi guru--murid dengan bobot tertinggi ditampilkan pada Tabel~\ref{tab:relasi-terkuat}.
@@ -123,6 +123,7 @@ Aisyah & Abu Hisyam bin Urwah & 3.950 & 0,000253 \\
 Tabel~\ref{tab:relasi-terkuat} menunjukkan bahwa relasi terkuat dalam jaringan adalah hubungan antara Ibnu Umar dan Nafi' dengan bobot 11.346, yang berarti Nafi' tercatat meriwayatkan hadis dari Ibnu Umar sebanyak 11.346 kali dalam korpus. Terlihat pula bahwa nilai \textit{Inverse Weight} berbanding terbalik dengan \textit{Weight}, yaitu semakin tinggi frekuensi relasi, semakin kecil nilai \textit{Inverse Weight}-nya. Nilai inilah yang digunakan sebagai representasi jarak dalam perhitungan sentralitas berbasis jalur (\textit{closeness} dan \textit{betweenness}), sehingga pasangan perawi dengan relasi terkuat dianggap memiliki jarak terdekat dalam jaringan. Bobot yang tinggi pada relasi-relasi ini mencerminkan adanya jalur periwayatan utama (\textit{backbone}) yang sangat dominan, yaitu pasangan guru--murid yang konsisten muncul di banyak rantai sanad.
 
 \section{Hasil Analisis Jaringan Sanad (Sentralitas)}
+\label{subsec:analisis-sentralitas}
 Analisis sentralitas dilakukan untuk mengidentifikasi perawi-perawi yang memiliki peran penting dalam jaringan sanad. Sebelum hasil masing-masing metrik dijelaskan, terdapat cakupan data yang digunakan dalam perhitungan, mengingat tidak seluruh metrik dihitung pada skala data yang sama.
 
 \begin{sloppypar}
@@ -242,29 +243,194 @@ Gambar~\ref{fig:supabase-sentralitas} memperlihatkan tabel Sentralitas yang memu
 Proses impor berlangsung dengan benar, ditandai oleh keberhasilan pemetaan setiap kolom (\textit{header}) pada berkas CSV menjadi kolom pada tabel basis data, serta tersimpannya setiap baris CSV sebagai satu \textit{record} tanpa kehilangan data. Penyimpanan hasil analisis ke dalam basis data ini menerapkan pemisahan antara proses komputasi dan proses penyajian. Seluruh perhitungan yang berat dilakukan satu kali secara \textit{offline}, kemudian hasil akhirnya disimpan di Supabase, sehingga \textit{dashboard} cukup mengambil data yang sudah jadi melalui \textit{REST API} tanpa perlu menghitung ulang. Pendekatan ini membuat \textit{dashboard} dapat berjalan ringan dan responsif ketika mengakses data hasil analisis.
 
 \section{Implementasi Sistem Dashboard}
-% Pengantar: dashboard hasil implementasi dari rancangan Bab III.
+Setelah data hasil analisis tersimpan di Supabase, tahap berikutnya adalah implementasi sistem \textit{dashboard} berdasarkan rancangan yang telah disusun sebelumnya. \textit{Dashboard} dibangun sebagai aplikasi web berbentuk \textit{Single Page Application} menggunakan React, yang mengambil data dari Supabase lalu menyajikannya secara interaktif kepada pengguna. Sistem terdiri atas empat halaman utama, yaitu halaman Graf Relasi Perawi, Statistik Perawi, Tabel Relasi, dan Tabel Sentralitas, yang masing-masing dijelaskan sebagai berikut.
 
 \begin{enumerate}
 	\item \textbf{Halaman Graf Relasi Perawi}
-	% Screenshot halaman. Jelaskan implementasi visualisasi graf interaktif:
-	% algoritma tata letak force-directed dan rendering dengan HTML5 Canvas,
-	% interaksi (zoom, drag, klik node -> panel detail), pewarnaan/ukuran node per metrik.
+
+	Halaman ini menampilkan visualisasi graf jaringan sanad secara interaktif yang dirender menggunakan HTML5 Canvas dengan tata letak \textit{force-directed}. Pada contoh berikut, metrik yang dipilih adalah \textit{In Degree Centrality}, yang menjadi dasar pewarnaan dan ukuran node. Tampilan awal halaman ditunjukkan pada Gambar~\ref{fig:graf-utama}.
+
+	\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{contents/chapter-4/Tampilan1.png}
+	\caption{Tampilan halaman Graf Relasi Perawi dengan metrik \textit{In Degree Centrality}}
+	\label{fig:graf-utama}
+	\end{figure}
+
+	Pada Gambar~\ref{fig:graf-utama}, panel filter di sisi kiri memuat kolom pencarian dan pilihan lima metrik sentralitas dengan \textit{In Degree Centrality} dalam keadaan aktif, disertai definisi dan rumus metrik tersebut. Legenda di sisi kanan atas menjelaskan bahwa warna node menunjukkan peringkat perawi (Rank 1--10 hingga Rank 41--50), ukuran node menunjukkan besar nilai metrik, dan arah panah menunjukkan relasi dari murid menuju guru. Demi keterbacaan, graf menampilkan subset representatif berisi 50 perawi teratas dengan 1.000 relasi, sehingga perawi dengan \textit{in-degree} tertinggi (berwarna oranye) tampak paling besar dan berada di pusat jaringan. Graf bersifat interaktif: pengguna dapat memperbesar atau memperkecil tampilan (\textit{zoom}) melalui tombol pada sudut kanan bawah maupun dengan menggulir \textit{scroll}, menggeser posisi graf dengan menarik (\textit{drag}), mengeklik node untuk melihat detailnya, serta mengembalikan tampilan ke posisi awal melalui tombol \textit{reset}.
+
+	Ketika salah satu node dipilih, panel detail di sisi kanan menampilkan informasi lengkap perawi tersebut.
+
+	\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{contents/chapter-4/Tampilan1Node.png}
+	\caption{Panel detail perawi saat sebuah node dipilih}
+	\label{fig:graf-detail}
+	\end{figure}
+
+	Pada Gambar~\ref{fig:graf-detail}, node Abu Hurairah dipilih sehingga panel detail menampilkan jumlah guru dan murid yang terhubung, kelima nilai metrik sentralitasnya, serta daftar perawi yang terhubung beserta peringkatnya. Node-node yang terhubung dengan perawi terpilih turut disorot pada graf, sehingga relasi periwayatannya dapat ditelusuri secara langsung.
+
+	Selain itu, pengguna dapat mencari perawi tertentu melalui kolom pencarian. Hasil pencarian akan memfokuskan tampilan pada perawi yang dimaksud.
+
+	\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{contents/chapter-4/Tampilan1CariPerawi.png}
+	\caption{Hasil pencarian perawi pada halaman Graf Relasi Perawi}
+	\label{fig:graf-cari}
+	\end{figure}
+
+	Pada Gambar~\ref{fig:graf-cari}, pengguna mencari perawi ``Umar bin Al-Khthab'' sehingga graf hanya menampilkan node perawi tersebut. Apabila node hasil pencarian dipilih, sistem menampilkan jaringan perawi yang terhubung dengannya beserta panel detailnya.
+
+	\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{contents/chapter-4/Tampilan1CariPerawiNode.png}
+	\caption{Jaringan perawi hasil pencarian beserta detailnya}
+	\label{fig:graf-cari-node}
+	\end{figure}
+
+	Pada Gambar~\ref{fig:graf-cari-node}, pemilihan node Umar bin Al-Khthab menampilkan jaringan perawi yang terhubung dengannya, yaitu para guru dan muridnya, beserta panel detail di sisi kanan. Dengan demikian, pengguna dapat menelusuri jaringan periwayatan seorang perawi secara terfokus.
+
+	Visualisasi yang sama juga berlaku untuk keempat metrik sentralitas lainnya, yaitu \textit{Out Degree}, \textit{Eigenvector}, \textit{Closeness}, dan \textit{Betweenness Centrality}. Pengguna cukup memilih metrik yang diinginkan pada panel filter, dan pewarnaan serta ukuran node akan menyesuaikan dengan nilai metrik yang dipilih.
 
 	\item \textbf{Halaman Statistik Perawi}
-	% Screenshot. Jelaskan kartu Total Perawi/Relasi dan lima diagram batang Top sentralitas.
+
+	Halaman ini menyajikan ringkasan statistik jaringan sanad dalam bentuk visual. Tampilan halaman Statistik Perawi ditunjukkan pada Gambar~\ref{fig:halaman-statistik}.
+
+	\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{contents/chapter-4/halamanStatistikPerawi.png}
+	\caption{Tampilan halaman Statistik Perawi}
+	\label{fig:halaman-statistik}
+	\end{figure}
+
+	Pada bagian atas halaman terdapat dua kartu indikator yang menampilkan Total Perawi sebanyak 177.047 dan Total Relasi guru--murid sebanyak 776.798, yang memberikan gambaran umum mengenai skala jaringan. Di bawahnya ditampilkan lima diagram batang, masing-masing untuk satu metrik sentralitas, yaitu In Degree, Out Degree, Eigenvector, Closeness, dan Betweenness Centrality. Setiap diagram memperlihatkan sepuluh perawi dengan nilai tertinggi pada metrik yang bersangkutan. Warna batang pada tiap diagram digunakan untuk membedakan kelompok peringkat, yaitu hijau untuk perawi peringkat teratas, biru untuk peringkat menengah, dan abu-abu untuk peringkat yang lebih rendah dalam sepuluh besar, sehingga urutan pengaruh perawi dapat dikenali dengan cepat secara visual. Penyajian dalam lima diagram terpisah memudahkan pengguna membandingkan perawi paling berpengaruh dari sudut pandang tiap metrik secara sekaligus dalam satu halaman.
 
 	\item \textbf{Halaman Tabel Relasi}
-	% Screenshot. Jelaskan penyajian data relasi (guru, murid, weight) + fitur pencarian.
+
+	Halaman ini menampilkan seluruh data relasi periwayatan guru--murid dalam bentuk tabel. Tampilan halaman Tabel Relasi ditunjukkan pada Gambar~\ref{fig:tabel-relasi}.
+
+	\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{contents/chapter-4/tampilantabelrelasi.png}
+	\caption{Tampilan halaman Tabel Relasi}
+	\label{fig:tabel-relasi}
+	\end{figure}
+
+	Pada Gambar~\ref{fig:tabel-relasi}, setiap baris tabel merepresentasikan satu relasi periwayatan, dengan kolom No, Guru, Murid, dan Jumlah Relasi. Nama guru dan murid ditampilkan dalam aksara Latin sekaligus aksara Arab, sedangkan kolom Jumlah Relasi menunjukkan bobot relasi, yaitu banyaknya kemunculan pasangan guru--murid tersebut di seluruh korpus. Secara baku tabel diurutkan menurun berdasarkan Jumlah Relasi, sehingga relasi terkuat (Ibnu Umar--Nafi' dengan 11.346) berada di urutan teratas. Mengingat jumlah relasi sangat banyak, yaitu 776.798 relasi yang terbagi ke dalam 777 halaman, tabel dilengkapi fitur paginasi serta pengurutan kolom, sehingga data dapat ditelusuri tanpa harus dimuat seluruhnya sekaligus.
+
+	Tabel juga dilengkapi kolom pencarian untuk menyaring relasi berdasarkan nama guru atau murid tertentu. Contoh hasil pencarian ditunjukkan pada Gambar~\ref{fig:tabel-relasi-cari}.
+
+	\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{contents/chapter-4/tampilantabelrelasiperawi.png}
+	\caption{Hasil pencarian relasi pada halaman Tabel Relasi}
+	\label{fig:tabel-relasi-cari}
+	\end{figure}
+
+	Pada Gambar~\ref{fig:tabel-relasi-cari}, pencarian dengan kata kunci ``Ibnu Abbas'' menyaring tabel sehingga hanya menampilkan relasi yang melibatkan perawi tersebut, yaitu sebanyak 3.785 relasi. Dengan fitur ini, pengguna dapat dengan cepat menelaah seluruh relasi periwayatan dari atau menuju seorang perawi tertentu.
 
 	\item \textbf{Halaman Tabel Sentralitas}
-	% Screenshot. Jelaskan penyajian data perawi + kelima metrik + fitur pencarian.
+
+	Halaman ini menampilkan data seluruh perawi beserta kelima nilai metrik sentralitasnya dalam bentuk tabel. Tampilan halaman Tabel Sentralitas ditunjukkan pada Gambar~\ref{fig:tabel-sentralitas}.
+
+	\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{contents/chapter-4/tampilantabelsentralitas.png}
+	\caption{Tampilan halaman Tabel Sentralitas}
+	\label{fig:tabel-sentralitas}
+	\end{figure}
+
+	Pada Gambar~\ref{fig:tabel-sentralitas}, setiap baris tabel merepresentasikan satu perawi, dengan kolom No, Nama Perawi (aksara Latin), Perawi (aksara Arab), serta lima kolom nilai metrik sentralitas, yaitu In Degree, Out Degree, Eigenvector, Closeness, dan Betweenness. Seluruh data perawi sebanyak 177.047 perawi disajikan dan terbagi ke dalam 178 halaman, sehingga tabel dilengkapi fitur paginasi dan pengurutan pada setiap kolom metrik. Secara baku tabel diurutkan menurun berdasarkan In Degree, sehingga Abu Hurairah berada di urutan teratas dengan nilai 0,01993.
+
+	Tabel juga dilengkapi kolom pencarian untuk menemukan perawi berdasarkan namanya. Contoh hasil pencarian ditunjukkan pada Gambar~\ref{fig:tabel-sentralitas-cari}.
+
+	\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{contents/chapter-4/tampilantabelsentralitasperawi.png}
+	\caption{Hasil pencarian perawi pada halaman Tabel Sentralitas}
+	\label{fig:tabel-sentralitas-cari}
+	\end{figure}
+
+	Pada Gambar~\ref{fig:tabel-sentralitas-cari}, pencarian dengan kata kunci ``Ibnu Abbas'' menyaring tabel sehingga hanya menampilkan perawi yang namanya mengandung kata kunci tersebut, yaitu sebanyak 65 perawi beserta nilai sentralitas masing-masing. Dengan fitur ini, pengguna dapat dengan cepat menemukan dan membandingkan nilai sentralitas perawi tertentu.
 \end{enumerate}
 
 \section{Pengujian Sistem}
-% Tabel hasil pengujian black-box: salin skenario dari Tabel pengujian Bab III,
-% tambahkan kolom Hasil Aktual dan Status (Valid/Tidak). Bahas tingkat keberhasilan.
+Pengujian dilakukan dengan metode \textit{black-box} terhadap seluruh fitur \textit{dashboard} yang telah diimplementasikan. Selain fitur utama, terdapat pula beberapa fitur tambahan yang juga diuji, yaitu fitur interaksi pada graf, seperti \textit{zoom}, \textit{drag}, dan \textit{reset} tampilan, serta fitur paginasi dan pengurutan pada tabel, sehingga diperoleh 14 skenario pengujian. Hasil pengujian terhadap seluruh fitur tersebut disajikan pada Tabel~\ref{tab:hasil-pengujian}.
+
+\begin{table}[H]
+\centering
+\caption{Hasil pengujian sistem dengan metode \textit{black-box}}
+\label{tab:hasil-pengujian}
+\renewcommand{\arraystretch}{1.2}
+\setlength{\tabcolsep}{4pt}
+\footnotesize
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|p{2.4cm}|p{3.6cm}|p{3.6cm}|p{3cm}|c|}
+\hline
+\multicolumn{1}{|c|}{\textbf{No}} & \multicolumn{1}{c|}{\textbf{Fitur yang Diuji}} & \multicolumn{1}{c|}{\textbf{Skenario Pengujian}} & \multicolumn{1}{c|}{\textbf{Hasil yang Diharapkan}} & \multicolumn{1}{c|}{\textbf{Hasil Pengujian}} & \multicolumn{1}{c|}{\textbf{Ket.}} \\
+\hline
+1 & Navigasi menu & Menekan setiap menu (Graf Relasi, Statistik, Tabel Relasi, Tabel Sentralitas) & Sistem menampilkan halaman sesuai menu yang dipilih & Halaman berpindah sesuai menu & Valid \\
+\hline
+2 & Pemuatan data & Membuka halaman yang mengambil data dari Supabase & Data perawi dan relasi berhasil dimuat & Data tampil sesuai isi basis data & Valid \\
+\hline
+3 & Visualisasi graf & Membuka halaman Graf Relasi Perawi & Graf (\textit{node} dan \textit{edge}) tampil dengan benar & Graf jaringan sanad tampil & Valid \\
+\hline
+4 & Pemilihan \textit{node} & Mengklik salah satu \textit{node} perawi & Panel detail perawi muncul & Panel detail (sentralitas, guru \& murid) muncul & Valid \\
+\hline
+5 & Filter metrik sentralitas & Memilih salah satu metrik sentralitas & Ukuran / warna \textit{node} berubah sesuai metrik & Tampilan \textit{node} berubah sesuai metrik & Valid \\
+\hline
+6 & Pencarian perawi & Memasukkan nama perawi pada kolom pencarian & Menampilkan perawi sesuai kata kunci & Hasil pencarian sesuai kata kunci & Valid \\
+\hline
+7 & \textit{Zoom} graf & Menggunakan \textit{scroll} atau tombol \textit{zoom in--out} & Tampilan graf membesar atau mengecil & Graf membesar dan mengecil & Valid \\
+\hline
+8 & \textit{Drag node} dan geser tampilan & Menggeser \textit{node} dan area graf & \textit{Node} dan tampilan berpindah mengikuti kursor & \textit{Node} dan tampilan berpindah & Valid \\
+\hline
+9 & \textit{Auto-fit} / \textit{reset} tampilan & Menekan tombol \textit{reset} tampilan & Tampilan kembali menyesuaikan seluruh graf & Tampilan ter-\textit{reset} proporsional & Valid \\
+\hline
+10 & Halaman statistik & Membuka halaman Statistik Perawi & Kartu total dan diagram \textit{Top} sentralitas tampil & Kartu dan 5 diagram batang tampil & Valid \\
+\hline
+11 & Tabel relasi & Membuka halaman Tabel Relasi & Data relasi guru--murid tampil dalam tabel & Data relasi tampil & Valid \\
+\hline
+12 & Paginasi tabel & Berpindah halaman pada tabel & Data berpindah ke halaman berikutnya & Paginasi berfungsi & Valid \\
+\hline
+13 & Tabel sentralitas & Membuka halaman Tabel Sentralitas & Data perawi dan nilai sentralitas tampil & Data sentralitas tampil & Valid \\
+\hline
+14 & Pengurutan (\textit{sorting}) & Menekan kolom metrik untuk mengurutkan data & Data terurut sesuai kolom yang dipilih & Data terurut naik atau turun & Valid \\
+\hline
+\end{tabular}%
+}
+\end{table}
+
+Berdasarkan hasil pengujian pada Tabel~\ref{tab:hasil-pengujian}, seluruh fitur yang diuji sebanyak 14 skenario memberikan hasil yang sesuai dengan yang diharapkan, sehingga seluruhnya dinyatakan valid (100\%). Dengan demikian, dapat disimpulkan bahwa \textit{dashboard} jaringan sanad hadis telah berfungsi dengan baik sesuai dengan rancangan dan kebutuhan sistem.
 
 \section{Perbandingan Hasil Penelitian dengan Hasil Terdahulu}
-% Tabel perbandingan dengan penelitian terdahulu (mis. Mghari et al., CHN Visualizer):
-% aspek data, metrik SNA, dan ketersediaan front-end interaktif.
-% Bahas kelebihan dan keterbatasan dibanding penelitian/produk lain.
+Untuk menempatkan hasil penelitian ini dalam konteks kajian sejenis, pada bagian ini dilakukan perbandingan dengan beberapa penelitian terdahulu yang menganalisis jaringan perawi hadis secara komputasional. Penelitian terdahulu pada umumnya telah berhasil memodelkan dan menganalisis jaringan perawi dalam skala besar, namun luaran yang dihasilkan cenderung bersifat statis dan bergantung pada perangkat lunak jaringan berbasis \textit{desktop} seperti Gephi dan Cytoscape, sehingga sulit diakses oleh kalangan yang lebih luas \cite{FAROOQI2024110439, Shuaib2022}. Perbandingan penelitian ini dengan penelitian terdahulu disajikan pada Tabel~\ref{tab:perbandingan}.
+
+\begin{table}[H]
+\centering
+\caption{Perbandingan penelitian ini dengan penelitian terdahulu}
+\label{tab:perbandingan}
+\renewcommand{\arraystretch}{1.3}
+\small
+\begin{tabular}{|p{2.8cm}|p{5.2cm}|p{5.2cm}|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Aspek}} & \multicolumn{1}{c|}{\textbf{Penelitian Terdahulu}} & \multicolumn{1}{c|}{\textbf{Penelitian Ini}} \\
+\hline
+Representasi data & Jaringan / \textit{knowledge graph} perawi & Jaringan / \textit{knowledge graph} perawi dari dataset Sanadset 650K \\
+\hline
+Metode analisis & Analisis jaringan dengan metrik sentralitas & \textit{Social Network Analysis} dengan lima metrik sentralitas (\textit{in-degree}, \textit{out-degree}, \textit{eigenvector}, \textit{closeness}, \textit{betweenness}) \\
+\hline
+Bentuk penyajian & Cenderung statis berupa gambar atau berkas graf & Visualisasi interaktif yang dapat ditelusuri secara langsung \\
+\hline
+Perangkat / platform & Perangkat lunak \textit{desktop} (Gephi, Cytoscape) & Aplikasi web (\textit{dashboard}) berbasis React \\
+\hline
+Aksesibilitas & Memerlukan instalasi perangkat lunak khusus & Dapat diakses publik melalui peramban web tanpa instalasi \\
+\hline
+Fitur eksplorasi & Terbatas & Pencarian perawi, filter metrik, paginasi, pengurutan, dan detail relasi guru--murid \\
+\hline
+\end{tabular}
+\end{table}
+
+Berdasarkan Tabel~\ref{tab:perbandingan}, kelebihan utama penelitian ini terletak pada penyajian hasil analisis jaringan sanad dalam bentuk \textit{dashboard} web yang interaktif dan dapat diakses secara publik tanpa memerlukan instalasi perangkat lunak khusus. Hal ini menjawab keterbatasan penelitian terdahulu yang luarannya cenderung statis dan bergantung pada perangkat lunak \textit{desktop}, sehingga hasil analisis dapat dimanfaatkan oleh kalangan yang lebih luas, mulai dari pelajar, peneliti, hingga masyarakat umum.
+
+Meskipun demikian, penelitian ini memiliki beberapa keterbatasan. Metrik \textit{closeness} dan \textit{betweenness} dihitung pada subset graf terkuat, bukan pada graf penuh, karena keterbatasan komputasi. Selain itu, data yang digunakan bersifat statis dan belum diperbarui secara otomatis, serta analisis difokuskan pada struktur jaringan periwayatan tanpa menilai derajat kesahihan sanad secara ilmu hadis.
