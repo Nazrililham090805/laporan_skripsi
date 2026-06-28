@@ -19,16 +19,18 @@ Kondisi inilah yang mendorong kebutuhan akan analisis kuantitatif dan komputasio
 Kebutuhan akan pendekatan komputasional tersebut telah mulai dijawab sejak lebih dari satu dekade lalu melalui sejumlah penelitian yang menganalisis jaringan perawi hadis secara kuantitatif. Beberapa penelitian membangun jaringan sosial historis perawi lintas generasi dan menerapkan analisis jaringan untuk merekonstruksi informasi temporal dari struktur transmisinya \cite{Shuaib2022}, 
 sementara penelitian lain merepresentasikan jaringan perawi dalam bentuk \textit{knowledge graph} dan menganalisisnya menggunakan berbagai perangkat lunak jaringan \cite{FAROOQI2024110439}. 
 Sebagaimana ditinjau oleh Mghari \textit{et al}, sejumlah studi telah menerapkan metrik sentralitas seperti \textit{in-degree}, \textit{out-degree}, \textit{betweenness}, dan \textit{closeness} untuk mengidentifikasi perawi paling berpengaruh dalam jaringan periwayatan, dan upaya ke arah visualisasi yang lebih eksploratif pun mulai dirintis melalui prototipe seperti \textit{Chain of Hadith Narrators Visualizer (CHN)} \cite{Mghari2024Narrator2Vec} .
-Penelitian-penelitian ini menegaskan bahwa jaringan perawi dapat dimodelkan dan dianalisis secara komputasional dalam skala besar. Meskipun demikian, luaran yang dihasilkan umumnya bersifat statis dan bergantung pada perangkat lunak desktop khusus seperti Gephi dan Cytoscape, sehingga sulit diakses oleh kalangan yang lebih luas \cite{FAROOQI2024110439}. Hasil analisis yang diperoleh pun belum disajikan dalam bentuk yang dapat dieksplorasi secara interaktif oleh pelajar, peneliti, maupun masyarakat umum.
+Penelitian-penelitian ini menegaskan bahwa jaringan perawi dapat dimodelkan dan dianalisis secara komputasional dalam skala besar. Meskipun demikian, luaran yang dihasilkan umumnya bersifat statis dan bergantung pada perangkat lunak desktop khusus seperti \textit{Gephi} dan \textit{Cytoscape}, sehingga sulit diakses oleh kalangan yang lebih luas \cite{FAROOQI2024110439}. Hasil analisis yang diperoleh pun belum disajikan dalam bentuk yang dapat dieksplorasi secara interaktif oleh pelajar, peneliti, maupun masyarakat umum.
 
-Meski demikian, representasi \textit{knowledge graph} yang telah digunakan dalam penelitian - penelitian tersebut menawarkan fondasi yang dapat dikembangkan menjadi sistem yang lebih interaktif dan mudah diakses secara luas.
-\textit{Knowledge graph} menggambarkan entitas beserta relasi antarentitas dalam bentuk graf, sehingga keterhubungan data yang kompleks tersaji secara semantis dan terstruktur.
+\begin{sloppypar}
+Meski demikian, representasi \textit{knowledge graph} yang telah digunakan dalam penelitian-penelitian tersebut menawarkan fondasi yang dapat dikembangkan menjadi sistem yang lebih interaktif dan mudah diakses secara luas.
+\textit{Knowledge Graph} menggambarkan entitas beserta relasi antarentitas dalam bentuk graf, sehingga keterhubungan data yang kompleks tersaji secara semantis dan terstruktur.
 Karena keunggulan tersebut, \textit{knowledge graph} telah diadopsi secara luas di berbagai bidang, seperti pendidikan untuk memprediksi kinerja siswa maupun pariwisata untuk menggali wawasan dari data berskala besar \cite{Aoula2026}.
 Dalam kajian hadis, pendekatan ini menyediakan representasi yang sesuai untuk memodelkan jaringan periwayatan secara komputasional, dengan perawi sebagai entitas dan hubungan guru–murid sebagai relasi yang menghubungkan antarsimpul \cite{FAROOQI2024110439}.
+\end{sloppypar}
 
-Setelah representasi berbasis \textit{knowledge graph} ditetapkan, komponen yang diperlukan berikutnya adalah sumber data sebagai bahan pembentukan jaringan perawi. Penelitian ini menggunakan Sanadset 650K, sebuah dataset sanad hadis yang dipublikasikan secara terbuka oleh Mghari \textit{et al}.
+Setelah representasi berbasis \textit{knowledge graph} ditetapkan, komponen yang diperlukan berikutnya adalah sumber data sebagai bahan pembentukan jaringan perawi. Penelitian ini menggunakan \textit{Sanadset 650K}, sebuah dataset sanad hadis yang dipublikasikan secara terbuka oleh Mghari \textit{et al}.
 Mereka menghimpun 650.986 entri hadis yang diekstraksi dari 926 kitab hadis klasik berbahasa Arab, dengan setiap entri menandai komponen sanad, tiap perawi di dalamnya, serta matan secara terstruktur. Pemilihan dataset ini didasarkan pada keautentikannya karena bersumber langsung dari kitab-kitab hadis klasik, cakupannya yang luas lintas ratusan kitab, serta skalanya yang besar sehingga mampu merepresentasikan jaringan periwayatan secara komprehensif \cite{MGHARI2022108540}.
-Kredibilitas Sanadset 650K turut ditunjukkan oleh pemanfaatannya dalam penelitian lanjutan tentang representasi perawi \cite{Mghari2024Narrator2Vec}. Data yang autentik dan berskala besar ini memungkinkan pembangunan jaringan perawi yang akurat dalam penelitian ini.
+Kredibilitas \textit{Sanadset 650K} turut ditunjukkan oleh pemanfaatannya dalam penelitian lanjutan tentang representasi perawi \cite{Mghari2024Narrator2Vec}. Data yang autentik dan berskala besar ini memungkinkan pembangunan jaringan perawi yang akurat dalam penelitian ini.
 
 Dengan jaringan perawi yang telah terbentuk, dibutuhkan metode untuk mengukur posisi dan pengaruh tiap perawi di dalamnya.
 \textit{Social Network Analysis} (SNA) merupakan pendekatan yang sesuai untuk tujuan tersebut, dengan memanfaatkan sejumlah metrik sentralitas untuk mengukur peran tiap simpul (\textit{node}) dalam jaringan, di antaranya \textit{degree centrality (in-degree dan out-degree)}, \textit{betweenness}, \textit{closeness}, dan \textit{eigenvector centrality} \cite{LópezWerner04072025}.
@@ -51,7 +53,7 @@ Selama ini penelitian terkait sanad hadis umumnya berhenti pada tahap visualisas
 
 \section{Tujuan Penelitian}
 
-Penelitian ini bertujuan untuk mengembangkan Front-End Knowledge Graph Keagamaan Ilmuwan Islam dengan memanfaatkan data sanad hadis dan pendekatan \textit{Social Network Analysis} (SNA). Tujuan penelitian ini adalah:
+Penelitian ini bertujuan untuk mengembangkan \textit{Front-End Knowledge Graph} Keagamaan Ilmuwan Islam dengan memanfaatkan data sanad hadis dan pendekatan \textit{Social Network Analysis} (SNA). Tujuan penelitian ini adalah:
 
 \begin{enumerate}
 	\item Menghasilkan representasi \textit{Knowledge Graph} yang menggambarkan hubungan guru dan murid antarperawi berdasarkan data sanad hadis.

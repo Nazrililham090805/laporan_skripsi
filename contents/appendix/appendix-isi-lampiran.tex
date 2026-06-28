@@ -1,44 +1,382 @@
 \chapter*{LAMPIRAN}
-%\addcontentsline{toc}{chapter}{LAMPIRAN}	
-
-\section{Isi Lampiran}
-
-Lampiran bersifat opsional bergantung hasil kesepakatan dengan pembimbing 
-dapat berupa:
-
-\begin{enumerate}
-\item Bukti pelaksanaan Kuesioner seperti pertanyaan kuesioner, resume jawaban 
-responden, dan dokumentasi kuesioner. 
-\item Spesifikasi Aplikasi atau Sistem yang dikembangkan meliputi spesifikasi 
-teknis aplikasi, tautan unduh aplikasi, manual penggunaan aplikasi, hingga 
-screenshot aplikasi. 
-\item Cuplikan kode yang sekiranya penting dan ditambahkan. 
-\item Tabel yang terlalu panjang yang masih diperlukan tetapi tidak 
-memungkinkan untuk ditayangkan di bagian utama skripsi.
-\item Gambar-gambar pendukung yang tidak terlalu penting untuk ditampilkan di 
-bagian utama. Akan tetapi, mendukung argumentasi/pengamatan/analisis.
-\item Penurunan rumus-rumus atau pembuktian suatu teorema yang terlalu
-panjang dan terlalu teknis sehingga Anda berasumsi bahwa pembaca biasa
-tidak akan menelaah lebih lanjut. Hal ini digunakan untuk memberikan
-kesempatan bagi pembaca tingkat lanjut untuk melihat proses penurunan
-rumus-rumus ini.
-\end{enumerate}
 
 \section{Rumus Algoritma Tata Letak Graf \textit{Force-Directed}}
 \label{lamp:rumus-graf}
 Bagian ini memuat persamaan matematis dari ketiga gaya yang digunakan pada algoritma tata letak graf \textit{force-directed} pada visualisasi jaringan sanad, beserta nilai parameternya.
 
 \begin{enumerate}
-\item \textbf{Gaya tolak (\textit{repulsion})}, bekerja antar pasangan node dan hanya diterapkan jika jarak antar node kurang dari 320 piksel:
+\item \textbf{Gaya tolak (\textit{repulsion})}, bekerja antar pasangan \textit{node} dan hanya diterapkan jika jarak antar \textit{node} kurang dari 320 piksel:
 $$ F_{tolak} = \frac{k_r}{d^2}, \quad k_r = 2000 $$
-dengan $d$ adalah jarak Euclidean antara dua node.
+dengan $d$ adalah jarak Euclidean antara dua \textit{node}.
 
-\item \textbf{Gaya pegas (\textit{spring})}, bekerja pada setiap edge dengan panjang ideal 200 piksel:
+\item \textbf{Gaya pegas (\textit{spring})}, bekerja pada setiap \textit{edge} dengan panjang ideal 200 piksel:
 $$ F_{pegas} = (d - L_0)\cdot k_s, \quad L_0 = 200,\ k_s = 0{,}003 $$
 
-\item \textbf{Gaya radial (\textit{radial constraint})}, menarik setiap node menuju jari-jari cincin targetnya ($r_{target}$) sesuai peringkat sentralitas:
+\item \textbf{Gaya radial (\textit{radial constraint})}, menarik setiap \textit{node} menuju jari-jari cincin targetnya ($r_{target}$) sesuai peringkat sentralitas:
 $$ F_{radial} = (r - r_{target})\cdot k_c, \quad k_c = 0{,}014 $$
-dengan $r$ adalah jarak node saat ini dari titik pusat.
+dengan $r$ adalah jarak \textit{node} saat ini dari titik pusat.
 \end{enumerate}
 
-Setelah ketiga gaya dijumlahkan, kecepatan tiap node diperbarui lalu dikalikan dengan faktor peredam (\textit{damping}) sebesar 0,78. Posisi awal node ditentukan berdasarkan peringkat sentralitasnya pada cincin konsentris dengan jari-jari 180 (peringkat 1--5), 320 (peringkat 6--15), 460 (peringkat 16--30), dan 600 (sisanya).
+Setelah ketiga gaya dijumlahkan, kecepatan tiap \textit{node} diperbarui lalu dikalikan dengan faktor peredam (\textit{damping}) sebesar 0,78. Posisi awal \textit{node} ditentukan berdasarkan peringkat sentralitasnya pada cincin konsentris dengan jari-jari 180 (peringkat 1--5), 320 (peringkat 6--15), 460 (peringkat 16--30), dan 600 (sisanya).
+
+\newpage
+\section{Kode Implementasi Algoritma \textit{Force-Directed}}
+\label{lamp:kode-force-directed}
+Berikut adalah implementasi lengkap algoritma tata letak graf \textit{force-directed} dalam bahasa JavaScript yang digunakan pada halaman Graf Relasi Perawi.
+
+\begin{lstlisting}[style=mystyle, language=Java, frame=single, caption={Implementasi algoritma \textit{force-directed} pada visualisasi graf jaringan sanad}]
+// 1. Gaya Tolak (Repulsion)
+// Ftolak = kr / d^2, kr = 2000
+// Hanya diterapkan jika d < 320 piksel
+for (let i = 0; i < nodes.length; i++) {
+  for (let j = i + 1; j < nodes.length; j++) {
+    const dx = nodes[j].x - nodes[i].x;
+    const dy = nodes[j].y - nodes[i].y;
+    const d  = Math.sqrt(dx*dx + dy*dy) || 0.1;
+    if (d < 320) {
+      const f  = 2000 / (d * d);       // kr / d^2
+      const fx = (dx / d) * f;
+      const fy = (dy / d) * f;
+      if (!nodes[i].fixed) { nodes[i].vx -= fx; nodes[i].vy -= fy; }
+      if (!nodes[j].fixed) { nodes[j].vx += fx; nodes[j].vy += fy; }
+    }
+  }
+}
+
+// 2. Gaya Pegas (Spring)
+// Fpegas = (d - L0) * ks, L0 = 200, ks = 0.003
+edges.forEach(e => {
+  const s = nodeMap.get(e.source);
+  const t = nodeMap.get(e.target);
+  if (!s || !t) return;
+  const dx = t.x - s.x;
+  const dy = t.y - s.y;
+  const d  = Math.sqrt(dx*dx + dy*dy) || 0.1;
+  const f  = (d - 200) * 0.003;        // (d - L0) * ks
+  const fx = (dx / d) * f;
+  const fy = (dy / d) * f;
+  if (!s.fixed) { s.vx += fx; s.vy += fy; }
+  if (!t.fixed) { t.vx -= fx; t.vy -= fy; }
+});
+
+// 3. Gaya Radial + Peredam (Damping)
+// Fradial = (r - rtarget) * kc, kc = 0.014
+// Peredam: vx, vy * 0.78
+nodes.forEach(n => {
+  if (n.fixed) return;
+  const dist    = Math.sqrt(n.x*n.x + n.y*n.y) || 0.1;
+  const radialF = (dist - n.targetR) * 0.014;  // (r - rtarget) * kc
+  n.vx -= (n.x / dist) * radialF;
+  n.vy -= (n.y / dist) * radialF;
+  n.vx *= 0.78;   // damping
+  n.vy *= 0.78;
+  n.x  += n.vx;
+  n.y  += n.vy;
+});
+
+// 4. Posisi Awal pada Cincin Konsentris
+// Peringkat 1-5   -> r = 180
+// Peringkat 6-15  -> r = 320
+// Peringkat 16-30 -> r = 460
+// Peringkat 31+   -> r = 600
+function initPosition(gen, genIdx, genCount) {
+  const radii = { 2: 180, 3: 320, 4: 460, 5: 600 };
+  const r = radii[gen] ?? 300;
+  if (r === 0) return [0, 0];
+  const angle  = (genIdx / genCount) * 2 * Math.PI - Math.PI / 2;
+  const jitter = (Math.random() - 0.5) * 20;
+  return [r * Math.cos(angle) + jitter, r * Math.sin(angle) + jitter];
+}
+\end{lstlisting}
+
+\newpage
+\section{Tautan Kode Sumber dan Akses Sistem}
+\label{lamp:tautan}
+
+\begin{enumerate}
+    \item \textbf{Kode Sumber Pra-Pemrosesan Data dan Pembangunan \textit{Knowledge Graph} \& Sentralitas}
+
+    Seluruh kode Python yang mencakup tahap pra-pemrosesan dataset \textit{Sanadset 650K}, pembangunan \textit{Knowledge Graph} jaringan sanad, serta perhitungan lima metrik sentralitas menggunakan \textit{NetworkX} tersedia secara publik pada repositori GitHub berikut:
+
+    \vspace{0.3cm}
+    \noindent\texttt{https://github.com/Nazrililham090805/sanad-hadith}
+
+    \item \textbf{Akses \textit{Dashboard} Sistem}
+
+    Sistem visualisasi \textit{front-end} \textit{Knowledge Graph} jaringan sanad hadis telah diterapkan secara daring dan dapat diakses oleh publik tanpa memerlukan instalasi perangkat lunak melalui tautan berikut:
+
+    \vspace{0.3cm}
+    \noindent\texttt{https://frontend-knowledge-graph-hadith.vercel.app/}
+\end{enumerate}
+
+\newpage
+\section{Contoh Perhitungan Metrik Sentralitas}
+\label{lamp:contoh-hitung}
+Bagian ini menyajikan contoh perhitungan kelima metrik sentralitas \textit{Social Network Analysis} (SNA) secara manual berdasarkan sampel jaringan guru--murid yang terdiri dari 10 relasi periwayatan hadis. Sampel ini bertujuan mengilustrasikan cara kerja setiap metrik sebelum diterapkan pada keseluruhan dataset.
+
+\vspace{0.3cm}
+\noindent\textbf{Data Sampel}
+
+\vspace{0.2cm}
+\noindent Tabel~\ref{lamp:tab:sampel} memuat 10 relasi periwayatan yang membentuk jaringan berarah dengan 7 simpul perawi ($n = 7$). Kolom \textit{Weight} menyatakan jumlah kemunculan relasi dalam dataset; kolom \textit{Inverse Weight} ($= 1 / \textit{weight}$) digunakan sebagai representasi jarak antar-perawi pada perhitungan \textit{closeness centrality}.
+
+\begin{table}[H]
+\centering
+\caption{Data sampel 10 relasi periwayatan hadis}
+\label{lamp:tab:sampel}
+\begin{tabular}{|c|l|l|c|c|}
+\hline
+\textbf{No} & \textbf{Murid} & \textbf{Guru} & \textbf{\textit{Weight}} & \textbf{\textit{Inverse Weight}} \\
+\hline
+1  & Nafi'            & Ibn Umar         & 11 & 0,0909 \\
+2  & Az-Zuhri         & Abu Hurairah     & 8  & 0,1250 \\
+3  & Az-Zuhri         & Anas bin Malik   & 6  & 0,1667 \\
+4  & Sufyan           & Az-Zuhri         & 5  & 0,2000 \\
+5  & Imam Malik       & Nafi'            & 4  & 0,2500 \\
+6  & Sufyan           & Ibn Umar         & 3  & 0,3333 \\
+7  & Imam Malik       & Az-Zuhri         & 3  & 0,3333 \\
+8  & Az-Zuhri         & Ibn Umar         & 2  & 0,5000 \\
+9  & Anas bin Malik   & Abu Hurairah     & 2  & 0,5000 \\
+10 & Nafi'            & Abu Hurairah     & 1  & 1,0000 \\
+\hline
+\end{tabular}
+\end{table}
+
+\noindent Pada graf berarah ini setiap sisi mengarah dari Murid ke Guru sesuai arah transmisi sanad. Ketujuh perawi yang terlibat beserta label singkatnya adalah: A = Abu Hurairah, B = Ibn Umar, C = Anas bin Malik, D = Az-Zuhri, E = Sufyan, F = Nafi', dan G = Imam Malik.
+
+\vspace{0.4cm}
+\noindent\textbf{1. \textit{In-Degree Centrality}}
+
+\vspace{0.2cm}
+\noindent \textit{In-degree} suatu simpul $v$ adalah jumlah sisi yang masuk ke $v$, yaitu banyaknya murid yang meriwayatkan langsung dari perawi tersebut. Nilai ternormalisasi dihitung dengan:
+$$C_{in}(v) = \frac{d_{in}(v)}{n - 1}$$
+
+\noindent Dengan $n = 7$ sehingga $n - 1 = 6$:
+
+\begin{table}[H]
+\centering
+\caption{Hasil perhitungan \textit{in-degree centrality}}
+\label{lamp:tab:indegree}
+\begin{tabular}{|l|l|c|c|}
+\hline
+\textbf{Perawi} & \textbf{Murid yang meriwayatkan} & $d_{in}$ & $C_{in}$ \\
+\hline
+Abu Hurairah    & Az-Zuhri, Anas bin Malik, Nafi'  & 3 & $3/6 = 0{,}5000$ \\
+Ibn Umar        & Nafi', Sufyan, Az-Zuhri          & 3 & $3/6 = 0{,}5000$ \\
+Az-Zuhri        & Sufyan, Imam Malik                & 2 & $2/6 = 0{,}3333$ \\
+Anas bin Malik  & Az-Zuhri                          & 1 & $1/6 = 0{,}1667$ \\
+Nafi'           & Imam Malik                        & 1 & $1/6 = 0{,}1667$ \\
+Sufyan          & ---                               & 0 & $0{,}0000$ \\
+Imam Malik      & ---                               & 0 & $0{,}0000$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\vspace{0.3cm}
+\noindent\textbf{2. \textit{Out-Degree Centrality}}
+
+\vspace{0.2cm}
+\noindent \textit{Out-degree} suatu simpul $v$ adalah jumlah sisi yang keluar dari $v$, yaitu banyaknya guru yang diriwayatkan oleh perawi tersebut. Nilai ternormalisasi dihitung dengan:
+$$C_{out}(v) = \frac{d_{out}(v)}{n - 1}$$
+
+\begin{table}[H]
+\centering
+\caption{Hasil perhitungan \textit{out-degree centrality}}
+\label{lamp:tab:outdegree}
+\begin{tabular}{|l|l|c|c|}
+\hline
+\textbf{Perawi} & \textbf{Guru yang diriwayatkan} & $d_{out}$ & $C_{out}$ \\
+\hline
+Az-Zuhri        & Abu Hurairah, Anas bin Malik, Ibn Umar & 3 & $3/6 = 0{,}5000$ \\
+Sufyan          & Az-Zuhri, Ibn Umar                     & 2 & $2/6 = 0{,}3333$ \\
+Nafi'           & Ibn Umar, Abu Hurairah                 & 2 & $2/6 = 0{,}3333$ \\
+Imam Malik      & Nafi', Az-Zuhri                        & 2 & $2/6 = 0{,}3333$ \\
+Anas bin Malik  & Abu Hurairah                           & 1 & $1/6 = 0{,}1667$ \\
+Abu Hurairah    & ---                                    & 0 & $0{,}0000$ \\
+Ibn Umar        & ---                                    & 0 & $0{,}0000$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\vspace{0.3cm}
+\noindent\textbf{3. \textit{Betweenness Centrality}}
+
+\vspace{0.2cm}
+\noindent \textit{Betweenness centrality} mengukur seberapa sering suatu simpul $v$ berada pada lintasan terpendek antara dua simpul lainnya. Sesuai implementasi pada kode Python (\texttt{normalized=True}, \texttt{weight="Inverse\_weight"}), lintasan terpendek dihitung secara berbobot menggunakan \textit{Inverse Weight} sebagai biaya antar-perawi dan hasilnya ternormalisasi:
+$$C_B(v) = \frac{1}{(n-1)(n-2)} \sum_{s \neq v \neq t} \frac{\sigma_{st}(v)}{\sigma_{st}}$$
+dengan $\sigma_{st}$ = jumlah lintasan terpendek berbobot dari $s$ ke $t$, dan $\sigma_{st}(v)$ = jumlah di antaranya yang melewati $v$. Faktor normalisasi: $(n-1)(n-2) = 6 \times 5 = 30$.
+
+\begin{sloppypar}
+\noindent Enumerasi seluruh pasangan simpul yang saling terhubung beserta lintasan terpendek berbobot (\textit{Inverse Weight} sebagai biaya sisi, dipilih jalur dengan total biaya terkecil):
+\end{sloppypar}
+
+\begin{table}[H]
+\centering
+\caption{Enumerasi lintasan terpendek berbobot pada sampel jaringan}
+\label{lamp:tab:paths}
+\begin{tabular}{|c|c|l|c|c|l|}
+\hline
+$s$ & $t$ & \textbf{Lintasan terpendek} & \textbf{Biaya total} & $\sigma_{st}$ & \textbf{Simpul perantara} \\
+\hline
+C & A & C $\to$ A              & 0,5000 & 1 & --- \\
+D & A & D $\to$ A              & 0,1250 & 1 & --- \\
+D & C & D $\to$ C              & 0,1667 & 1 & --- \\
+D & B & D $\to$ B              & 0,5000 & 1 & --- \\
+E & D & E $\to$ D              & 0,2000 & 1 & --- \\
+E & B & E $\to$ B              & 0,3333 & 1 & --- \\
+E & A & E $\to$ D $\to$ A      & 0,3250 & 1 & D \\
+E & C & E $\to$ D $\to$ C      & 0,3667 & 1 & D \\
+F & B & F $\to$ B              & 0,0909 & 1 & --- \\
+F & A & F $\to$ A              & 1,0000 & 1 & --- \\
+G & F & G $\to$ F              & 0,2500 & 1 & --- \\
+G & D & G $\to$ D              & 0,3333 & 1 & --- \\
+G & B & G $\to$ F $\to$ B      & 0,3409 & 1 & F \\
+G & A & G $\to$ D $\to$ A      & 0,4583 & 1 & D \\
+G & C & G $\to$ D $\to$ C      & 0,5000 & 1 & D \\
+\hline
+\end{tabular}
+\end{table}
+
+\noindent Pada baris G$\to$B, jalur G$\to$F$\to$B (biaya $0{,}2500 + 0{,}0909 = 0{,}3409$) lebih pendek dari G$\to$D$\to$B ($0{,}3333 + 0{,}5000 = 0{,}8333$), sehingga hanya F yang menjadi perantara. Pada baris G$\to$A, jalur G$\to$D$\to$A (biaya $0{,}3333 + 0{,}1250 = 0{,}4583$) lebih pendek dari G$\to$F$\to$A ($0{,}2500 + 1{,}0000 = 1{,}2500$), sehingga hanya D yang menjadi perantara.
+
+\noindent Kontribusi setiap simpul dihitung dari tabel di atas:
+\begin{itemize}
+    \item \textbf{Az-Zuhri (D):} pasangan (E,A): $1/1 = 1$; pasangan (E,C): $1/1 = 1$; pasangan (G,A): $1/1 = 1$; pasangan (G,C): $1/1 = 1$. \\
+          $C_B(\text{D}) = 1 + 1 + 1 + 1 = 4{,}0 \;\Rightarrow\; C_B(\text{D}) = 4{,}0 / 30 = 0{,}1333$
+    \item \textbf{Nafi' (F):} pasangan (G,B): $1/1 = 1$. \\
+          $C_B(\text{F}) = 1{,}0 \;\Rightarrow\; C_B(\text{F}) = 1{,}0 / 30 = 0{,}0333$
+    \item Simpul lainnya: $C_B = 0{,}0000$ (tidak ada lintasan terpendek yang melewatinya).
+\end{itemize}
+
+\vspace{0.3cm}
+\noindent\textbf{4. \textit{Closeness Centrality}}
+
+\vspace{0.2cm}
+\noindent \textit{Closeness centrality} mengukur seberapa dekat suatu simpul ke seluruh simpul lain. Definisi matematis sesuai Subbab~\ref{subsubsec:metrik-sentralitas} adalah:
+$$C_C(v) = \frac{n-1}{\displaystyle\sum_{u \neq v} d(v,u)}$$
+dengan $d(v,u)$ = jarak terpendek dari $v$ ke $u$ (menggunakan \textit{Inverse Weight} sebagai bobot jarak).
+
+\begin{sloppypar}
+\noindent Pada sampel jaringan ini tidak semua simpul dapat dijangkau dari setiap simpul lainnya (misalnya, dari Anas bin Malik hanya bisa menjangkau Abu Hurairah). Apabila formula di atas diterapkan dengan memasukkan seluruh $n-1$ simpul ke penyebut, simpul yang tidak terjangkau menghasilkan $d = \infty$ sehingga $C_C \to 0$ untuk hampir semua simpul --- tidak informatif sebagai perbandingan. Oleh karena itu, fungsi \texttt{nx.closeness\_centrality} menggunakan adaptasi Wasserman-Faust yang membatasi penjumlahan hanya pada simpul yang terjangkau ($R(v)$) dan mengoreksi skala dengan faktor $n_r/(n-1)$:
+\end{sloppypar}
+$$C_C(v) = \frac{n_r}{n-1} \cdot \frac{n-1}{\displaystyle\sum_{u \in R(v)} d(v,u)} = \frac{n_r^2}{(n-1) \cdot \displaystyle\sum_{u \in R(v)} d(v,u)}$$
+dengan $n_r$ = jumlah simpul yang terjangkau dari $v$ (tidak termasuk $v$ sendiri). Formula ini ekuivalen dengan formula dasar di atas ketika semua simpul terjangkau ($n_r = n-1$). Selain itu, pada implementasi aktual (kode Python tersedia di repositori GitHub pada Lampiran~\ref{lamp:tautan}), hasil WF ini dinormalisasi lebih lanjut menggunakan \textit{min-max normalization} agar seluruh nilai berada pada rentang $[0, 1]$.
+
+\noindent Untuk contoh di bawah, $d(v,u)$ dihitung berdasarkan jumlah \textit{hop} (bukan \textit{Inverse Weight}) agar perhitungan lebih mudah diikuti:
+
+\begin{table}[H]
+\centering
+\caption{Hasil perhitungan \textit{closeness centrality}}
+\label{lamp:tab:closeness}
+\begin{tabular}{|l|c|c|l|c|}
+\hline
+\textbf{Perawi} & $n_r$ & $\sum d$ & \textbf{Rincian jarak} & $C_C$ \\
+\hline
+Imam Malik   & 5 & 8 & F(1), D(1), B(2), A(2), C(2) & $25 / (6 \times 8) = 0{,}5208$ \\
+Az-Zuhri     & 3 & 3 & A(1), C(1), B(1)              & $9 / (6 \times 3) = 0{,}5000$ \\
+Sufyan       & 4 & 6 & D(1), B(1), A(2), C(2)        & $16 / (6 \times 6) = 0{,}4444$ \\
+Nafi'        & 2 & 2 & B(1), A(1)                    & $4 / (6 \times 2) = 0{,}3333$ \\
+Anas bin Malik & 1 & 1 & A(1)                        & $1 / (6 \times 1) = 0{,}1667$ \\
+Abu Hurairah & 0 & 0 & tidak ada simpul terjangkau   & $0{,}0000$ \\
+Ibn Umar     & 0 & 0 & tidak ada simpul terjangkau   & $0{,}0000$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\vspace{0.3cm}
+\noindent\textbf{5. \textit{Eigenvector Centrality}}
+
+\vspace{0.2cm}
+\noindent \textit{Eigenvector centrality} menghitung nilai pengaruh suatu simpul berdasarkan pengaruh simpul-simpul yang menunjuk padanya. Skor dihitung secara iteratif dengan metode \textit{power iteration}:
+$$x_v^{(t+1)} = \frac{1}{\lambda} \sum_{u\,:\,(u,v)\,\in\,E} x_u^{(t)}, \quad \text{lalu dinormalisasi}$$
+
+\noindent\textbf{Iterasi 0} --- nilai awal seragam: $x_v = 1{,}0000$ untuk semua $v$.
+
+\noindent\textbf{Iterasi 1} --- setiap simpul menjumlahkan skor murid-muridnya (simpul yang menunjuk padanya):
+\begin{itemize}
+    \item Abu Hurairah: $x_D + x_C + x_F = 1 + 1 + 1 = 3$
+    \item Ibn Umar: $x_F + x_E + x_D = 1 + 1 + 1 = 3$
+    \item Anas bin Malik: $x_D = 1$
+    \item Az-Zuhri: $x_E + x_G = 1 + 1 = 2$
+    \item Sufyan: $0$ (tidak ada murid dalam sampel)
+    \item Nafi': $x_G = 1$
+    \item Imam Malik: $0$ (tidak ada murid dalam sampel)
+\end{itemize}
+Setelah normalisasi terhadap nilai maksimum (3):\\
+$x = [1{,}0000,\ 1{,}0000,\ 0{,}3333,\ 0{,}6667,\ 0{,}0000,\ 0{,}3333,\ 0{,}0000]$.
+
+\noindent\textbf{Iterasi 2} --- menggunakan skor hasil iterasi 1:
+\begin{itemize}
+    \item Abu Hurairah: $0{,}6667 + 0{,}3333 + 0{,}3333 = 1{,}3333$
+    \item Ibn Umar: $0{,}3333 + 0{,}0000 + 0{,}6667 = 1{,}0000$
+    \item Anas bin Malik: $0{,}6667$
+    \item Az-Zuhri: $0{,}0000 + 0{,}0000 = 0$ (murid Sufyan dan Imam Malik bernilai 0)
+    \item Sufyan, Nafi', Imam Malik: $0$
+\end{itemize}
+Setelah normalisasi terhadap nilai maksimum (1,3333):\\
+$x = [1{,}0000,\ 0{,}7500,\ 0{,}5000,\ 0{,}0000,\ 0{,}0000,\ 0{,}0000,\ 0{,}0000]$.
+
+\begin{sloppypar}
+\noindent Pada sampel jaringan kecil ini, simpul sumber (Sufyan dan Imam Malik) tidak memiliki murid sehingga skor mereka bertahan di $0{,}0000$. Hal ini menyebabkan Az-Zuhri, Nafi', dan Sufyan juga menuju $0$ pada iterasi berikutnya, sehingga konvergensi hanya menyisakan Abu Hurairah dan Ibn Umar dengan skor positif. Pada dataset sesungguhnya yang memiliki 177.047 simpul, keberadaan jalur siklik membuat \textit{eigenvector centrality} dapat berkonvergensi sepenuhnya dan menghasilkan peringkat yang lebih representatif.
+\end{sloppypar}
+
+\newpage
+\section{Tangkapan Layar \textit{Dashboard}}
+\label{lamp:screenshot}
+Bagian ini menyajikan tangkapan layar halaman Graf Relasi Perawi pada \textit{dashboard} dengan berbagai pilihan metrik sentralitas sebagai filter tampilan jaringan.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{contents/Asset-Lampiran/hal1node.png}
+    \caption{Halaman Graf Relasi Perawi --- tampilan jaringan tanpa filter sentralitas}
+    \label{lamp:fig:hal1node}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{contents/Asset-Lampiran/hal1indegree.png}
+    \caption{Halaman Graf Relasi Perawi --- filter \textit{In-Degree Centrality}}
+    \label{lamp:fig:hal1indegree}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{contents/Asset-Lampiran/hal1outdegree.png}
+    \caption{Halaman Graf Relasi Perawi --- filter \textit{Out-Degree Centrality}}
+    \label{lamp:fig:hal1outdegree}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{contents/Asset-Lampiran/hal1eigenvector.png}
+    \caption{Halaman Graf Relasi Perawi --- filter \textit{Eigenvector Centrality}}
+    \label{lamp:fig:hal1eigenvector}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{contents/Asset-Lampiran/hal1closeness.png}
+    \caption{Halaman Graf Relasi Perawi --- filter \textit{Closeness Centrality}}
+    \label{lamp:fig:hal1closeness}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{contents/Asset-Lampiran/hal1betweenn.png}
+    \caption{Halaman Graf Relasi Perawi --- filter \textit{Betweenness Centrality}}
+    \label{lamp:fig:hal1betweenn}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{contents/Asset-Lampiran/zoomin.png}
+    \caption{Halaman Graf Relasi Perawi --- fitur perbesar (\textit{zoom in}) jaringan}
+    \label{lamp:fig:zoomin}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{contents/Asset-Lampiran/zoomout.png}
+    \caption{Halaman Graf Relasi Perawi --- fitur perkecil (\textit{zoom out}) jaringan}
+    \label{lamp:fig:zoomout}
+\end{figure}
