@@ -46,9 +46,9 @@ Selama ini penelitian terkait sanad hadis umumnya berhenti pada tahap visualisas
 
 
 \begin{enumerate}
-	\item Bagaimana membangun \textit{Knowledge Graph} jaringan keilmuan Islam berdasarkan relasi guru-murid yang diperoleh dari data sanad hadis?
-	\item Bagaimana mengidentifikasi peran dan pengaruh masing-masing perawi dalam jaringan sanad hadis?
-	\item Bagaimana membangun sistem visualisasi \textit{front-end} yang mampu menyajikan jaringan perawi dan hasil analisis jaringan keilmuan Islam secara interaktif?
+	\item Data sanad hadis menyimpan informasi relasi guru-murid antarperawi yang belum terstruktur sebagai representasi graf pengetahuan. Relasi tersebut perlu diekstraksi melalui tahap pra-pemrosesan dan dimodelkan sebagai \textit{Knowledge Graph} berbentuk graf berarah berbobot agar jaringan keilmuan Islam dapat dianalisis secara komputasional.
+	\item Setiap perawi dalam jaringan sanad menempati posisi yang berbeda-beda dengan tingkat peran dan pengaruh yang tidak dapat diukur secara intuitif. Pengukuran kuantitatif menggunakan metrik sentralitas \textit{Social Network Analysis} (SNA) diperlukan untuk mengidentifikasi perawi-perawi kunci yang memiliki posisi strategis dalam jaringan secara objektif.
+	\item Hasil analisis jaringan sanad hadis yang selama ini hanya tersedia dalam bentuk statis atau melalui perangkat lunak khusus membatasi akses bagi peneliti, mahasiswa, dan masyarakat umum. Oleh karena itu, sistem \textit{front-end} berbasis web dengan visualisasi graf interaktif perlu dikembangkan agar hasil analisis dapat dieksplorasi secara langsung tanpa instalasi perangkat lunak tambahan.
 \end{enumerate}
 
 \section{Tujuan Penelitian}
@@ -56,9 +56,9 @@ Selama ini penelitian terkait sanad hadis umumnya berhenti pada tahap visualisas
 Penelitian ini bertujuan untuk mengembangkan \textit{Front-End Knowledge Graph} Keagamaan Ilmuwan Islam dengan memanfaatkan data sanad hadis dan pendekatan \textit{Social Network Analysis} (SNA). Tujuan penelitian ini adalah:
 
 \begin{enumerate}
-	\item Menghasilkan representasi \textit{Knowledge Graph} yang menggambarkan hubungan guru dan murid antarperawi berdasarkan data sanad hadis.
-	\item Menganalisis jaringan keilmuan Islam menggunakan metode \textit{Social Network Analysis} (SNA) melalui perhitungan metrik sentralitas untuk mengidentifikasi perawi yang memiliki peran penting dalam jaringan.
-	\item Membangun sistem visualisasi \textit{front-end} yang mampu menyajikan jaringan perawi dan hasil analisis jaringan keilmuan Islam secara interaktif dan mudah digunakan.
+	\item Membangun \textit{Knowledge Graph} jaringan keilmuan Islam dengan mengekstraksi relasi guru-murid antarperawi dari data sanad hadis melalui tahap pra-pemrosesan dan memodelkannya sebagai graf berarah berbobot.
+	\item Mengidentifikasi peran dan pengaruh masing-masing perawi dalam jaringan sanad hadis secara kuantitatif menggunakan lima metrik sentralitas \textit{Social Network Analysis} (SNA), yaitu \textit{in-degree}, \textit{out-degree}, \textit{eigenvector}, \textit{closeness}, dan \textit{betweenness centrality}.
+	\item Mengembangkan sistem \textit{front-end} berbasis web dengan visualisasi graf interaktif yang memungkinkan peneliti, mahasiswa, dan masyarakat umum mengeksplorasi jaringan perawi serta hasil analisis sentralitas secara langsung tanpa instalasi perangkat lunak tambahan.
 \end{enumerate}	
 
 \section{Batasan Penelitian}

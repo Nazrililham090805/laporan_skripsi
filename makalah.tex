@@ -1,0 +1,557 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{Development of a Knowledge Graph Front-End\\
+for the Islamic Scholarly Network}
+
+\author{\IEEEauthorblockN{1\textsuperscript{st} Moh. Nazril Ilham}
+\IEEEauthorblockA{\textit{Department of Electrical and}\\
+\textit{Information Engineering}\\
+\textit{Universitas Gadjah Mada}\\
+Yogyakarta, Indonesia\\
+mohnazrililham@mail.ugm.ac.id}
+\and
+\IEEEauthorblockN{2\textsuperscript{nd} Widyawan}
+\IEEEauthorblockA{\textit{Department of Electrical and}\\
+\textit{Information Engineering}\\
+\textit{Universitas Gadjah Mada}\\
+Yogyakarta, Indonesia\\
+widyawan@ugm.ac.id}
+\and
+\IEEEauthorblockN{3\textsuperscript{rd} Guntur Dharma Putra}
+\IEEEauthorblockA{\textit{Department of Electrical and}\\
+\textit{Information Engineering}\\
+\textit{Universitas Gadjah Mada}\\
+Yogyakarta, Indonesia\\
+gdputra@ugm.ac.id}}
+
+\maketitle
+
+\begin{abstract}
+The hadith \textit{sanad} is an Islamic scholarly network formed by chains of
+teacher--student relationships among narrators across generations. Its
+relational structure lends itself naturally to directed-graph modeling, enabling
+computational measurement of each narrator's role and influence. Prior studies
+have applied Knowledge Graph (KG) and Social Network Analysis (SNA) methods to
+\textit{sanad} networks, yet their outputs are largely static and accessible
+only through specialized desktop software, keeping the results out of reach for
+students, researchers, and the general public who must install particular tools
+and possess the technical knowledge to operate them.
+This paper presents the development of a publicly accessible, web-based front-end
+that integrates an interactive KG of the hadith narrator network with five SNA
+centrality metrics. From the Sanadset~650K corpus (650{,}986 hadith entries from
+926 classical Arabic books), 487{,}451 cleaned \textit{sanad} chains were modeled
+as a weighted directed graph of 177{,}047 narrator nodes and 776{,}798 narration
+edges. In-degree, out-degree, and eigenvector centrality were computed on the
+full graph, while closeness and betweenness centrality were computed on a
+14{,}695-node strongest-weight subgraph. The analysis identified Abu Hurairah as
+the most central narrator in four of five metrics, while Sufyan ranked highest in
+out-degree. The results were stored in a Supabase (PostgreSQL) backend and
+served through a React dashboard with four pages: Narrator Relation Graph,
+Narrator Statistics, Relation Table, and Centrality Table; the interactive graph
+is rendered on an HTML5 Canvas with a custom force-directed layout. Black-box
+testing across 14 scenarios achieved a 100\% success rate. The system fills the
+gap left by prior work by turning a large-scale \textit{sanad} KG into an
+interactive front-end that is freely explorable without any software
+installation.
+\end{abstract}
+
+\begin{IEEEkeywords}
+knowledge graph, hadith sanad, social network analysis, narrator centrality,
+network visualization, interactive dashboard
+\end{IEEEkeywords}
+
+% =============================================================
+\section{Introduction}
+% =============================================================
+
+Hadith, the recorded sayings, actions, and tacit approvals of the Prophet
+Muhammad, is the second source of Islamic law after the Qur'an
+\cite{handayani2026hadis,hatta2026teknik}. Structurally, a hadith consists of two
+components: the \textit{matn} (the text itself) and the \textit{sanad}, the
+continuous chain of narrators who transmitted the text across generations. The
+\textit{sanad} forms an Islamic scholarly network built from teacher--student
+relationships, in which each narrator is a link in the intergenerational transfer
+of religious knowledge \cite{Mustang_Abubakar_2025}. Because of this relational
+structure, a \textit{sanad} is naturally represented as a directed graph, with
+narrators as nodes and teacher--student relations as edges
+\cite{FAROOQI2024110439}.
+
+Not all narrators play an equal role. Some occupy strategic positions by
+receiving hadith from many teachers and transmitting them to many students,
+becoming convergence points traversed by diverse \textit{sanad} paths. Such
+narrators, known as \textit{common links}, underscore the importance of
+identifying the most influential and most connective narrators
+\cite{mufid2023track}. Classical scholarship performs this identification
+manually through \textit{isnad}-bundle analysis, but when the scope spans
+hundreds of thousands of narrators with highly complex relations, manual analysis
+becomes inadequate, motivating quantitative and computational approaches that
+measure each narrator's position and influence at scale \cite{FAROOQI2024110439}.
+
+This need has been addressed over the past decade by studies that analyze the
+narrator network quantitatively. Several works model historical social networks
+of narrators and apply network analysis to reconstruct temporal information from
+the transmission structure \cite{Shuaib2022}, while others represent the narrator
+network as a Knowledge Graph (KG) and analyze it with network software
+\cite{FAROOQI2024110439}. Centrality metrics such as in-degree, out-degree,
+betweenness, and closeness have been used to identify the most influential
+narrators \cite{Mghari2024Narrator2Vec}. These studies confirm that the narrator
+network can be modeled and analyzed computationally at scale. Their outputs,
+however, are generally static and depend on specialized desktop software such as
+Gephi and Cytoscape, requiring installation and technical expertise that restrict
+access to a narrow audience of specialists \cite{FAROOQI2024110439}. Students,
+researchers, and the general public who lack these tools and skills therefore
+cannot explore the Islamic scholarly network and its centrality insights
+interactively.
+
+The KG representation used in those studies nonetheless offers a foundation that
+can be developed into a more interactive and widely accessible system. A KG
+captures entities and the relations among them as a graph, presenting complex,
+connected data in a semantic and structured manner; it has been widely adopted
+across domains such as education and tourism \cite{Aoula2026}. For hadith studies,
+this representation is well suited to modeling the narration network, with
+narrators as entities and teacher--student relations as the connecting edges
+\cite{FAROOQI2024110439}. To turn such a network into knowledge that can be
+explored easily, an interactive web-based front-end is required for three
+reasons: interactivity (users need to zoom, filter, search, and traverse nodes
+directly rather than view a static image), accessibility (a web interface
+requires no software installation and reaches a wide audience), and presentation
+(rendering an enormous network all at once harms readability, so centrality
+scores can be used to emphasize the most central nodes
+\cite{LópezWerner04072025}).
+
+This paper presents the development of a web-based front-end that integrates an
+interactive KG of the hadith narrator network with SNA centrality analysis,
+built on the publicly available Sanadset~650K dataset \cite{MGHARI2022108540}.
+The contributions are threefold: (i) construction of a large-scale weighted
+directed KG of the \textit{sanad} network through systematic preprocessing and
+directed-graph modeling of teacher--student relations; (ii) quantitative
+identification of each narrator's role and influence using five SNA centrality
+metrics---in-degree, out-degree, eigenvector, closeness, and betweenness; and
+(iii) an interactive, publicly deployed web dashboard that makes the narrator KG
+and its centrality analysis freely explorable without any software installation,
+addressing the static and desktop-bound limitations of prior work.
+
+% =============================================================
+\section{Related Work}
+% =============================================================
+
+Computational research on the hadith \textit{sanad} has progressed from dataset
+construction toward graph-based modeling and SNA. Mghari \textit{et al.}\ built
+Sanadset~650K, a corpus of 650{,}986 entries from 926 classical Arabic books, in
+which each entry separates the full hadith text, \textit{matn}, narrator list,
+and \textit{sanad} ordering \cite{MGHARI2022108540}. Its scale and coverage make
+it the most representative source for \textit{sanad} transmission research, though
+it is provided as raw data without graph visualization or network analysis. The
+same group later proposed Narrator2Vec, a Skip-Gram Word2Vec adaptation that
+learns vector representations of narrator names and predicts missing narrators in
+broken chains \cite{Mghari2024Narrator2Vec}; it does not, however, produce
+per-narrator quantitative scores that users can compare.
+
+Farooqi \textit{et al.}\ introduced Multi-IsnadSet, representing the Sahih Muslim
+transmission network as a directed graph of 2{,}092 nodes and 77{,}797 edges,
+built and analyzed with NetworkX, Neo4j, Gephi, and Cytoscape
+\cite{FAROOQI2024110439}. They demonstrated that a \textit{sanad} network can be
+modeled as a KG and analyzed with degree, betweenness, and eigenvector
+centrality, but the resulting visualizations are static and depend on desktop
+software. Shuaib \textit{et al.}\ applied trophic analysis to a 49{,}309-narrator
+hadith network and showed that the network is hierarchical and sequential,
+recovering temporal information from structure \cite{Shuaib2022}, yet without
+centrality metrics or an interactive interface. Mahmoud \textit{et al.}\ proposed
+NarratorsKG, the first KG dedicated to hadith narrators (79{,}256 nodes,
+197{,}183 edges), used for narrator disambiguation with graph-query embeddings
+and AraBERT \cite{Mahmoud2024}; it is an internal NLP resource rather than an
+end-user system. Hendawi \textit{et al.}\ used machine learning to verify
+\textit{sanad} continuity from narrator biographical data
+\cite{10974901}, reinforcing the value of structured narrator data.
+
+A parallel line of work visualizes narrator chains as graphs. Sara\c{c}o\u{g}lu
+converted 2{,}258 \textit{isnad} chains into source--target pairs and visualized
+them with Pajek, Gephi, and Isnalyser \cite{saraccougluvisualization}. HadithNet
+automated narrator-name identification and chain generation on a web system using
+Django, MySQL, and Graphviz, reaching 99.37\% name precision but struggling with
+complex branching chains \cite{alias2024hadithnet}. Ahmad \textit{et al.}\ showed
+that transforming \textit{isnad} into directed graphs enables centrality,
+clustering, and bridge-narrator analysis \cite{ahmad2025hadith}, and the KASHAF
+system offered interactive Sankey-flow visualization over 60{,}000 hadith
+\cite{shafie2021kashaf}, though focused on retrieval and \textit{takhreej}
+classification rather than narrator-centrality exploration.
+
+Across these studies, two gaps persist. Dataset-oriented works yield large
+corpora without an exploration interface, while analytical works produce models
+operable only through desktop software or technical expertise. No prior study
+integrates a narrator KG with SNA centrality metrics in a single web interface
+accessible without specialized software. This work fills that gap.
+
+% =============================================================
+\section{Materials and Methods}
+% =============================================================
+
+The research was conducted in four stages: preprocessing of the Sanadset~650K
+dataset, KG construction from teacher--student relations, network analysis using
+five centrality metrics, and development of an interactive web dashboard. The
+analytical pipeline was implemented in Python~3.13 with NetworkX~3.6, and the
+front-end in React~18 with a Supabase (PostgreSQL) backend.
+
+\subsection{Dataset}
+
+The primary input is \texttt{sanadset.csv} from Sanadset~650K
+\cite{MGHARI2022108540}, a static CSV of 650{,}986 hadith records drawn from 926
+classical Arabic books. Each record contains the source book, hadith number,
+hadith text, \textit{matn}, narrator list, and \textit{sanad} length. Only the
+\textit{sanad} column is used, as it carries the narrator chain required for
+graph construction and centrality computation.
+
+\subsection{Data Preprocessing}
+
+Because narrator names in classical texts are written inconsistently, a single
+narrator may otherwise be split into several nodes, distorting the graph and its
+centrality values. Seven preprocessing steps were applied:
+
+\begin{enumerate}
+\item \textbf{Removal of chainless rows.} Rows marked \texttt{No SANAD} carry no
+narration relation and were removed, eliminating 159{,}558 rows.
+\item \textbf{Diacritic (\textit{harakat}) removal.} Arabic vocalization marks
+were stripped via regular expressions so that the same name written with or
+without diacritics maps to one entity.
+\item \textbf{Arabic-letter normalization.} Unicode variants of \textit{alif},
+\textit{ya}/\textit{alif maqsura}, and \textit{ta marbuta} were unified to
+canonical forms.
+\item \textbf{Kinship-term resolution.} Contextual terms meaning ``his father,''
+``his mother,'' or ``his grandfather'' were replaced by explicit constructions
+referencing the preceding narrator, preventing generic merge nodes.
+\item \textbf{Transmission-term removal.} Narration formulas (e.g.,
+\textit{haddathana}, \textit{akhbarana}, \textit{`an}) were removed so they do
+not form spurious nodes.
+\item \textbf{\textit{Abu} variant normalization.} Grammatical forms
+\textit{Abu}/\textit{Aba}/\textit{Abi} were unified to the nominative
+\textit{Abu}.
+\item \textbf{Non-Arabic character validation.} Characters outside the Arabic
+Unicode range were removed; none remained after the prior steps.
+\end{enumerate}
+
+Additional removal of ambiguous rows (single \textit{Abu} elements and rows
+beginning with kinship terms) left 487{,}451 clean \textit{sanad} chains for
+graph construction, as summarized in Table~\ref{tab:reduksi}.
+
+\begin{table}[!t]
+\caption{Data Reduction Across Preprocessing Stages}
+\label{tab:reduksi}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{clrr}
+\toprule
+Stage & Process & Rows & Removed \\
+\midrule
+1 & Raw data                          & 650{,}986 & --- \\
+2 & Remove chainless rows (No SANAD)  & 491{,}428 & 159{,}558 \\
+3 & Remove single-\textit{Abu} rows   & 488{,}195 & 3{,}233 \\
+4 & Remove kinship-led rows           & 487{,}451 & 744 \\
+\midrule
+\multicolumn{2}{c}{\textbf{Final}}    & \textbf{487{,}451} & \textbf{163{,}535} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Knowledge Graph Construction}
+
+The \textit{sanad} network is modeled as a KG of structured triples
+(Student, narrates-from, Teacher). Each chain of $n$ narrators is decomposed into
+$n-1$ triples, one per adjacent pair. Because transmission flows directionally
+from student to teacher, the network is built as a directed graph using
+\texttt{nx.DiGraph()}, with each student node as the source and each teacher node
+as the target. Self-loops are removed.
+
+Each edge carries two weight attributes. \textit{Weight} is the frequency with
+which a teacher--student pair occurs across the corpus; a higher weight indicates
+a stronger, more frequently attested transmission. \textit{Inverse Weight}, the
+reciprocal $1/\text{Weight}$, serves as the edge distance for path-based
+centrality: frequent relations imply closer narrators (shorter distance), while
+rare relations imply greater distance. The final graph comprises
+\textbf{177{,}047 narrator nodes} and \textbf{776{,}798 narration edges}.
+Narrator names in Arabic script were additionally transliterated to Latin script
+for readability.
+
+\subsection{Centrality Metrics}
+
+Five SNA centrality metrics \cite{Mamatha2024} were computed for every node, each
+capturing a distinct narrator role.
+
+\textit{In-degree centrality} measures incoming edges, i.e., how many students
+narrate from a narrator (role as a source/teacher):
+\begin{equation}
+C_D^{in}(v) = \frac{\deg^{in}(v)}{n-1}.
+\label{eq:indeg}
+\end{equation}
+
+\textit{Out-degree centrality} measures outgoing edges, i.e., how many teachers a
+narrator received from (role as an active student):
+\begin{equation}
+C_D^{out}(v) = \frac{\deg^{out}(v)}{n-1}.
+\label{eq:outdeg}
+\end{equation}
+
+\textit{Eigenvector centrality} measures influence by connection quality---being
+linked to other influential narrators:
+\begin{equation}
+C_E(v) = \frac{1}{\lambda} \sum_{u \in N(v)} A_{vu}\, C_E(u),
+\label{eq:eig}
+\end{equation}
+where $\lambda$ is the largest eigenvalue of the adjacency matrix $A$ and $N(v)$
+is the neighbor set of $v$.
+
+\textit{Closeness centrality} measures proximity to all other nodes by shortest
+path, using \textit{Inverse Weight} as distance:
+\begin{equation}
+C_C(v) = \frac{n-1}{\displaystyle\sum_{u \neq v} d(v,u)}.
+\label{eq:close}
+\end{equation}
+
+\textit{Betweenness centrality} measures how often a node lies on shortest paths
+between other pairs, marking bridge narrators:
+\begin{equation}
+C_B(v) = \sum_{s \neq v \neq t} \frac{\sigma_{st}(v)}{\sigma_{st}},
+\label{eq:betw}
+\end{equation}
+where $\sigma_{st}$ is the number of shortest $s$--$t$ paths and
+$\sigma_{st}(v)$ the number passing through $v$.
+
+In-degree, out-degree, and eigenvector centrality are computationally light and
+were computed on the full graph. Closeness and betweenness require all-pairs
+shortest-path traversal, which is intractable on the full graph; they were
+computed on a representative subgraph of the 50{,}000 strongest-weight edges
+(14{,}695 nodes), preserving the principal transmission backbone.
+
+\subsection{System Architecture and Dashboard}
+
+The system follows a three-tier architecture (Fig.~\ref{fig:arsitektur})
+separating heavy computation from data presentation. The \emph{data processing
+layer} runs offline in Python, performing preprocessing, KG construction, and
+centrality computation, then exporting two CSV files: \texttt{sentralitas.csv}
+(per-narrator centrality scores) and \texttt{edge\_slim.csv} (weighted
+relations). The \emph{data storage layer} is Supabase (PostgreSQL), holding a
+\textsc{Centrality} table (nodes) and an \textsc{Edge} table (relations) linked by
+narrator ID, queryable via REST API. The \emph{presentation layer} is a
+read-only Single Page Application built with React, TypeScript, and Vite, styled
+with TailwindCSS, that retrieves data through \texttt{@supabase/supabase-js} and
+renders four pages. Statistical charts use Recharts, while the interactive
+network graph is rendered directly on an HTML5 Canvas with a custom
+force-directed layout. Placing all computation in the processing layer ensures
+centrality is computed once on the backend rather than on the client, keeping the
+dashboard lightweight and responsive.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.78\columnwidth]{contents/chapter-3/Arsitektur-sistem.png}
+\caption{Three-tier system architecture separating offline analysis, centralized
+storage, and the interactive presentation layer.}
+\label{fig:arsitektur}
+\end{figure}
+
+The force-directed layout combines three forces per animation frame: a
+Coulomb-like \emph{repulsion} between nearby nodes, a Hooke-like \emph{spring}
+force along edges toward an ideal length, and a \emph{radial constraint} that
+pulls each node toward a concentric ring keyed to its centrality rank, so the
+most central narrators settle near the graph center. Centrality is further
+encoded visually through node size and color (rank groups), and edges are drawn
+as arrows pointing from student to teacher. The dashboard was validated with
+black-box testing.
+
+% =============================================================
+\section{Results and Discussion}
+% =============================================================
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.92\textwidth]{contents/chapter-4/Tampilan1.png}
+\caption{Narrator Relation Graph page of the dashboard. Node size and color encode
+centrality rank (In-degree selected); arrows point from student to teacher. The
+left panel filters by metric and search; the right panel shows per-narrator
+detail when a node is selected.}
+\label{fig:dashboard}
+\end{figure*}
+
+\subsection{Graph Construction}
+
+Normalization yielded 177{,}289 unique narrator names; of these, 177{,}047
+participate in at least one narration relation and form the graph nodes, the
+remaining 242 being isolated names (single-narrator chains or names dropped
+during self-loop and empty-name cleaning). The resulting directed graph contains
+177{,}047 nodes and 776{,}798 edges. The strongest relation is Ibnu
+Umar~$\leftarrow$~Nafi' with a weight of 11{,}346, indicating that Nafi'
+narrated from Ibnu Umar that many times in the corpus; such high-weight pairs
+form a dominant transmission backbone that recurs across many chains.
+
+\subsection{Centrality Analysis}
+
+Table~\ref{tab:topnarrators} lists the top narrators for each metric. Abu
+Hurairah ranks first in four of five metrics---in-degree, eigenvector, closeness,
+and betweenness---identifying him as the most central and most influential
+narrator in the network. This is consistent with his historical status as the
+most prolific companion narrator. Sufyan ranks first in out-degree, reflecting a
+distinct role as an exceptionally active recipient who narrated from many
+teachers; the divergence between the in-degree and out-degree rankings confirms
+that dominant sources of narration are not necessarily the most active
+receivers.
+
+\begin{table}[!t]
+\caption{Top Narrators by Centrality Metric}
+\label{tab:topnarrators}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{cllc}
+\toprule
+Rank & Metric & Narrator & Score \\
+\midrule
+1 & In-degree    & Abu Hurairah          & 0.0199 \\
+2 & In-degree    & Ibnu Abbas            & 0.0150 \\
+3 & In-degree    & Aisyah                & 0.0132 \\
+\midrule
+1 & Out-degree   & Sufyan                & 0.0135 \\
+2 & Out-degree   & Abu Abdullah Al-Hafizh & 0.0127 \\
+3 & Out-degree   & Syu'bah               & 0.0124 \\
+\midrule
+1 & Eigenvector  & Abu Hurairah          & 0.5195 \\
+2 & Eigenvector  & Aisyah                & 0.4836 \\
+3 & Eigenvector  & Ibnu Umar             & 0.3821 \\
+\midrule
+1 & Closeness    & Abu Hurairah          & 1.0000 \\
+2 & Closeness    & Aisyah                & 0.9965 \\
+3 & Closeness    & Ibnu Abbas            & 0.9864 \\
+\midrule
+1 & Betweenness  & Abu Hurairah          & 0.0500 \\
+2 & Betweenness  & Syu'bah               & 0.0445 \\
+3 & Betweenness  & Sufyan                & 0.0384 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The eigenvector scores drop sharply after the top four narrators (from 0.2659
+for Ibnu Abbas to 0.1723 for Anas), indicating that influence is concentrated in
+a small, tightly interconnected core. Closeness scores among the top ten are very
+high and closely spaced (0.9630--1.0000) because, within the strongest-weight
+subgraph, central narrators reach others through very short paths. In
+betweenness, the recurrence of Abu Hurairah, Syu'bah, and Sufyan among the top
+ranks signals a dual role as both influential and connective nodes. Together, the
+five metrics provide complementary, quantitatively distinguishable views of
+narrator roles.
+
+\subsection{Dashboard Implementation}
+
+The analytical results were stored in Supabase and served through the React
+dashboard. Fig.~\ref{fig:dashboard} shows the Narrator Relation Graph page, the
+core of the system, rendering narrators as nodes and teacher--student relations as
+directed edges on an HTML5 Canvas. A left filter panel provides search and the
+five centrality metrics; selecting a metric drives node size and color so that
+the most central narrators appear largest and centered. For readability the view
+displays a representative subset of the top 50 narrators with 1{,}000 relations.
+Selecting a node opens a right-hand detail panel with the narrator's connected
+teacher and student counts, all five centrality values, and the linked narrators,
+while highlighting the node's direct relations. The graph supports zoom, pan,
+drag, node selection, and auto-fit reset.
+
+The remaining three pages complement this view. The \emph{Narrator Statistics}
+page summarizes the network with total-narrator (177{,}047) and total-relation
+(776{,}798) indicator cards and five bar charts of the top ten narrators per
+metric. The \emph{Relation Table} page lists all 776{,}798 weighted
+teacher--student relations with pagination, sorting, and search; by default it is
+sorted by weight, placing Ibnu Umar--Nafi' (11{,}346) at the top. The
+\emph{Centrality Table} page lists all 177{,}047 narrators with their five
+centrality scores, also paginated, sortable, and searchable. The dashboard was
+deployed online and is publicly accessible without installation.
+
+\subsection{System Testing}
+
+Black-box testing covered 14 scenarios spanning menu navigation, data loading,
+graph rendering, node selection, metric filtering, narrator search, zoom, drag
+and pan, auto-fit reset, the statistics page, the relation and centrality tables,
+pagination, and column sorting. All 14 scenarios produced the expected output,
+yielding a 100\% success rate and confirming that the dashboard functions as
+designed.
+
+\subsection{Comparison with Prior Work}
+
+Table~\ref{tab:compare} positions this work against prior \textit{sanad} network
+studies. Earlier work successfully models and analyzes narrator networks at
+scale, but the outputs are typically static and tied to desktop software such as
+Gephi and Cytoscape, restricting access to expert users
+\cite{FAROOQI2024110439,Shuaib2022}. The principal advantage of this work is the
+presentation of the analysis as an interactive, publicly accessible web dashboard
+that integrates a large-scale narrator KG with all five centrality metrics and
+exploration features (search, metric filtering, pagination, sorting, and
+teacher--student detail) in a single interface.
+
+\begin{table}[!t]
+\caption{Comparison with Prior Sanad Network Studies}
+\label{tab:compare}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{p{2.4cm}cccc}
+\toprule
+Study & KG & SNA & Web & Public \\
+\midrule
+Farooqi \textit{et al.}~\cite{FAROOQI2024110439}   & Yes & Partial & No  & No  \\
+Shuaib \textit{et al.}~\cite{Shuaib2022}           & No  & No      & No  & No  \\
+Mahmoud \textit{et al.}~\cite{Mahmoud2024}         & Yes & No      & No  & No  \\
+Ahmad \textit{et al.}~\cite{ahmad2025hadith}       & Yes & Yes     & No  & No  \\
+KASHAF~\cite{shafie2021kashaf}                      & Yes & No      & Yes & Partial \\
+\textbf{This work} & \textbf{Yes} & \textbf{Yes} & \textbf{Yes} & \textbf{Yes} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+This work also has limitations. Closeness and betweenness centrality were
+computed on the strongest-weight subgraph rather than the full graph due to
+computational cost; the dataset is static and not automatically updated; and the
+analysis focuses on network structure without assessing \textit{sanad}
+authenticity from the perspective of hadith science.
+
+% =============================================================
+\section{Conclusion}
+% =============================================================
+
+This paper presented an interactive, web-based KG front-end for the hadith
+narrator network with integrated SNA. From the Sanadset~650K corpus, 487{,}451
+cleaned \textit{sanad} chains were modeled as a weighted directed graph of
+177{,}047 narrator nodes and 776{,}798 narration edges. Five centrality metrics
+distinguished narrator roles, identifying Abu Hurairah as the most central
+narrator in four of five metrics and Sufyan as the most active recipient by
+out-degree. The results were served through a React dashboard backed by Supabase,
+with an interactive force-directed graph rendered on an HTML5 Canvas and four
+exploration pages; black-box testing across 14 scenarios achieved a 100\% success
+rate. By turning a large-scale \textit{sanad} KG into a freely explorable
+front-end, the system addresses the static, desktop-bound limitations of prior
+work and makes the Islamic scholarly network broadly accessible to researchers,
+students, and the public.
+
+Future work should compute closeness and betweenness on the full graph using
+approximation algorithms or parallel computation, incorporate periodic data
+updates and additional \textit{sanad} sources, add narrator-quality and
+\textit{sanad}-authenticity dimensions grounded in hadith science, and validate
+narrator names with expert input to further improve the accuracy of the network
+and its centrality analysis.
+
+\section*{Acknowledgment}
+
+The authors thank the Department of Electrical and Information Engineering,
+Universitas Gadjah Mada, for supporting this research, and acknowledge Mghari
+\textit{et al.}\ for publicly releasing the Sanadset~650K dataset.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
