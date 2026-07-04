@@ -1,30 +1,10 @@
 \chapter*{LAMPIRAN}
 
-\section{Rumus Algoritma Tata Letak Graf \textit{Force-Directed}}
-\label{lamp:rumus-graf}
-Bagian ini memuat persamaan matematis dari ketiga gaya yang digunakan pada algoritma tata letak graf \textit{force-directed} pada visualisasi jaringan sanad, beserta nilai parameternya.
-
-\begin{enumerate}
-\item \textbf{Gaya tolak (\textit{repulsion})}, bekerja antar pasangan \textit{node} dan hanya diterapkan jika jarak antar \textit{node} kurang dari 320 piksel:
-$$ F_{tolak} = \frac{k_r}{d^2}, \quad k_r = 2000 $$
-dengan $d$ adalah jarak Euclidean antara dua \textit{node}.
-
-\item \textbf{Gaya pegas (\textit{spring})}, bekerja pada setiap \textit{edge} dengan panjang ideal 200 piksel:
-$$ F_{pegas} = (d - L_0)\cdot k_s, \quad L_0 = 200,\ k_s = 0{,}003 $$
-
-\item \textbf{Gaya radial (\textit{radial constraint})}, menarik setiap \textit{node} menuju jari-jari cincin targetnya ($r_{target}$) sesuai peringkat sentralitas:
-$$ F_{radial} = (r - r_{target})\cdot k_c, \quad k_c = 0{,}014 $$
-dengan $r$ adalah jarak \textit{node} saat ini dari titik pusat.
-\end{enumerate}
-
-Setelah ketiga gaya dijumlahkan, kecepatan tiap \textit{node} diperbarui lalu dikalikan dengan faktor peredam (\textit{damping}) sebesar 0,78. Posisi awal \textit{node} ditentukan berdasarkan peringkat sentralitasnya pada cincin konsentris dengan jari-jari 180 (peringkat 1--5), 320 (peringkat 6--15), 460 (peringkat 16--30), dan 600 (sisanya).
-
-\newpage
 \section{Kode Implementasi Algoritma \textit{Force-Directed}}
 \label{lamp:kode-force-directed}
-Berikut adalah implementasi lengkap algoritma tata letak graf \textit{force-directed} dalam bahasa JavaScript yang digunakan pada halaman Graf Relasi Perawi.
+Berikut adalah implementasi lengkap algoritma tata letak graf \textit{force-directed} dalam bahasa JavaScript yang digunakan pada halaman Graf Relasi Perawi, sebagaimana dibahas pada Subbab~\ref{subsec:implementasi-visualisasi-graf}.
 
-\begin{lstlisting}[style=mystyle, language=Java, frame=single, caption={Implementasi algoritma \textit{force-directed} pada visualisasi graf jaringan sanad}]
+\begin{lstlisting}[style=mystyle, language=JavaScript, caption={Implementasi algoritma \textit{force-directed} pada visualisasi graf jaringan sanad}, label={lst:force-directed}]
 // 1. Gaya Tolak (Repulsion)
 // Ftolak = kr / d^2, kr = 2000
 // Hanya diterapkan jika d < 320 piksel
@@ -96,17 +76,24 @@ function initPosition(gen, genIdx, genCount) {
 \begin{enumerate}
     \item \textbf{Kode Sumber Pra-Pemrosesan Data dan Pembangunan \textit{Knowledge Graph} \& Sentralitas}
 
-    Seluruh kode Python yang mencakup tahap pra-pemrosesan dataset \textit{Sanadset 650K}, pembangunan \textit{Knowledge Graph} jaringan sanad, serta perhitungan lima metrik sentralitas menggunakan \textit{NetworkX} tersedia secara publik pada repositori GitHub berikut:
+    Seluruh kode Python yang mencakup tahap pra-pemrosesan dataset \textit{Sanadset 650K}, pembangunan \textit{Knowledge Graph} jaringan sanad, serta perhitungan lima metrik sentralitas menggunakan NetworkX tersedia secara publik pada repositori GitHub berikut:
 
     \vspace{0.3cm}
-    \noindent\texttt{https://github.com/Nazrililham090805/sanad-hadith}
+    \noindent\url{https://github.com/Nazrililham090805/sanad-hadith}
+
+    \item \textbf{Kode Sumber \textit{Front-End Dashboard}}
+
+    Seluruh kode pembangunan \textit{dashboard}, mencakup halaman Graf Relasi Perawi, Statistik Perawi, Tabel Relasi, dan Tabel Sentralitas yang dibangun menggunakan React, TypeScript, dan Supabase, tersedia secara publik pada repositori GitHub berikut:
+
+    \vspace{0.3cm}
+    \noindent\url{https://github.com/Nazrililham090805/Frontend-KnowledgeGraphHadith}
 
     \item \textbf{Akses \textit{Dashboard} Sistem}
 
     Sistem visualisasi \textit{front-end} \textit{Knowledge Graph} jaringan sanad hadis telah diterapkan secara daring dan dapat diakses oleh publik tanpa memerlukan instalasi perangkat lunak melalui tautan berikut:
 
     \vspace{0.3cm}
-    \noindent\texttt{https://frontend-knowledge-graph-hadith.vercel.app/}
+    \noindent\url{https://frontend-knowledge-graph-hadith.vercel.app/}
 \end{enumerate}
 
 \newpage
@@ -323,49 +310,7 @@ $x = [1{,}0000,\ 0{,}7500,\ 0{,}5000,\ 0{,}0000,\ 0{,}0000,\ 0{,}0000,\ 0{,}0000
 \newpage
 \section{Tangkapan Layar \textit{Dashboard}}
 \label{lamp:screenshot}
-Bagian ini menyajikan tangkapan layar halaman Graf Relasi Perawi pada \textit{dashboard} dengan berbagai pilihan metrik sentralitas sebagai filter tampilan jaringan.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{contents/Asset-Lampiran/hal1node.png}
-    \caption{Halaman Graf Relasi Perawi --- tampilan jaringan tanpa filter sentralitas}
-    \label{lamp:fig:hal1node}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{contents/Asset-Lampiran/hal1indegree.png}
-    \caption{Halaman Graf Relasi Perawi --- filter \textit{In-Degree Centrality}}
-    \label{lamp:fig:hal1indegree}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{contents/Asset-Lampiran/hal1outdegree.png}
-    \caption{Halaman Graf Relasi Perawi --- filter \textit{Out-Degree Centrality}}
-    \label{lamp:fig:hal1outdegree}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{contents/Asset-Lampiran/hal1eigenvector.png}
-    \caption{Halaman Graf Relasi Perawi --- filter \textit{Eigenvector Centrality}}
-    \label{lamp:fig:hal1eigenvector}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{contents/Asset-Lampiran/hal1closeness.png}
-    \caption{Halaman Graf Relasi Perawi --- filter \textit{Closeness Centrality}}
-    \label{lamp:fig:hal1closeness}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{contents/Asset-Lampiran/hal1betweenn.png}
-    \caption{Halaman Graf Relasi Perawi --- filter \textit{Betweenness Centrality}}
-    \label{lamp:fig:hal1betweenn}
-\end{figure}
+Bagian ini menyajikan tangkapan layar tambahan halaman Graf Relasi Perawi pada \textit{dashboard}, yaitu fitur perbesar dan perkecil (\textit{zoom}) jaringan. Tangkapan layar untuk tampilan jaringan tanpa filter dan kelima metrik sentralitas (\textit{In-Degree}, \textit{Out-Degree}, \textit{Eigenvector}, \textit{Closeness}, dan \textit{Betweenness Centrality}) disajikan pada Bab 4 Subbab~\ref{subsec:halaman-graf-relasi} bersamaan dengan pembahasan hasil pengujiannya.
 
 \begin{figure}[H]
     \centering

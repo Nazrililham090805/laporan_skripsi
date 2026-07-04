@@ -9,7 +9,7 @@ Penelitian komputasional pada sanad hadis berkembang dari sekadar pembangunan da
 Mghari \textit{et al} (2022) membangun \textit{Sanadset 650K}, korpus hadis yang memuat 650.986 entri dari 926 kitab berbahasa Arab menggunakan \textit{web scraping} dan \textit{web crawling} berbasis Python (\textit{Beautiful Soup} dan \textit{Selenium}). Setiap entri menyertakan teks hadis lengkap, matan, daftar perawi, dan urutan rantai sanad. Dataset ini dipublikasikan di repositori Mendeley Data untuk mendukung klasifikasi hadis (sahih/lemah), pengenalan perawi, pemodelan linguistik Arabic NLP, dan pembangunan graf perawi \cite{MGHARI2022108540}. Skala dan cakupannya yang mencapai ratusan kitab menjadikan Sanadset 650K sumber data paling representatif untuk penelitian jaringan transmisi sanad.
 
 \begin{sloppypar}
-Farooqi \textit{et al} (2024) memperkenalkan \textit{Multi-IsnadSet} (MIS), dataset yang merepresentasikan jaringan transmisi Sahih Muslim sebagai graf berarah dengan 2.092 \textit{node} (perawi) dan 77.797 \textit{edge} \cite{FAROOQI2024110439}. Untuk membangun dan menganalisis jaringan tersebut, peneliti menggunakan \textit{NetworkX}, \textit{Neo4j}, \textit{Gephi}, dan \textit{CytoScape}. Studi ini menunjukkan bahwa jaringan sanad dapat dimodelkan sebagai \textit{knowledge graph} di \textit{Neo4j} dan dianalisis dengan metrik SNA (\textit{degree}, \textit{betweenness}, \textit{eigenvector centrality}) untuk mengidentifikasi perawi berpengaruh \cite{FAROOQI2024110439}. Namun, visualisasi yang dihasilkan bersifat statis dan bergantung pada perangkat lunak desktop, sehingga pengguna umum tidak dapat mengaksesnya tanpa instalasi khusus.
+Farooqi \textit{et al} (2024) memperkenalkan \textit{Multi-IsnadSet} (MIS), dataset yang merepresentasikan jaringan transmisi Sahih Muslim sebagai graf berarah dengan 2.092 \textit{node} (perawi) dan 77.797 \textit{edge} \cite{FAROOQI2024110439}. Untuk membangun dan menganalisis jaringan tersebut, peneliti menggunakan NetworkX, Neo4j, Gephi, dan CytoScape. Studi ini menunjukkan bahwa jaringan sanad dapat dimodelkan sebagai \textit{knowledge graph} di Neo4j dan dianalisis dengan metrik SNA (\textit{degree}, \textit{betweenness}, \textit{eigenvector centrality}) untuk mengidentifikasi perawi berpengaruh \cite{FAROOQI2024110439}. Namun, visualisasi yang dihasilkan bersifat statis dan bergantung pada perangkat lunak desktop, sehingga pengguna umum tidak dapat mengaksesnya tanpa instalasi khusus.
 \end{sloppypar}
 
 Shuaib \textit{et al} (2022) menerapkan \textit{trophic analysis}, metode yang diadaptasi dari ekologi makanan, terhadap \textit{Hadith Social Network} dari corpus Gawāmi' al-Kalim yang memuat 447.205 hadis dan 49.309 perawi unik dengan 294.303 edge berarah, mencakup sembilan abad sejarah transmisi \cite{Shuaib2022}. Jaringan sanad diperlakukan sebagai sistem difusi informasi hierarkis, dengan Nabi Muhammad SAW sebagai \textit{node} sumber (\textit{basal node}) dan tiap lapisan transmisi mencerminkan jarak temporal dari sumber. Hasilnya menunjukkan bahwa jaringan sanad bersifat hierarkis dan sekuensial, dan analisis berbasis graf mengungkap informasi temporal yang tidak tercatat dalam teks historis \cite{Shuaib2022}. Shuaib \textit{et al} menyebutkan potensi penggabungan analisis trofik dengan metrik sentralitas SNA untuk mengidentifikasi perawi berpengaruh pada periode tertentu, sebuah arah yang belum diwujudkan dalam antarmuka yang dapat dieksplorasi pengguna.
@@ -90,6 +90,14 @@ Python (Scikit-learn), AraBERT &
 Random Forest 96,55\% \& HistGradBoost 93,16\%; ungguli ChatGPT (77,23\%) &
 Dataset kecil (503 paragraf); tidak mencakup semua alasan terputusnya sanad \\
 \hline
+\textbf{Penelitian Ini (2026)} &
+Sanadset 650K (926 kitab) &
+Membangun \textit{Knowledge Graph} jaringan keilmuan Islam serta mengidentifikasi peran dan pengaruh perawi secara kuantitatif &
+Pra-pemrosesan data, pembangunan KG sebagai graf berarah berbobot, SNA dengan 5 metrik sentralitas &
+Python (NetworkX), React, Supabase &
+KG dengan 177.047 \textit{node} \& 776.798 \textit{edge}; \textit{dashboard} web interaktif yang dapat diakses publik tanpa instalasi &
+\textit{Closeness} \& \textit{betweenness centrality} dihitung pada subgraf terkuat; data bersifat statis; belum menilai kesahihan sanad \\
+\hline
 \end{tabular}%
 }
 \end{table}
@@ -142,6 +150,13 @@ Mesin pencari hadis berbasis \textit{knowledge graph} &
 \textit{Recall} \& presisi 0,9 pada klasifikasi \textit{takhreej}; visualisasi Sankey interaktif &
 Fokus pada \textit{retrieval} \& visualisasi, bukan penilaian \textit{grade} hadis otomatis \\
 \hline
+\textbf{Penelitian Ini (2026)} &
+\textit{Dashboard} web (React, Supabase, HTML5 Canvas) &
+\textit{Knowledge graph} + SNA (5 metrik sentralitas); visualisasi graf \textit{force-directed} interaktif &
+Sanadset 650K (487.451 rantai sanad bersih) &
+177.047 \textit{node}, 776.798 \textit{edge}; pengujian \textit{black-box} 14 skenario, tingkat keberhasilan 100\% &
+\textit{Closeness}/\textit{betweenness centrality} pada subgraf terkuat; belum menilai kesahihan sanad; data belum diperbarui otomatis \\
+\hline
 \end{tabular}%
 }
 \end{table}
@@ -180,8 +195,13 @@ Adapun metode penerimaan dan penyampaian hadis terdiri atas delapan cara utama, 
 Di antara metode tersebut, sama' dipandang sebagai yang paling kuat karena terjadi transmisi langsung antara guru dan murid, dan keberagaman metode ini menunjukkan bahwa tradisi periwayatan hadis berkembang secara sistematis dalam menjaga keotentikan ajaran Islam \cite{hatta2026teknik}.
 
 \subsection{Graf}
-Graf $G$ didefinisikan sebagai pasangan dari dua himpunan berhingga, yaitu himpunan titik dan himpunan sisi, yang dituliskan sebagai $G = (V, E)$, dengan $V$ menyatakan himpunan titik dan $E$ menyatakan himpunan sisi. 
-Titik (\textit{vertex} atau \textit{node}) merupakan komponen dasar penyusun graf, sedangkan sisi (\textit{edge}) merupakan elemen yang menghubungkan dua buah titik. 
+Graf $G$ didefinisikan sebagai pasangan dari dua himpunan berhingga, yaitu himpunan titik dan himpunan sisi, sebagaimana dirumuskan pada Persamaan~\eqref{eq:graf}.
+\begin{equation}
+G = (V, E)
+\label{eq:graf}
+\end{equation}
+dengan $V$ menyatakan himpunan titik dan $E$ menyatakan himpunan sisi.
+Titik (\textit{vertex} atau \textit{node}) merupakan komponen dasar penyusun graf, sedangkan sisi (\textit{edge}) merupakan elemen yang menghubungkan dua buah titik.
 Suatu graf memungkinkan untuk tidak memiliki sisi sama sekali, namun setidaknya harus memuat satu titik. Himpunan titik dinyatakan dengan $V(G) = \{v_1, v_2, v_3, \dots, v_n\}$, sedangkan himpunan sisi dinyatakan dengan $E(G) = \{e_1, e_2, e_3, \dots, e_n\}$. 
 Banyaknya titik pada graf $G$ disebut sebagai \textit{order} dan dilambangkan dengan $|V(G)|$, sementara banyaknya sisi disebut \textit{size} dan dilambangkan dengan $|E(G)|$. 
 Dua titik $u$ dan $v$ pada graf $G$ dikatakan saling bertetangga (\textit{adjacent}) apabila keduanya dihubungkan oleh suatu sisi $e$, yaitu $e = uv$, dan banyaknya sisi yang bersisian dengan suatu titik $u$ disebut sebagai derajat (\textit{degree}) titik tersebut yang dinotasikan dengan $d(u)$ \cite{Lestari_Kristiana_Prihandini_Alfarisi_Setiawan_Adawiyah_2024}.
@@ -202,12 +222,80 @@ Dalam konteks penelitian media sosial, SNA dipahami sebagai pendekatan analitis 
 Keunggulan utama metode ini terletak pada kemampuannya mengungkap pola dan dinamika tersembunyi yang tidak tampak pada level individu, seperti bagaimana relasi sosial memengaruhi penyebaran informasi, pembentukan komunitas, serta aliran pengaruh dan kekuasaan dalam jaringan \cite{GoledzinowskiBlocki2023}.
 
 \subsection{Sentralitas}
+\label{subsec:sentralitas}
 Untuk menentukan aktor yang memiliki peranan penting dalam sebuah jaringan, SNA menggunakan pengukuran sentralitas (\textit{centrality}) yang menjadi inti analisis, karena salah satu kegunaan paling kuat dari teori graf dalam SNA adalah mengidentifikasi individu yang berpengaruh \cite{Mamatha2024}.
-Terdapat beberapa ukuran sentralitas yang umum digunakan. \textit{Degree centrality} mengukur jumlah koneksi langsung yang dimiliki suatu \textit{node}, sehingga menunjukkan tingkat keterhubungan, popularitas, atau pengaruh langsung aktor tersebut dalam jaringan.
-\textit{Betweenness centrality} mengidentifikasi seberapa sering suatu \textit{node} berada pada lintasan terpendek (\textit{shortest path}) antara node-node lain, sehingga menandai aktor yang berperan sebagai jembatan atau \textit{gatekeeper} dalam aliran informasi.
-\textit{Closeness centrality} dihitung dari kebalikan rata-rata jarak lintasan terpendek dari suatu \textit{node} ke seluruh node lainnya, dan menggambarkan seberapa cepat sebuah aktor dapat menjangkau anggota jaringan yang lain.
-Sementara itu, \textit{eigenvector centrality} menilai pentingnya sebuah \textit{node} berdasarkan kualitas koneksinya, di mana sebuah \textit{node} dianggap berpengaruh apabila terhubung dengan node-node lain yang juga berpengaruh, sehingga pendekatan rekursif ini lebih baik dalam memodelkan propagasi pengaruh pada jaringan kompleks \cite{Mamatha2024}. 
-Melalui keempat pengukuran tersebut, kedudukan dan peran setiap aktor di dalam jaringan dapat diidentifikasi secara sistematis, baik aktor yang menempati posisi sentral, aktor yang berfungsi sebagai penghubung antarkelompok, maupun aktor yang memiliki keterhubungan luas dengan aktor lainnya. Dengan demikian, struktur jaringan beserta pola relasi dan alur transmisi yang terbentuk di dalamnya dapat dianalisis secara lebih mendalam dan menyeluruh.
+Terdapat beberapa ukuran sentralitas yang umum digunakan, yaitu \textit{degree centrality} (yang pada graf berarah terbagi menjadi \textit{in-degree} dan \textit{out-degree centrality}), \textit{eigenvector centrality}, \textit{closeness centrality}, dan \textit{betweenness centrality}. Definisi matematis kelima metrik tersebut mengacu pada kajian teori graf untuk analisis jaringan sosial \cite{Mamatha2024} dan diuraikan sebagai berikut.
+
+\begin{enumerate}
+	\item \textbf{\textit{In-Degree Centrality}}
+
+	\textit{In-degree centrality} mengukur jumlah sisi yang masuk ke suatu simpul, dinormalisasi terhadap jumlah maksimum koneksi yang mungkin, sehingga menunjukkan tingkat keterhubungan atau popularitas suatu aktor sebagai tujuan relasi dalam jaringan berarah. Nilai metrik ini dirumuskan pada Persamaan~\eqref{eq:indegree}.
+	\begin{equation}
+	C_{D}^{in}(v) = \frac{\deg^{in}(v)}{n-1}
+	\label{eq:indegree}
+	\end{equation}
+	Keterangan:
+	\begin{itemize}[leftmargin=2em,label=$\cdot$]
+		\item $\deg^{in}(v)$ = jumlah sisi masuk ke simpul $v$
+		\item $n$ = jumlah total simpul dalam jaringan
+	\end{itemize}
+
+	\item \textbf{\textit{Out-Degree Centrality}}
+
+	\textit{Out-degree centrality} mengukur jumlah sisi yang keluar dari suatu simpul, dinormalisasi terhadap jumlah maksimum koneksi yang mungkin, sehingga menunjukkan tingkat keaktifan suatu aktor sebagai sumber relasi dalam jaringan berarah. Nilai metrik ini dirumuskan pada Persamaan~\eqref{eq:outdegree}.
+	\begin{equation}
+	C_{D}^{out}(v) = \frac{\deg^{out}(v)}{n-1}
+	\label{eq:outdegree}
+	\end{equation}
+	Keterangan:
+	\begin{itemize}[leftmargin=2em,label=$\cdot$]
+		\item $\deg^{out}(v)$ = jumlah sisi keluar dari simpul $v$
+		\item $n$ = jumlah total simpul dalam jaringan
+	\end{itemize}
+
+	\item \textbf{\textit{Eigenvector Centrality}}
+
+	\textit{Eigenvector centrality} menilai pentingnya sebuah simpul berdasarkan kualitas koneksinya, yaitu keterhubungan dengan simpul-simpul lain yang juga memiliki pengaruh tinggi, sehingga pendekatan rekursif ini lebih baik dalam memodelkan propagasi pengaruh pada jaringan kompleks \cite{Mamatha2024}. Nilai metrik ini dirumuskan pada Persamaan~\eqref{eq:eigenvector}.
+	\begin{equation}
+	C_E(v) = \frac{1}{\lambda} \sum_{u \in N(v)} A_{vu} \, C_E(u)
+	\label{eq:eigenvector}
+	\end{equation}
+	Keterangan:
+	\begin{itemize}[leftmargin=2em,label=$\cdot$]
+		\item $\lambda$ = nilai eigen terbesar dari matriks ketetanggaan
+		\item $N(v)$ = himpunan tetangga simpul $v$
+		\item $A_{vu}$ = elemen matriks ketetanggaan, bernilai 1 jika terdapat sisi dari $v$ ke $u$
+	\end{itemize}
+
+	\item \textbf{\textit{Closeness Centrality}}
+
+	\textit{Closeness centrality} dihitung dari kebalikan rata-rata jarak lintasan terpendek dari suatu simpul ke seluruh simpul lainnya, dan menggambarkan seberapa cepat sebuah aktor dapat menjangkau anggota jaringan yang lain. Nilai metrik ini dirumuskan pada Persamaan~\eqref{eq:closeness}.
+	\begin{equation}
+	C_C(v) = \frac{n-1}{\displaystyle\sum_{u \neq v} d(v,u)}
+	\label{eq:closeness}
+	\end{equation}
+	Keterangan:
+	\begin{itemize}[leftmargin=2em,label=$\cdot$]
+		\item $d(v,u)$ = jarak terpendek antara simpul $v$ dan $u$
+		\item $n$ = jumlah total simpul dalam jaringan
+	\end{itemize}
+
+	\item \textbf{\textit{Betweenness Centrality}}
+
+	\textit{Betweenness centrality} mengidentifikasi seberapa sering suatu simpul berada pada lintasan terpendek (\textit{shortest path}) antara pasangan simpul lain dalam jaringan, sehingga menandai aktor yang berperan sebagai jembatan atau \textit{gatekeeper} dalam aliran informasi. Nilai metrik ini dirumuskan pada Persamaan~\eqref{eq:betweenness}.
+	\begin{equation}
+	C_B(v) = \sum_{s \neq v \neq t} \frac{\sigma_{st}(v)}{\sigma_{st}}
+	\label{eq:betweenness}
+	\end{equation}
+	Keterangan:
+	\begin{itemize}[leftmargin=2em,label=$\cdot$]
+		\item $\sigma_{st}$ = jumlah total jalur terpendek dari simpul $s$ ke simpul $t$
+		\item $\sigma_{st}(v)$ = jumlah jalur tersebut yang melewati simpul $v$
+	\end{itemize}
+
+\end{enumerate}
+
+Melalui kelima pengukuran tersebut, kedudukan dan peran setiap aktor di dalam jaringan dapat diidentifikasi secara sistematis, baik aktor yang menempati posisi sentral, aktor yang berfungsi sebagai penghubung antarkelompok, maupun aktor yang memiliki keterhubungan luas dengan aktor lainnya. Dengan demikian, struktur jaringan beserta pola relasi dan alur transmisi yang terbentuk di dalamnya dapat dianalisis secara lebih mendalam dan menyeluruh.
 
 \subsection{Python}
 Python adalah bahasa pemrograman tingkat tinggi yang pertama kali ditemukan oleh Guido van Rossum di Stichting Mathematisch Centrum (CWI), Amsterdam pada tahun 1991, yang pengembangannya terinspirasi oleh bahasa pemrograman ABC \cite{Rahman2023}.
@@ -231,6 +319,14 @@ React.Js adalah \textit{library front-end} yang dikembangkan oleh Facebook dan s
 \subsection{Supabase}
 Supabase merupakan sebuah platform \textit{Backend-as-a-Service} (BaaS) bersifat \textit{open-source} yang menyediakan serangkaian layanan \textit{backend} secara terintegrasi untuk mempermudah pengembangan aplikasi tanpa perlu membangun infrastruktur server dari awal. Supabase dibangun di atas basis data PostgreSQL yang andal dan menyediakan berbagai fitur utama seperti database relasional, autentikasi pengguna (\textit{authentication}), penyimpanan berkas (\textit{storage}), serta dukungan \textit{real-time} yang memungkinkan sinkronisasi data secara langsung antara server dan aplikasi klien. Dalam perancangan aplikasi pemrosesan input data pada Kumbah Laundry yang dikembangkan menggunakan Flutter, Supabase berperan sebagai \textit{backend} yang menangani proses penyimpanan, pengelolaan, dan pengambilan data pelanggan maupun transaksi laundry. Integrasi antara Flutter sebagai kerangka kerja pengembangan antarmuka (\textit{frontend}) dan Supabase sebagai \textit{backend} dilakukan melalui \textit{REST API} maupun pustaka (\textit{library}) resmi Supabase untuk Flutter, sehingga data yang diinputkan melalui aplikasi dapat langsung tersimpan dan diakses secara aman dan efisien pada basis data. Dengan demikian, penggunaan Supabase memberikan kemudahan dalam pengembangan aplikasi karena menyederhanakan proses pengelolaan basis data, mempercepat waktu pengembangan, serta menjamin keamanan dan ketersediaan data secara \textit{real-time} \cite{Murizar2025}.
 
+\subsection{Pengujian Sistem (\textit{Black-Box Testing})}
+\label{subsec:blackbox-testing}
+Pengujian merupakan tahap evaluasi yang bertujuan menilai kualitas perangkat lunak berdasarkan indikator yang telah ditentukan, sekaligus berfungsi sebagai tinjauan akhir terhadap pengkodean, desain, dan spesifikasi sistem sebelum digunakan oleh pengguna. \textit{Black-box testing} merupakan salah satu pendekatan pengujian perangkat lunak yang hanya memeriksa hasil keluaran berdasarkan nilai masukan yang diberikan, tanpa memperhatikan struktur maupun kode program internal yang menghasilkan keluaran tersebut \cite{Lubis_Ginting_2024}.
+
+\textit{Black-box testing} bertujuan memverifikasi bahwa setiap fungsi sistem beroperasi sesuai dengan kebutuhan yang telah ditetapkan, sehingga penguji dapat menyusun himpunan kondisi masukan untuk menguji seluruh persyaratan fungsional suatu program, mengidentifikasi kesalahan yang muncul, kemudian melakukan perbaikan hingga sistem dinyatakan layak digunakan. Metode ini juga dikenal sebagai \textit{behavioral testing}, \textit{specification-based testing}, \textit{input/output testing}, atau \textit{functional testing} karena berfokus pada persyaratan fungsional perangkat lunak, bukan pada struktur kode di dalamnya \cite{Lubis_Ginting_2024}.
+
+Kelebihan teknik \textit{black-box testing} terletak pada tidak diperlukannya pengetahuan khusus mengenai bahasa pemrograman tertentu karena pengujian dilaksanakan dari sudut pandang pengguna, sedangkan kelemahannya terletak pada kesulitan menyusun kasus uji tanpa spesifikasi yang jelas serta kemungkinan sebagian bagian \textit{back-end} tidak teruji sama sekali. Metode ini digunakan untuk mendeteksi berbagai kategori kesalahan, antara lain fungsi yang tidak sesuai atau hilang, kesalahan pada struktur data maupun saat mengakses basis data eksternal, kesalahan inisialisasi dan terminasi, serta kesalahan pada antarmuka. Pelaksanaannya diawali dengan mengidentifikasi kebutuhan pengujian, menyusun kasus uji, kemudian menjalankan setiap kasus uji pada aplikasi untuk memverifikasi kesesuaian fungsi, masukan, dan keluaran perangkat lunak dengan spesifikasi yang telah ditetapkan \cite{Lubis_Ginting_2024}.
+
 \section{Analisis Perbandingan Metode}
 
 Berdasarkan Tabel~\ref{tab:ringkasan-pustaka}, studi-studi pada domain dataset dan pemodelan jaringan sanad menunjukkan dua keterbatasan utama. Studi yang berfokus pada pembangunan dataset, seperti Mghari \textit{et al} (2022) dan Farooqi \textit{et al} (2024), menghasilkan korpus berskala besar namun tidak menyediakan antarmuka eksplorasi bagi pengguna. Studi yang menerapkan SNA dan knowledge graph, seperti Shuaib \textit{et al} (2022), Mahmoud \textit{et al} (2024), dan Hendawi \textit{et al} (2024), menghasilkan model analitik yang hanya dapat dioperasikan melalui perangkat lunak desktop atau keahlian teknis khusus. Sanadset 650K \cite{MGHARI2022108540} dipilih sebagai data utama penelitian ini karena skalanya yang mencakup 650.986 entri dari 926 kitab melampaui dataset lain, bersifat terbuka, dan strukturnya yang memisahkan komponen matan, sanad, serta perawi memudahkan transformasi ke format knowledge graph.
@@ -238,8 +334,4 @@ Berdasarkan Tabel~\ref{tab:ringkasan-pustaka}, studi-studi pada domain dataset d
 Berdasarkan Tabel~\ref{tab:visualisasi-perawi}, keempat studi visualisasi perawi bertumpu pada perangkat desktop (Pajek, Gephi) atau sistem web yang terbatas pada rantai perawi tunggal. Ahmad \textit{et al} \cite{ahmad2025hadith} menerapkan metrik sentralitas dan graf, tetapi hasilnya berupa model analitik, bukan antarmuka yang dapat dijelajahi pengguna. KASHAF \cite{shafie2021kashaf} menyediakan antarmuka web, tetapi fokusnya pada pencarian dan klasifikasi takhreej, bukan eksplorasi posisi sentralitas perawi. Tidak ada studi yang mengintegrasikan knowledge graph perawi dengan metrik sentralitas SNA dalam satu antarmuka web yang dapat diakses tanpa perangkat lunak khusus.
 
 Penelitian ini mengisi celah tersebut dengan membangun \textit{front-end} berbasis web yang menyajikan \textit{knowledge graph} perawi dari \textit{Sanadset 650K} beserta skor sentralitas SNA (\textit{degree} (\textit{in-degree} dan \textit{out-degree}), \textit{betweenness}, \textit{eigenvector centrality}) dalam satu antarmuka yang dapat dijelajahi pengguna tanpa instalasi perangkat lunak khusus.
-
-\section{Pertanyaan Tugas Akhir (Jika Perlu)}
-
-Pertanyaan tugas akhir bersifat opsional dan dapat ditambahkan untuk menekankan hal-hal yang hendak diketahui dari tugas akhir berdasar pada tujuan tugas akhir. Pertanyaan tugas akhir dikenal dengan RQ (\textit{Research Question}) dan harus memiliki keterkaitan dengan RO (\textit{Research Objective}). Satu RO dapat memiliki satu atau lebih dari satu RQ. 
 

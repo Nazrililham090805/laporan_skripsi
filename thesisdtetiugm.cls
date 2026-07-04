@@ -613,8 +613,8 @@
 \newcommand{\chapterdedication}[1]{
 	\newgeometry{top=2.54cm,bottom=2.54cm,left=3.54cm,right=2.54cm}
 	\chapter*{\dedicationpage}%
-	\input{#1}
 	\addcontentsline{toc}{chapter}{\dedicationpage}
+	\input{#1}
 }
 
 %======================================
@@ -634,22 +634,20 @@
 	\newpage
 	\fancyhf{}
 	\fancyfoot[C]{\thepage}
-	\begin{center}
-	\vspace*{-4cm}
-	\noindent\makebox[\textwidth]{\includegraphics[width=\paperwidth]{#1}}		
-	\end{center}
+	\thispagestyle{empty}
+	\begin{tikzpicture}[remember picture, overlay]
+		\node[anchor=center, inner sep=0pt] at (current page.center) {\includegraphics[width=\paperwidth,height=\paperheight,keepaspectratio]{#1}};
+	\end{tikzpicture}
 	\addcontentsline{toc}{chapter}{\statementname}
-	\clearpage
 }
 
 %======================================
 %% Preface
 %======================================
 \newcommand{\chapterpreface}[1]{
-	\restoregeometry% Restore Geometry
 	\chapter*{\prefacename}%
-	\input{#1}
 	\addcontentsline{toc}{chapter}{\prefacename}
+	\input{#1}
 }
 
 %======================================
@@ -740,25 +738,44 @@
 %% Misc Styling
 %======================================
 %Source code style
-\definecolor{codegreen}{rgb}{0,0.6,0}
-\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codebg}{rgb}{0.96,0.96,0.96}
+\definecolor{codegreen}{rgb}{0,0.5,0}
+\definecolor{codegray}{rgb}{0.45,0.45,0.45}
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{codeblue}{rgb}{0.13,0.13,0.8}
+\definecolor{coderule}{rgb}{0.75,0.75,0.75}
 
-\lstdefinestyle{mystyle}{ 
-	commentstyle=\color{codegreen},
-	keywordstyle=\color{magenta},
+\lstdefinelanguage{JavaScript}{
+	morekeywords={typeof, new, true, false, catch, function, return, null, switch, var, let, const, if, in, while, do, else, case, break, this, class, extends, super, import, export, default, from, async, await, of, try, finally, throw, yield, static, get, set},
+	morecomment=[l]{//},
+	morecomment=[s]{/*}{*/},
+	morestring=[b]',
+	morestring=[b]",
+	morestring=[b]`,
+	sensitive=true
+}
+
+\lstdefinestyle{mystyle}{
+	backgroundcolor=\color{codebg},
+	commentstyle=\color{codegreen}\itshape,
+	keywordstyle=\color{codeblue}\bfseries,
 	numberstyle=\tiny\color{codegray},
 	stringstyle=\color{codepurple},
-	basicstyle=\small,
-	breakatwhitespace=false,         
-	breaklines=true,                 
-	captionpos=b,                    
-	keepspaces=true,                 
-	numbers=left,                    
-	numbersep=5pt,                  
-	showspaces=false,                
+	basicstyle=\ttfamily\footnotesize,
+	breakatwhitespace=false,
+	breaklines=true,
+	captionpos=b,
+	keepspaces=true,
+	numbers=left,
+	numbersep=8pt,
+	frame=single,
+	rulecolor=\color{coderule},
+	framesep=4pt,
+	xleftmargin=12pt,
+	xrightmargin=5pt,
+	showspaces=false,
 	showstringspaces=false,
-	showtabs=false,                  
+	showtabs=false,
 	tabsize=2
 }
 \lstset{style=mystyle}

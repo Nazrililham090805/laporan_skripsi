@@ -60,6 +60,8 @@
 
 \usepackage{float}
 \usepackage{array}
+\usepackage{amsmath}
+\usepackage{xurl} % agar tautan (\url{}) panjang dapat berpindah baris tanpa melewati margin
 % Buat paragraf di dalam item daftar (enumerate/itemize) ikut menjorok seperti paragraf biasa
 \setlist[enumerate,1]{listparindent=\parindent}
 \setlist[itemize,1]{listparindent=\parindent}
@@ -86,9 +88,9 @@
 %\printendorsementjpg{sample/scanned-endorsement.jpg}
 
 %---- DEDICATION PAGE ----
-\cleardoublepage \phantomsection
-\chapterstatement{contents/statement/statement}
-%\chapterstatementjpg{sample/scanned-statement.jpg}
+\phantomsection
+%\chapterstatement{contents/statement/statement}
+\chapterstatementjpg{contents/statement/PengesahanIlham.jpg}
 
 \cleardoublepage \phantomsection
 \chapterdedication{contents/dedication/dedication}
@@ -102,6 +104,7 @@
 
 
 %---- PREFACE PAGE ----
+\restoregeometry
 \cleardoublepage \phantomsection
 \chapterpreface{contents/preface/preface}
 

@@ -38,11 +38,22 @@ Dari keempat file tersebut, \texttt{sanadset.csv} dipilih sebagai dataset utama 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{contents/chapter-3/data-sanadset.png}
-	\caption{Contoh data pada \textit{sanadset.csv}}
+	\caption{Contoh data pada \textit{sanadset.csv}} 
 	\label{fig:sanadset-preview}
 \end{figure}
 
 \section{Metode yang Digunakan}
+
+Secara teknis, penelitian ini mengolah data mentah \texttt{sanadset.csv} melalui serangkaian tahap pemrosesan data hingga menjadi \textit{dashboard}.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth,height=0.85\textheight,keepaspectratio]{contents/chapter-3/FlowchartAlurPengembangan.png}
+	\caption{Flowchart Alur Pengembangan Knowledge Graph}
+	\label{fig:flowchart-kg}
+\end{figure}
+
+Sebagaimana ditunjukkan pada Gambar~\ref{fig:flowchart-kg}, berkas \texttt{sanadset.csv} terlebih dahulu melalui tahap pra-pemrosesan dan normalisasi nama perawi (Subbab~\ref{subsec:pra-pemrosesan}) sehingga menghasilkan data bersih. Setiap rantai sanad kemudian dimodelkan menjadi tripel Guru--Murid, dilanjutkan dengan penghitungan bobot \textit{edge} (\textit{Weight} dan \textit{Inverse Weight}) yang menghasilkan berkas \texttt{edge\_slim.csv} (Subbab~\ref{subsubsec:bobot-edge}). Data tripel berbobot ini kemudian dibangun menjadi graf berarah berbobot menggunakan \texttt{nx.DiGraph()}, lalu digunakan untuk menghitung kelima metrik sentralitas menggunakan NetworkX yang menghasilkan berkas \texttt{sentralitas.csv} (Subbab~\ref{subsec:analisis-jaringan}). Kedua berkas keluaran, \texttt{edge\_slim.csv} dan \texttt{sentralitas.csv}, kemudian diunggah ke basis data Supabase (Subbab~\ref{subsubsec:penyimpanan-basis-data}), sebelum akhirnya diambil oleh \textit{dashboard} berbasis React melalui \textit{REST API} dan divisualisasikan pada keempat halaman utamanya.
+
 \subsection{Pra Pemrosesan Data}
 \label{subsec:pra-pemrosesan}
 \subsubsection{Penghapusan baris tanpa sanad}
@@ -129,9 +140,11 @@ Graf jaringan sanad yang dibangun terdiri dari tiga komponen utama:
 
 	\item \textbf{Arah Graf}
 	
-	Transmisi hadis dalam sanad berlangsung secara searah, yaitu dari murid yang menerima riwayat menuju guru sebagai sumber riwayat. Oleh karena itu, graf yang dibangun bersifat berarah (\textit{directed graph}), di mana setiap sisi memiliki titik asal (murid) dan titik tujuan (guru) yang tidak dapat dipertukarkan. Sifat berarah ini diimplementasikan menggunakan kelas \texttt{nx.DiGraph()} pada \textit{library} \textit{NetworkX}.
+	Transmisi hadis dalam sanad berlangsung secara searah, yaitu dari murid yang menerima riwayat menuju guru sebagai sumber riwayat. Oleh karena itu, graf yang dibangun bersifat berarah (\textit{directed graph}), di mana setiap sisi memiliki titik asal (murid) dan titik tujuan (guru) yang tidak dapat dipertukarkan. Sifat berarah ini diimplementasikan menggunakan kelas \texttt{nx.DiGraph()} pada \textit{library} NetworkX.
 
 \end{enumerate}
+
+Secara formal, graf jaringan sanad hadis yang dibangun dapat dinyatakan sebagai graf berarah berbobot $G = (V, E)$ sebagaimana dirumuskan pada Persamaan~\eqref{eq:graf} di Bab II, dengan $V$ menyatakan himpunan simpul yang merepresentasikan perawi, dan $E$ menyatakan himpunan sisi berarah yang merepresentasikan relasi periwayatan murid terhadap guru, dengan setiap sisi $(u,v) \in E$ menunjukkan bahwa perawi $u$ meriwayatkan dari perawi $v$.
 
 
 \subsubsection{Pemodelan Tripel Data}
@@ -170,7 +183,7 @@ Tidak semua relasi guru-murid dalam jaringan sanad memiliki tingkat kekuatan yan
 Untuk merepresentasikan perbedaan kekuatan relasi tersebut, setiap \textit{edge} dalam graf dilengkapi dengan dua atribut bobot, yaitu \textit{Weight} dan \textit{Inverse Weight}.
 Atribut \textit{Weight} merepresentasikan frekuensi kemunculan suatu pasangan guru-murid di seluruh \textit{dataset}, di mana semakin tinggi nilai \textit{Weight}, semakin sering relasi periwayatan tersebut muncul.
 Hal ini mengindikasikan hubungan transmisi yang lebih kuat dan lebih terpercaya antara dua perawi. Nilai \textit{Weight} diperoleh dengan menghitung jumlah kemunculan setiap pasangan (Guru, Murid) yang identik, kemudian pasangan-pasangan duplikat tersebut digabungkan menjadi satu \textit{edge} tunggal dengan bobot yang sesuai.
-Selanjutnya, atribut \textit{Inverse Weight} dihitung sebagai kebalikan dari \textit{Weight}, yaitu $\dfrac{1}{\text{Weight}}$.
+Selanjutnya, atribut \textit{Inverse Weight} dihitung sebagai kebalikan dari \textit{Weight}, yaitu $\textit{Inverse Weight} = 1/\textit{Weight}$.
 Atribut ini digunakan dalam algoritma sentralitas berbasis jarak, khususnya \textit{Closeness Centrality}.
 Logika yang mendasarinya adalah bahwa relasi yang sering muncul (\textit{Weight} tinggi) mencerminkan kedekatan yang lebih erat antar-perawi, sehingga jarak antar-keduanya dianggap lebih pendek (\textit{Inverse Weight} kecil).
 Sebaliknya, relasi yang jarang muncul dianggap memiliki jarak yang lebih jauh (\textit{Inverse Weight} besar). Penggunaan kedua atribut bobot ini memungkinkan analisis jaringan yang lebih akurat karena tidak hanya mempertimbangkan keberadaan relasi, tetapi juga intensitas dan kekuatan transmisi periwayatan di antara para perawi. Contoh hasil perhitungan ditunjukkan pada Tabel~\ref{tab:bobot-edge}.
@@ -208,80 +221,39 @@ Untuk memudahkan pembacaan hasil analisis, seluruh nama perawi dalam aksara Arab
 \label{subsec:analisis-jaringan}
 \subsubsection{Konstruksi Graf dengan NetworkX}
 \begin{sloppypar}
-Setelah seluruh tripel relasi terbentuk, graf jaringan sanad dikonstruksi secara komputasional menggunakan pustaka \textit{NetworkX} melalui fungsi \texttt{from\_pandas\_edgelist}. Kolom \texttt{Murid} ditetapkan sebagai simpul sumber dan kolom \texttt{Guru} sebagai simpul tujuan, sesuai dengan arah transmisi sanad dari murid kepada gurunya, sementara atribut \textit{Weight} dan \textit{Inverse\_Weight} disertakan sebagai properti setiap sisi. Graf dibangun sebagai graf berarah (\textit{directed graph}) menggunakan parameter \texttt{nx.DiGraph()}. Selanjutnya, dilakukan penghapusan \textit{self-loop}, yaitu sisi yang menghubungkan suatu simpul dengan dirinya sendiri, karena relasi semacam itu tidak merepresentasikan periwayatan yang valid. Graf akhir yang terbentuk terdiri dari 177.047 simpul perawi dan 776.798 sisi relasi periwayatan.
+Setelah seluruh tripel relasi terbentuk, graf jaringan sanad dikonstruksi secara komputasional menggunakan pustaka NetworkX melalui fungsi \texttt{from\_pandas\_edgelist}. Kolom \texttt{Murid} ditetapkan sebagai simpul sumber dan kolom \texttt{Guru} sebagai simpul tujuan, sesuai dengan arah transmisi sanad dari murid kepada gurunya, sementara atribut \textit{Weight} dan \textit{Inverse\_Weight} disertakan sebagai properti setiap sisi. Graf dibangun sebagai graf berarah (\textit{directed graph}) menggunakan parameter \texttt{nx.DiGraph()}. Selanjutnya, dilakukan penghapusan \textit{self-loop}, yaitu sisi yang menghubungkan suatu simpul dengan dirinya sendiri, karena relasi semacam itu tidak merepresentasikan periwayatan yang valid. Graf akhir yang terbentuk terdiri dari 177.047 simpul perawi dan 776.798 sisi relasi periwayatan.
 \end{sloppypar}
 
 \subsubsection{Perhitungan Metrik Sentralitas}
 \label{subsubsec:metrik-sentralitas}
 
-Perhitungan kelima metrik sentralitas dalam penelitian ini mengacu pada definisi matematis yang dirumuskan dalam kajian teori graf untuk analisis jaringan sosial \cite{Mamatha2024}. Masing-masing metrik beserta persamaannya diuraikan sebagai berikut.
+Perhitungan kelima metrik sentralitas dalam penelitian ini menggunakan definisi matematis yang telah dirumuskan pada Subbab~\ref{subsec:sentralitas} Bab II, yaitu Persamaan~\eqref{eq:indegree} hingga \eqref{eq:betweenness}. Penerapan kelima metrik tersebut pada jaringan sanad diuraikan sebagai berikut.
 
 \begin{enumerate}
 	\item \textbf{\textit{In-Degree Centrality} (Peran Perawi sebagai guru dalam jaringan)}
 
-	\textit{In-degree centrality} mengukur jumlah sisi yang masuk ke suatu simpul, dinormalisasi terhadap jumlah maksimum koneksi yang mungkin. Dalam jaringan sanad, karena arah sisi bergerak dari murid menuju guru, metrik ini merepresentasikan jumlah murid yang meriwayatkan dari seorang perawi. Semakin tinggi nilainya, semakin banyak perawi yang menimba riwayat darinya, sehingga perawi tersebut berperan sebagai sumber riwayat yang dominan dalam jaringan. Nilai metrik ini dihitung menggunakan persamaan berikut:
-	$$
-	C_{D}^{in}(v) = \frac{\deg^{in}(v)}{n-1}
-	$$
-	Keterangan:
-	\begin{itemize}[leftmargin=2em,label=$\cdot$]
-		\item $\deg^{in}(v)$ = jumlah sisi masuk ke simpul $v$
-		\item $n$ = jumlah total simpul dalam jaringan
-	\end{itemize}
+	Dalam jaringan sanad, karena arah sisi bergerak dari murid menuju guru, Persamaan~\eqref{eq:indegree} merepresentasikan jumlah murid yang meriwayatkan dari seorang perawi. Semakin tinggi nilainya, semakin banyak perawi yang menimba riwayat darinya, sehingga perawi tersebut berperan sebagai sumber riwayat yang dominan dalam jaringan.
 
 	\item \textbf{\textit{Out-Degree Centrality} (Peran Perawi sebagai murid dalam jaringan)}
 
-	\textit{Out-degree centrality} mengukur jumlah sisi yang keluar dari suatu simpul, dinormalisasi terhadap jumlah maksimum koneksi yang mungkin. Dalam jaringan sanad, karena sisi berarah dari murid menuju guru, metrik ini merepresentasikan jumlah guru yang pernah diriwayatkan oleh seorang perawi. Semakin tinggi nilainya, semakin banyak guru yang menjadi sumber riwayat baginya, sehingga menunjukkan keaktifan perawi tersebut sebagai penerima riwayat dalam jaringan. Nilai metrik ini dihitung menggunakan persamaan berikut:
-	$$
-	C_{D}^{out}(v) = \frac{\deg^{out}(v)}{n-1}
-	$$
-	Keterangan:
-	\begin{itemize}[leftmargin=2em,label=$\cdot$]
-		\item $\deg^{out}(v)$ = jumlah sisi keluar dari simpul $v$
-		\item $n$ = jumlah total simpul dalam jaringan
-	\end{itemize}
+	Dalam jaringan sanad, karena sisi berarah dari murid menuju guru, Persamaan~\eqref{eq:outdegree} merepresentasikan jumlah guru yang pernah diriwayatkan oleh seorang perawi. Semakin tinggi nilainya, semakin banyak guru yang menjadi sumber riwayat baginya, sehingga menunjukkan keaktifan perawi tersebut sebagai penerima riwayat dalam jaringan.
 
 	\item \textbf{\textit{Eigenvector Centrality} (Peran perawi sebagai Tokoh Berpengaruh)}
 
-	\textit{Eigenvector centrality} mengukur pentingnya suatu simpul berdasarkan kualitas koneksinya, yaitu keterhubungan dengan simpul-simpul lain yang juga memiliki pengaruh tinggi. Dalam jaringan sanad, perawi yang terhubung dengan perawi-perawi berpengaruh akan memperoleh nilai yang tinggi, meskipun jumlah koneksi langsungnya tidak banyak. Metrik ini mencerminkan prestise dan kewibawaan seorang perawi dalam jaringan transmisi hadis. Nilai metrik ini dihitung menggunakan persamaan berikut:
-	$$
-	C_E(v) = \frac{1}{\lambda} \sum_{u \in N(v)} A_{vu} \, C_E(u)
-	$$
-	Keterangan:
-	\begin{itemize}[leftmargin=2em,label=$\cdot$]
-		\item $\lambda$ = nilai eigen terbesar dari matriks ketetanggaan
-		\item $N(v)$ = himpunan tetangga simpul $v$
-		\item $A_{vu}$ = elemen matriks ketetanggaan, bernilai 1 jika terdapat sisi dari $v$ ke $u$
-	\end{itemize}
+	Dalam jaringan sanad, perawi yang terhubung dengan perawi-perawi berpengaruh akan memperoleh nilai yang tinggi menurut Persamaan~\eqref{eq:eigenvector}, meskipun jumlah koneksi langsungnya tidak banyak. Metrik ini mencerminkan prestise dan kewibawaan seorang perawi dalam jaringan transmisi hadis.
 
 	\item \textbf{\textit{Closeness Centrality} (Peran Perawi sebagai Tokoh Paling Terjangkau dalam jaringan)}
 
-	\textit{Closeness centrality} mengukur kedekatan suatu simpul terhadap seluruh simpul lain berdasarkan rata-rata jarak terpendek. Dalam jaringan sanad, perawi dengan nilai tinggi dapat menjangkau perawi lain melalui jalur periwayatan yang lebih pendek, sehingga menempati posisi sentral dalam penyebaran riwayat. Metrik ini dihitung dengan membalik total jarak terpendek dari satu simpul ke seluruh simpul lainnya, dan nilai \textit{Inverse Weight} digunakan sebagai bobot jarak antar-perawi. Nilai metrik ini dihitung menggunakan persamaan berikut:
-	$$
-	C_C(v) = \frac{n-1}{\displaystyle\sum_{u \neq v} d(v,u)}
-	$$
-	Keterangan:
-	\begin{itemize}[leftmargin=2em,label=$\cdot$]
-		\item $d(v,u)$ = jarak terpendek antara simpul $v$ dan $u$
-		\item $n$ = jumlah total simpul dalam jaringan
-	\end{itemize}
+	Dalam jaringan sanad, perawi dengan nilai tinggi pada Persamaan~\eqref{eq:closeness} dapat menjangkau perawi lain melalui jalur periwayatan yang lebih pendek, sehingga menempati posisi sentral dalam penyebaran riwayat. Nilai \textit{Inverse Weight} digunakan sebagai bobot jarak $d(v,u)$ antar-perawi dalam perhitungan metrik ini.
 
 	\item \textbf{\textit{Betweenness Centrality} (Peran Perawi sebagai Penghubung dalam jaringan)}
 
-	\textit{Betweenness centrality} mengukur seberapa sering suatu simpul berada pada jalur terpendek antara pasangan simpul lain dalam jaringan. Dalam jaringan sanad, perawi dengan nilai tinggi berperan sebagai penghubung antara kelompok-kelompok perawi yang berbeda, sehingga mengendalikan aliran informasi riwayat secara struktural. Nilai metrik ini dihitung menggunakan persamaan berikut:
-	$$
-	C_B(v) = \sum_{s \neq v \neq t} \frac{\sigma_{st}(v)}{\sigma_{st}}
-	$$
-	Keterangan:
-	\begin{itemize}[leftmargin=2em,label=$\cdot$]
-		\item $\sigma_{st}$ = jumlah total jalur terpendek dari simpul $s$ ke simpul $t$
-		\item $\sigma_{st}(v)$ = jumlah jalur tersebut yang melewati simpul $v$
-	\end{itemize}
+	Dalam jaringan sanad, perawi dengan nilai tinggi pada Persamaan~\eqref{eq:betweenness} berperan sebagai penghubung antara kelompok-kelompok perawi yang berbeda, sehingga mengendalikan aliran informasi riwayat secara struktural.
 
 \end{enumerate}
 
 \begin{sloppypar}
-Kelima persamaan di atas merupakan definisi matematis dari masing-masing metrik sentralitas, yaitu bentuk perhitungan apabila nilai sentralitas dihitung secara manual. Dalam penelitian ini, perhitungan tersebut tidak dilakukan secara manual, melainkan menggunakan pustaka \textit{NetworkX} yang telah menyediakan implementasi baku untuk setiap metrik, masing-masing melalui fungsi \textit{in-degree centrality}, \textit{out-degree centrality}, \textit{eigenvector centrality}, \textit{closeness centrality}, dan \textit{betweenness centrality}. Pencantuman persamaan matematis ini bertujuan untuk menjelaskan dasar teori dan logika perhitungan di balik setiap metrik, sehingga nilai yang dihasilkan oleh \textit{NetworkX} dapat dipahami maknanya secara konseptual, bukan sekadar diperoleh sebagai keluaran pustaka.
+Perhitungan kelima metrik tersebut tidak dilakukan secara manual, melainkan menggunakan pustaka NetworkX yang telah menyediakan implementasi baku untuk setiap metrik, masing-masing melalui fungsi \textit{in-degree centrality}, \textit{out-degree centrality}, \textit{eigenvector centrality}, \textit{closeness centrality}, dan \textit{betweenness centrality}, sehingga nilai yang dihasilkan sesuai dengan definisi matematis pada Bab II.
 \end{sloppypar}
 
 \begin{sloppypar}
@@ -291,7 +263,7 @@ Kelima metrik tersebut dihitung untuk seluruh simpul, sehingga setiap perawi mem
 \subsubsection{Penyimpanan Hasil Analisis ke Basis Data (Supabase)}
 \label{subsubsec:penyimpanan-basis-data}
 \begin{sloppypar}
-Setelah seluruh metrik sentralitas dihitung menggunakan pustaka \textit{NetworkX} sebagaimana dijelaskan pada Subbab~\ref{subsubsec:metrik-sentralitas}, tahap berikutnya adalah menyimpan hasil analisis ke dalam basis data agar dapat diakses secara terpusat oleh sistem \textit{dashboard}. Basis data yang digunakan pada penelitian ini adalah Supabase, yaitu layanan \textit{Backend as a Service} (BaaS) berbasis PostgreSQL. Supabase dipilih karena menyediakan basis data relasional yang andal sekaligus antarmuka pemrograman, yaitu \textit{REST API} dan klien JavaScript \texttt{@supabase/supabase-js}, sehingga data hasil analisis dapat langsung dikueri oleh \textit{dashboard} tanpa perlu membangun \textit{back-end} tersendiri.
+Setelah seluruh metrik sentralitas dihitung menggunakan pustaka NetworkX sebagaimana dijelaskan pada Subbab~\ref{subsubsec:metrik-sentralitas}, tahap berikutnya adalah menyimpan hasil analisis ke dalam basis data agar dapat diakses secara terpusat oleh sistem \textit{dashboard}. Basis data yang digunakan pada penelitian ini adalah Supabase, yaitu layanan \textit{Backend as a Service} (BaaS) berbasis PostgreSQL. Supabase dipilih karena menyediakan basis data relasional yang andal sekaligus antarmuka pemrograman, yaitu \textit{REST API} dan klien JavaScript \texttt{@supabase/supabase-js}, sehingga data hasil analisis dapat langsung dikueri oleh \textit{dashboard} tanpa perlu membangun \textit{back-end} tersendiri.
 \end{sloppypar}
 
 \begin{sloppypar}
@@ -509,7 +481,7 @@ Adapun pada sisi penyimpanan dan integrasi data, Supabase yang berbasis PostgreS
 \end{sloppypar}
 
 \subsection{Pengujian Sistem}
-Pengujian sistem dilakukan untuk memastikan setiap fungsi pada \textit{dashboard} berjalan sesuai dengan yang dirancang. Metode pengujian yang digunakan pada penelitian ini adalah \textit{black-box testing}, yaitu pengujian yang berfokus pada fungsionalitas sistem tanpa memeriksa struktur kode internalnya. Pengujian ini dilakukan dengan memberikan masukan (\textit{input}) tertentu pada setiap fitur, lalu membandingkan keluaran (\textit{output}) yang dihasilkan dengan keluaran yang diharapkan. Sebuah fitur dinyatakan valid apabila keluaran yang dihasilkan sesuai dengan keluaran yang diharapkan.
+Pengujian sistem dilakukan untuk memastikan setiap fungsi pada \textit{dashboard} berjalan sesuai dengan yang dirancang, menggunakan metode \textit{black-box testing} sebagaimana dijelaskan pada Subbab~\ref{subsec:blackbox-testing} Bab II. Pengujian ini dilakukan dengan memberikan masukan (\textit{input}) tertentu pada setiap fitur, lalu membandingkan keluaran (\textit{output}) yang dihasilkan dengan keluaran yang diharapkan. Sebuah fitur dinyatakan valid apabila keluaran yang dihasilkan sesuai dengan keluaran yang diharapkan.
 
 Pengujian difokuskan pada fitur-fitur utama \textit{dashboard}, yaitu navigasi antarhalaman, visualisasi graf jaringan sanad, penyajian statistik, serta penyajian data pada tabel relasi dan tabel sentralitas. Rancangan skenario pengujian (\textit{test case}) ditunjukkan pada Tabel~\ref{tab:pengujian}.
 
@@ -549,7 +521,7 @@ Secara keseluruhan, pelaksanaan tugas akhir ini mengikuti serangkaian tahapan ya
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[height=0.85\textheight]{contents/chapter-3/AlurTugasAkhir.png}
+	\includegraphics[height=0.85\textheight]{contents/chapter-3/AlurTugasAkhir.drawio.png}
 	\caption{Diagram alir pelaksanaan tugas akhir}
 	\label{fig:alur-tugas-akhir}
 \end{figure}
