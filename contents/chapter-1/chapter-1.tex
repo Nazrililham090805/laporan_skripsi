@@ -46,20 +46,20 @@ Selama ini penelitian terkait sanad hadis umumnya berhenti pada tahap visualisas
 
 
 \begin{enumerate}
-	\item \textit{Knowledge Graph} berdasarkan data sanad hadis pada penelitian terdahulu masih memiliki keterbatasan dalam tahap pra-pemrosesan data, sehingga relasi guru-murid antarperawi belum terstruktur secara optimal untuk dianalisis secara komputasional.
-	\item Penelitian terkait jaringan sanad hadis umumnya berhenti pada tahap visualisasi hubungan antarperawi tanpa mengkaji lebih dalam peran dan pengaruh masing-masing perawi dalam jaringan tersebut secara kuantitatif.
-	\item Keterbatasan antarmuka \textit{Knowledge Graph} jaringan perawi hadis pada penelitian terdahulu yang berbasis perangkat lunak \textit{desktop} khusus menyebabkan hasil analisis sulit diakses dan dieksplorasi secara interaktif oleh peneliti, mahasiswa, maupun masyarakat umum.
+	\item \textit{Knowledge Graph} berdasarkan data sanad hadis pada penelitian terdahulu masih memiliki keterbatasan dalam tahap pra-pemrosesan data, sehingga relasi guru-murid antarperawi belum terstruktur secara optimal untuk dianalisis secara komputasional, akibatnya satu perawi yang sama berisiko terpecah menjadi beberapa simpul berbeda dan menghasilkan perhitungan sentralitas yang bias.
+	\item Penelitian terkait jaringan sanad hadis umumnya berhenti pada tahap visualisasi hubungan antarperawi, sehingga peran dan pengaruh masing-masing perawi dalam jaringan tersebut belum dikaji secara kuantitatif, akibatnya posisi strategis seorang perawi, seperti perannya sebagai \textit{common link}, belum dapat diidentifikasi secara terukur.
+	\item Keterbatasan antarmuka \textit{Knowledge Graph} jaringan perawi hadis pada penelitian terdahulu yang berbasis perangkat lunak \textit{desktop} khusus menyebabkan hasil analisis sulit diakses dan dieksplorasi secara interaktif oleh mahasiswa dan peneliti ilmu hadis sebagai pengguna sasaran, meskipun merekalah pihak yang secara rutin membutuhkan penelusuran kedudukan perawi dalam sanad.
 \end{enumerate}
 
 \section{Tujuan Penelitian}
 
-Penelitian ini bertujuan untuk mengembangkan \textit{Front-End Knowledge Graph} Keagamaan Ilmuwan Islam dengan memanfaatkan data sanad hadis dan pendekatan \textit{Social Network Analysis} (SNA). Tujuan penelitian ini adalah:
+Penelitian ini bertujuan menganalisis jaringan keilmuan Islam pada sanad hadis berbasis \textit{Knowledge Graph} dengan pendekatan \textit{Social Network Analysis} (SNA), serta menyajikan hasil analisis tersebut melalui \textit{dashboard} interaktif. Tujuan penelitian ini adalah:
 
 \begin{enumerate}
 	\item Membangun \textit{Knowledge Graph} jaringan keilmuan Islam dengan mengekstraksi relasi guru-murid antarperawi dari data sanad hadis melalui tahap pra-pemrosesan dan memodelkannya sebagai graf berarah berbobot.
 	\item Mengidentifikasi peran dan pengaruh masing-masing perawi dalam jaringan sanad hadis secara kuantitatif menggunakan lima metrik sentralitas \textit{Social Network Analysis} (SNA), yaitu \textit{in-degree}, \textit{out-degree}, \textit{eigenvector}, \textit{closeness}, dan \textit{betweenness centrality}.
-	\item Mengembangkan sistem \textit{front-end} berbasis web dengan visualisasi graf interaktif yang memungkinkan peneliti, mahasiswa, dan masyarakat umum mengeksplorasi jaringan perawi serta hasil analisis sentralitas secara langsung tanpa instalasi perangkat lunak tambahan.
-\end{enumerate}	
+	\item Menyajikan hasil pembangunan \textit{Knowledge Graph} dan analisis sentralitas jaringan perawi melalui \textit{dashboard} interaktif berbasis web yang dirancang sesuai kebutuhan mahasiswa dan peneliti ilmu hadis sebagai pengguna sasaran, sehingga jaringan perawi dapat ditelusuri tanpa instalasi perangkat lunak tambahan.
+\end{enumerate}
 
 \section{Batasan Penelitian}
 
@@ -68,13 +68,13 @@ Batasan penelitian dalam skripsi ini adalah sebagai berikut:
 \begin{enumerate}
 	\item Penelitian ini menggunakan dataset publik \textit{Sanadset 650K: Data on Hadith Narrators} sebagai sumber data utama. Pengolahan data hanya dilakukan pada kolom sanad yang tersedia dalam dataset tersebut, tidak mencakup kolom lainnya seperti matan, buku, dan Hadis.
 
-	\item Nama perawi di kolom sanad digunakan sebagaimana tercantum dalam dataset tanpa normalisasi atau verifikasi keaslian nama aslinya. Jaringan yang dibangun merepresentasikan hubungan antar perawi tanpa memperhitungkan kronologi periwayatan maupun isi matan hadis.
+	\item Nama perawi pada kolom sanad telah melalui tahap normalisasi ejaan (penghapusan harakat, penyeragaman variasi huruf Arab, dan resolusi kata kekerabatan), namun belum melalui tahap verifikasi keaslian terhadap sumber rujukan ilmu hadis, sehingga masih dimungkinkan terdapat entri yang bukan merupakan nama perawi yang valid. Jaringan yang dibangun merepresentasikan hubungan antar perawi tanpa memperhitungkan kronologi periwayatan maupun isi matan hadis.
 
 	\item Proses pembangunan \textit{Knowledge Graph} didasarkan pada relasi guru-murid yang diekstraksi dari data sanad, sehingga entitas yang dimodelkan hanya mencakup perawi hadis beserta hubungan periwayatannya.
 
-	\item Analisis jaringan menggunakan metode \textit{Social Network Analysis} (SNA) dengan 5 metrik sentralitas, yaitu \textit{in degree centrality}, \textit{out degree centrality}, \textit{eigenvector centrality}, \textit{closeness centrality} dan \textit{betweenness centrality}.
+	\item Analisis jaringan menggunakan metode \textit{Social Network Analysis} (SNA) dengan 5 metrik sentralitas, yaitu \textit{in degree centrality}, \textit{out degree centrality}, \textit{eigenvector centrality}, \textit{closeness centrality} dan \textit{betweenness centrality}. Perhitungan \textit{closeness} dan \textit{betweenness centrality} dilakukan pada subgraf berbobot tertinggi, bukan pada graf penuh, karena keterbatasan sumber daya komputasi perangkat yang digunakan.
 
-	\item Pengembangan sistem dibatasi pada antarmuka berbasis web (\textit{web-based front-end}) yang mencakup visualisasi graf interaktif dan eksplorasi jaringan keilmuan Islam.
+	\item Pengembangan sistem dibatasi pada antarmuka berbasis web (\textit{web-based front-end}) yang mencakup visualisasi graf interaktif dan eksplorasi jaringan keilmuan Islam, dengan mahasiswa dan peneliti ilmu hadis sebagai pengguna sasaran utama dalam perancangan sistem.
 
 	\item Penelitian dilaksanakan pada tahun 2026 dengan menggunakan dataset publik \textit{Sanadset 650K} serta perangkat keras pribadi penulis sebagai sarana komputasi.
 \end{enumerate}
@@ -154,17 +154,17 @@ Batasan penelitian dalam skripsi ini adalah sebagai berikut:
 Penelitian ini diharapkan dapat memberikan manfaat bagi berbagai pihak sebagai berikut:
 
 \begin{enumerate}
-	\item \textbf{Bagi Peneliti}\\
-	Penelitian ini meningkatkan pemahaman dan keterampilan peneliti dalam menerapkan pendekatan komputasional pada data keagamaan, khususnya dalam pengolahan data sanad hadis, pembangunan \textit{Knowledge Graph}, serta analisis jaringan menggunakan metode \textit{Social Network Analysis} (SNA). Pengalaman ini menjadi bekal bagi pengembangan penelitian atau proyek ilmiah berikutnya di bidang yang serupa.
+	\item \textbf{Bagi Penulis}\\
+	Penelitian ini meningkatkan pemahaman dan keterampilan penulis dalam menerapkan pendekatan komputasional pada data keagamaan, khususnya dalam pengolahan data sanad hadis, pembangunan \textit{Knowledge Graph}, serta analisis jaringan menggunakan metode \textit{Social Network Analysis} (SNA). Pengalaman ini menjadi bekal bagi pengembangan penelitian atau proyek ilmiah penulis berikutnya di bidang yang serupa.
 
 	\item \textbf{Bagi Akademik}\\
 	Penelitian ini memberikan kontribusi pada pengembangan ilmu di bidang teknologi informasi yang diterapkan pada domain keislaman. Hasil penelitian dapat menjadi referensi metodologis bagi penelitian selanjutnya yang ingin mengkaji jaringan keilmuan Islam melalui pendekatan \textit{Knowledge Graph} dan analisis jaringan secara kuantitatif. Selain itu, data perawi paling sentral yang dihasilkan dapat dibanding\-kan dengan penilaian ulama dalam literatur ilmu hadis, sehingga membuka peluang untuk menemukan perspektif baru dalam kajian hadis.
 
-	\item \textbf{Bagi Mahasiswa dan Praktisi Ilmu Hadis}\\
-	Sistem visualisasi \textit{front-end} yang dihasilkan memudahkan mahasiswa maupun praktisi ilmu hadis dalam menelusuri posisi dan otoritas seorang perawi dalam jaringan sanad. Pengguna dapat melihat siapa saja guru dan murid yang berinteraksi dengan seorang perawi, serta memahami pola transmisi keilmuan antar generasi. Hal ini memperkaya pemahaman terhadap sanad sebagai jaringan sosial keilmuan, melampaui sekadar rantai teks.
+	\item \textbf{Bagi Mahasiswa dan Peneliti Ilmu Hadis}\\
+	Sebagai pengguna sasaran utama, mahasiswa dan peneliti ilmu hadis dimudahkan dalam menelusuri posisi dan otoritas seorang perawi dalam jaringan sanad melalui \textit{dashboard} yang dirancang sesuai kebutuhan mereka. Pengguna dapat melihat siapa saja guru dan murid yang berinteraksi dengan seorang perawi, membandingkan peran antarperawi melalui metrik sentralitas, serta memahami pola transmisi keilmuan antar generasi. Hal ini memperkaya pemahaman terhadap sanad sebagai jaringan sosial keilmuan, melampaui sekadar rantai teks, sekaligus dapat menjadi rujukan dalam penyusunan karya ilmiah.
 
 	\item \textbf{Bagi Masyarakat Umum}\\
-	Masyarakat umum yang tertarik mempelajari sejarah keilmuan Islam dapat memanfaatkan sistem ini untuk mengeksplorasi jaringan perawi hadis secara mandiri dan interaktif, tanpa memerlukan pemahaman teknis yang mendalam. Dengan tampilan visual yang intuitif, informasi mengenai jaringan keilmuan Islam menjadi lebih mudah diakses dan dipahami oleh berbagai kalangan.
+	Sebagai pengguna sekunder, masyarakat umum yang tertarik mempelajari sejarah keilmuan Islam dapat memanfaatkan sistem ini untuk mengeksplorasi jaringan perawi hadis secara mandiri dan interaktif, tanpa memerlukan pemahaman teknis yang mendalam. Dengan tampilan visual yang intuitif, informasi mengenai jaringan keilmuan Islam menjadi lebih mudah diakses dan dipahami oleh berbagai kalangan.
 \end{enumerate}
 
 
@@ -175,9 +175,9 @@ Penelitian ini diharapkan dapat memberikan manfaat bagi berbagai pihak sebagai b
 
 \noindent Bab II membahas tinjauan pustaka dan dasar teori yang menjadi landasan penelitian. Tinjauan pustaka berisi kajian terhadap penelitian-penelitian terdahulu yang relevan dengan topik \textit{Knowledge Graph}, analisis jaringan sanad hadis, dan visualisasi data keagamaan. Dasar teori mencakup konsep hadis dan sanad, \textit{Knowledge Graph}, \textit{Social Network Analysis} beserta metrik sentralitasnya, serta teknologi pengembangan \textit{front-end} yang digunakan.
 
-\noindent Bab III membahas metode penelitian yang digunakan, meliputi alat dan bahan penelitian, tahapan pengolahan data sanad dari dataset \textit{Sanadset 650K}, proses pembangunan \textit{Knowledge Graph} berbasis relasi guru-murid antarperawi, penerapan metode \textit{Social Network Analysis} untuk menganalisis jaringan perawi, serta perancangan dan pengembangan sistem visualisasi \textit{front-end} yang interaktif.
+\noindent Bab III membahas metode penelitian yang digunakan, meliputi alat dan bahan penelitian, tahapan pengolahan data sanad dari dataset \textit{Sanadset 650K}, proses pembangunan \textit{Knowledge Graph} berbasis relasi guru-murid antarperawi, penerapan metode \textit{Social Network Analysis} untuk menganalisis jaringan perawi, analisis kebutuhan pengguna sasaran, serta perancangan dan pengembangan sistem visualisasi \textit{front-end} yang interaktif.
 
-\noindent Bab IV membahas hasil dan pembahasan dari setiap tahapan penelitian. Bab ini menyajikan hasil pembangunan \textit{Knowledge Graph} jaringan perawi, hasil analisis SNA berupa nilai metrik sentralitas masing-masing perawi beserta interpretasinya, serta hasil pengembangan sistem visualisasi \textit{front-end} beserta pembahasannya.
+\noindent Bab IV membahas hasil dan pembahasan dari setiap tahapan penelitian, meliputi hasil pra-pemrosesan data sanad, hasil pembangunan \textit{Knowledge Graph} jaringan perawi, hasil analisis SNA berupa nilai metrik sentralitas masing-masing perawi beserta interpretasinya, hasil implementasi sistem \textit{dashboard}, hasil pengujian sistem, serta perbandingan hasil penelitian ini dengan penelitian terdahulu.
 
-\noindent Bab V membahas kesimpulan yang menjawab seluruh rumusan masalah penelitian berdasarkan hasil yang telah diperoleh, serta saran untuk pengembangan penelitian selanjutnya di bidang yang relevan.
+\noindent Bab V membahas kesimpulan yang menjawab rumusan masalah penelitian, serta saran bagi penelitian selanjutnya.
 

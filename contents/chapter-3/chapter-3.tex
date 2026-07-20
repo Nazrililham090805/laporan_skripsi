@@ -7,7 +7,7 @@
 Alat-alat yang digunakan dalam tugas akhir ini terdiri atas perangkat keras dan perangkat lunak sebagai berikut:
 
 \begin{enumerate}
-	\item Laptop Lenovo IdeaPad Slim 3 (Model 82K2) dengan sistem operasi Windows 11 Home Single Language 64-bit. Laptop ini dilengkapi prosesor AMD Ryzen 5 5600H with Radeon Graphics berarsitektur 64-bit dengan 6 core dan 12 thread, memori utama sebesar 8 GB RAM, serta grafis terintegrasi AMD Radeon Graphics.
+	\item Laptop dengan sistem operasi Windows 10 64-bit. Laptop ini dilengkapi prosesor Intel berarsitektur 64-bit dengan 14 core, serta memori utama sebesar 15,5 GB RAM.
 	Laptop ini digunakan untuk pengolahan data, pemrograman, dan pengembangan web.
 	\item Visual Studio Code versi 1.125.1 digunakan sebagai IDE untuk menulis, menjalankan, dan mengelola kode Python berbasis \textit{Jupyter Notebook (.ipynb)}, mencakup pra-pemrosesan data, pembangunan graf jaringan sanad, perhitungan sentralitas perawi, dan pengembangan \textit{front-end}.
 	\item Python versi 3.13.13 digunakan sebagai bahasa pemrograman utama dalam pembersihan dan pengolahan data.
@@ -278,6 +278,64 @@ Rancangan rinci kedua tabel, yang mencakup struktur kolom serta diagram relasi a
 
 
 \subsection{Perancangan dan Pembangunan Dashboard}
+\subsubsection{Analisis Kebutuhan Pengguna}
+\label{subsubsec:kebutuhan-pengguna}
+Sebelum sistem dirancang, terlebih dahulu ditetapkan kelompok pengguna yang menjadi sasaran \textit{dashboard}. Penetapan ini diperlukan karena informasi yang disajikan pada jaringan sanad bersifat teknis, sehingga bentuk penyajian dan tingkat kedalaman informasinya perlu disesuaikan dengan latar belakang keilmuan penggunanya. Tanpa sasaran pengguna yang jelas, fitur yang dibangun berisiko tidak menjawab kebutuhan siapa pun secara spesifik.
+
+Pengguna sasaran primer pada penelitian ini adalah mahasiswa dan peneliti ilmu hadis, yaitu kalangan akademik yang menekuni kajian hadis pada program studi seperti Ilmu Hadis, Ilmu Al-Qur'an dan Tafsir, atau Ushuluddin. Kelompok ini dipilih atas tiga pertimbangan. Pertama, mereka adalah pihak yang secara rutin menelusuri sanad dan menilai kedudukan perawi, sehingga hasil analisis jaringan pada penelitian ini secara langsung bersinggungan dengan aktivitas keilmuan mereka. Kedua, konsep-konsep yang diukur melalui metrik sentralitas memiliki padanan dalam khazanah ilmu hadis yang telah mereka kenal, seperti \textit{common link} yang bersesuaian dengan peran perawi sebagai penghubung antarjalur periwayatan \cite{mufid2023track}, sehingga hasil analisis dapat dimaknai secara tepat. Ketiga, kelompok ini umumnya tidak memiliki latar belakang teknis untuk mengoperasikan perangkat lunak analisis jaringan berbasis \textit{desktop} seperti Gephi maupun Cytoscape yang digunakan pada penelitian terdahulu \cite{FAROOQI2024110439}, sehingga justru merekalah yang paling terdampak oleh keterbatasan aksesibilitas tersebut. Adapun masyarakat umum yang tertarik pada sejarah keilmuan Islam diposisikan sebagai pengguna sekunder, yaitu dapat memanfaatkan sistem namun tidak dijadikan acuan dalam perancangan maupun pengujian. Karakteristik pengguna sasaran primer diuraikan pada Tabel~\ref{tab:karakteristik-pengguna}.
+
+\begin{table}[H]
+\centering
+\caption{Karakteristik pengguna sasaran primer}
+\label{tab:karakteristik-pengguna}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|p{3.5cm}|p{10.5cm}|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Aspek}} & \multicolumn{1}{c|}{\textbf{Deskripsi}} \\
+\hline
+Kelompok pengguna & Mahasiswa dan peneliti ilmu hadis pada jenjang sarjana maupun pascasarjana \\
+\hline
+Latar belakang keilmuan & Menguasai dasar ulumul hadis, konsep sanad dan matan, serta penilaian perawi melalui \textit{jarh wa ta'dil} \\
+\hline
+Kemampuan teknis & Terbiasa menggunakan peramban web dan perangkat lunak perkantoran, namun tidak terbiasa dengan perangkat lunak analisis jaringan maupun pemrograman \\
+\hline
+Konteks pemakaian & Penelusuran kedudukan perawi ketika mengkaji suatu sanad, serta penyusunan karya ilmiah yang membahas jaringan periwayatan \\
+\hline
+Perangkat & Komputer atau laptop dengan peramban web, tanpa kepastian memiliki izin untuk memasang perangkat lunak tambahan \\
+\hline
+\end{tabular}
+\end{table}
+
+Berdasarkan karakteristik tersebut, dirumuskan enam kebutuhan pengguna yang harus dipenuhi oleh \textit{dashboard}. Kebutuhan ini disusun dalam bentuk pertanyaan yang ingin dijawab pengguna ketika membuka sistem, yaitu (K1) mengetahui posisi dan tingkat pengaruh seorang perawi dalam jaringan secara terukur; (K2) menelusuri siapa saja guru dan murid yang terhubung dengan seorang perawi; (K3) membandingkan peran antarperawi yang berbeda-beda, misalnya perawi yang dominan sebagai sumber riwayat dibandingkan perawi yang berperan sebagai penghubung; (K4) memperoleh gambaran menyeluruh mengenai perawi-perawi yang paling menonjol dalam jaringan tanpa harus menelusuri graf satu per satu; (K5) memeriksa data relasi dan nilai sentralitas secara tekstual dan rinci sebagai rujukan dalam penulisan karya ilmiah; serta (K6) mengakses seluruh informasi tersebut tanpa perlu memasang perangkat lunak khusus. Pemetaan keenam kebutuhan tersebut terhadap fitur dan halaman \textit{dashboard} disajikan pada Tabel~\ref{tab:pemetaan-kebutuhan}.
+
+\begin{table}[H]
+\centering
+\caption{Pemetaan kebutuhan pengguna terhadap fitur \textit{dashboard}}
+\label{tab:pemetaan-kebutuhan}
+\renewcommand{\arraystretch}{1.3}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|p{4.6cm}|p{6.2cm}|p{4cm}|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Kode}} & \multicolumn{1}{c|}{\textbf{Kebutuhan Pengguna}} & \multicolumn{1}{c|}{\textbf{Fitur yang Menjawab}} & \multicolumn{1}{c|}{\textbf{Halaman}} \\
+\hline
+K1 & Mengetahui posisi dan pengaruh seorang perawi secara terukur & Panel detail perawi yang menampilkan kelima nilai sentralitas dalam bentuk \textit{bar} pembanding & Graf Relasi Perawi \\
+\hline
+K2 & Menelusuri guru dan murid seorang perawi & Daftar guru dan murid pada panel detail, serta visualisasi \textit{node} dan \textit{edge} yang bertetangga pada graf & Graf Relasi Perawi \\
+\hline
+K3 & Membandingkan peran antarperawi & Filter lima metrik sentralitas yang mengubah ukuran dan warna \textit{node} sesuai metrik terpilih & Graf Relasi Perawi \\
+\hline
+K4 & Memperoleh gambaran perawi paling menonjol & Lima diagram batang peringkat teratas per metrik serta kartu Total Perawi dan Total Relasi & Statistik Perawi \\
+\hline
+K5 & Memeriksa data relasi dan sentralitas secara rinci & Penyajian tabel lengkap dengan fitur pencarian, paginasi, dan pengurutan & Tabel Relasi dan Tabel Sentralitas \\
+\hline
+K6 & Mengakses tanpa instalasi perangkat lunak & Aplikasi berbentuk \textit{Single Page Application} berbasis web yang diterapkan secara daring & Seluruh halaman \\
+\hline
+\end{tabular}%
+}
+\end{table}
+
+Tabel~\ref{tab:pemetaan-kebutuhan} menjadi dasar bagi perancangan arsitektur, basis data, dan antarmuka yang diuraikan pada subbab-subbab berikutnya, sekaligus menjadi acuan dalam menyusun skenario pengujian sistem. Dengan pemetaan ini, setiap halaman \textit{dashboard} yang dibangun dapat ditelusuri kembali kepada kebutuhan pengguna yang melatarbelakanginya, sehingga fitur yang disediakan tidak ditentukan semata-mata oleh kemudahan implementasi.
+
 \subsubsection{Arsitektur Sistem}
 Sistem yang dibangun pada penelitian ini menggunakan arsitektur tiga lapis (\textit{three-tier architecture}) yang terdiri atas lapisan pemrosesan data (\textit{data processing layer}), lapisan penyimpanan data (\textit{data storage layer}), dan lapisan presentasi (\textit{presentation layer}). Pemisahan menjadi tiga lapisan ini bertujuan agar proses analisis yang berat secara komputasi dipisahkan dari proses penyajian data, sehingga \textit{dashboard} dapat berjalan ringan dan responsif. Gambaran umum arsitektur sistem ditunjukkan pada Gambar~\ref{fig:arsitektur-sistem}.
 
