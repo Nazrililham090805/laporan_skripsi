@@ -1,6 +1,7 @@
 \chapter{Hasil dan Pembahasan}
 
 \section{Hasil Pra-Pemrosesan Data}
+\label{sec:hasil-pra-pemrosesan}
 Bagian ini memaparkan hasil dari setiap tahap pembersihan dan normalisasi data yang telah dilakukan, beserta dampaknya terhadap jumlah dan kualitas data yang digunakan dalam pembangunan graf.
 
 \subsection{Reduksi Jumlah Data}
@@ -85,7 +86,140 @@ Graf jaringan sanad yang terbentuk terdiri dari 177.047 simpul yang merepresenta
 
 Jumlah simpul tersebut sedikit lebih kecil dibandingkan 177.289 nama perawi unik yang teridentifikasi pada tahap normalisasi nama perawi. Selisih sebanyak 242 perawi muncul karena perawi-perawi tersebut tidak membentuk relasi apa pun dalam graf, sehingga tidak tercatat sebagai simpul. Kondisi ini terjadi antara lain pada rantai sanad yang hanya memuat satu nama perawi sehingga tidak dapat membentuk pasangan guru--murid, serta pada perawi yang gugur saat pembersihan tahap penyusunan sisi, seperti penghapusan \textit{self-loop} (relasi dengan guru dan murid yang sama) dan penghapusan nama kosong. Dengan demikian, 177.289 menunjukkan jumlah perawi yang teridentifikasi, sedangkan 177.047 menunjukkan jumlah perawi yang benar-benar terlibat dalam minimal satu relasi periwayatan.
 
-\subsection{Hubungan Guru - Murid}
+Selain ukuran dasar berupa jumlah simpul dan sisi, karakteristik struktural graf turut diukur untuk memberikan gambaran topologi jaringan secara lebih menyeluruh, sebagaimana ditunjukkan pada Tabel~\ref{tab:struktur-graf}.
+
+\begin{table}[H]
+\centering
+\caption{Karakteristik struktural graf jaringan sanad}
+\label{tab:struktur-graf}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|p{7cm}|c|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Parameter}} & \multicolumn{1}{c|}{\textbf{Nilai}} \\
+\hline
+Kepadatan (\textit{density}) & $2,478 \times 10^{-5}$ \\
+\hline
+Rata-rata derajat simpul & 8,775 \\
+\hline
+Jumlah komponen terhubung lemah (\textit{weakly connected component}) & 51 \\
+\hline
+Ukuran komponen terhubung lemah terbesar & 176.891 (99,91\%) \\
+\hline
+Jumlah komponen terhubung kuat (\textit{strongly connected component}) & 47.300 \\
+\hline
+Ukuran komponen terhubung kuat terbesar & 129.721 \\
+\hline
+Estimasi diameter (pada komponen terhubung lemah terbesar) & 28 \\
+\hline
+\end{tabular}
+\end{table}
+
+Nilai kepadatan graf yang sangat kecil ($2,478 \times 10^{-5}$) menunjukkan bahwa graf bersifat \textit{sparse}, yaitu setiap perawi rata-rata hanya terhubung langsung dengan 8,775 perawi lain dari 177.046 kemungkinan relasi, karakteristik yang lazim ditemukan pada jaringan sosial berskala besar di dunia nyata. Sebanyak 99,91\% simpul tergabung dalam satu komponen terhubung lemah yang sama (176.891 dari 177.047 simpul), menunjukkan bahwa jaringan sanad pada dasarnya membentuk satu kesatuan struktur besar yang saling terhubung, bukan terpecah menjadi pulau-pulau periwayatan yang terisolasi. Sebaliknya, jumlah komponen terhubung kuat jauh lebih banyak (47.300 komponen, dengan komponen terbesar hanya mencakup 129.721 simpul), yang sejalan dengan sifat searah relasi periwayatan: seorang perawi hanya dapat ditelusuri kembali ke perawi lain apabila terdapat jalur guru--murid yang berurutan pada arah yang sama, sehingga jauh lebih sedikit pasangan perawi yang saling terjangkau secara dua arah dibandingkan jika arah relasi diabaikan. Adapun estimasi diameter sebesar 28 pada komponen terhubung lemah terbesar mengindikasikan bahwa jalur terpanjang antar-dua perawi mana pun dalam jaringan utama relatif pendek dibandingkan skala jaringan yang mencapai ratusan ribu simpul, konsisten dengan fenomena \textit{small-world} yang umum ditemukan pada jaringan sosial berskala besar.
+
+\subsection{Performa Komputasi Pembangunan dan Analisis Graf}
+Pengujian performa komputasi dilakukan sesuai metode pada Subbab~\ref{subsubsec:performa-komputasi-kg} untuk mengukur waktu eksekusi dan penggunaan memori tiap tahap pembangunan graf dan perhitungan metrik sentralitas pada graf penuh (177.047 simpul, 776.798 sisi). Hasil pengujian ditampilkan pada Tabel~\ref{tab:performa-komputasi-kg}.
+
+\begin{table}[H]
+\centering
+\caption{Hasil pengujian performa komputasi pembangunan dan analisis \textit{Knowledge Graph}}
+\label{tab:performa-komputasi-kg}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|p{6.5cm}|c|c|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Tahap}} & \multicolumn{1}{c|}{\textbf{Waktu}} & \multicolumn{1}{c|}{\textbf{$\Delta$ Memori (RSS)}} \\
+\hline
+Pemuatan berkas CSV & 2,07 detik & +172,6 MB \\
+\hline
+Pembangunan graf (\texttt{from\_pandas\_}\allowbreak\texttt{edgelist}) & 4,09 detik & +300,9 MB \\
+\hline
+Penghapusan \textit{self-loop} & 0,06 detik & $\approx$0 MB \\
+\hline
+\textit{Degree} berbobot & 0,86 detik & +1,8 MB \\
+\hline
+\textit{Degree Centrality} & 0,19 detik & +1,4 MB \\
+\hline
+\textit{In-Degree Centrality} & 0,16 detik & $\approx$0 MB \\
+\hline
+\textit{Out-Degree Centrality} & 0,15 detik & $\approx$0 MB \\
+\hline
+\textit{Eigenvector Centrality} & 5,10 detik & +7,3 MB \\
+\hline
+\textit{Closeness Centrality} (\textit{sampled}, k=100) & 562,83 detik ($\approx$9,4 menit) & -- \\
+\hline
+\textit{Betweenness Centrality} (\textit{sampled}, k=100) & 228,57 detik ($\approx$3,8 menit) & -- \\
+\hline
+\textbf{Puncak penggunaan memori proses (\textit{peak RSS})} & \multicolumn{2}{c|}{\textbf{701,4 MB}} \\
+\hline
+\end{tabular}
+\end{table}
+
+Tabel~\ref{tab:performa-komputasi-kg} menunjukkan bahwa tahap pemuatan data, pembangunan graf, dan keempat metrik sentralitas berbasis \textit{degree} maupun \textit{eigenvector} secara keseluruhan hanya membutuhkan waktu sekitar 13 detik, dengan penggunaan memori yang sangat rendah. Sebaliknya, \textit{closeness} dan \textit{betweenness centrality} menjadi tahap dengan biaya komputasi jauh lebih tinggi, masing-masing membutuhkan sekitar 9,4 menit dan 3,8 menit meskipun sudah menggunakan pendekatan \textit{sampling} (k=100), bukan perhitungan \textit{exact} pada seluruh 177.047 simpul. Berdasarkan estimasi ekstrapolasi dari waktu \textit{sampling} tersebut, perhitungan \textit{exact} \textit{betweenness centrality} pada graf penuh diperkirakan membutuhkan waktu lebih dari 50 jam, sehingga secara kuantitatif mengonfirmasi alasan metodologis pada Subbab~\ref{subsubsec:metrik-sentralitas} yang membatasi kedua metrik tersebut pada subgraf representatif berisi 14.695 simpul (Tabel~\ref{tab:cakupan-metrik}) alih-alih graf penuh. Adapun penggunaan memori secara keseluruhan tergolong ringan, dengan puncak penggunaan memori proses hanya mencapai 701,4 MB pada lingkungan pengujian dengan RAM 6,29 GB (Tabel~\ref{tab:lingkungan-benchmark} Bab III), menunjukkan bahwa pembangunan dan analisis \textit{Knowledge Graph} berskala 177.047 simpul dapat dijalankan pada perangkat dengan spesifikasi memori yang relatif terbatas, sekalipun waktu eksekusi \textit{closeness} dan \textit{betweenness centrality} tetap menjadi kendala utama dari sisi durasi.
+
+\subsection{Evaluasi Risiko Ambiguitas Resolusi Kata Kekerabatan}
+\label{subsec:evaluasi-kekerabatan-hasil}
+Evaluasi dilakukan sesuai metode pada Subbab~\ref{subsubsec:evaluasi-kekerabatan} terhadap seluruh 102.100 kejadian resolusi kata kekerabatan yang terjadi pada 487.451 rantai sanad, dengan replikasi \textit{pipeline} yang tervalidasi mencapai tingkat kecocokan 99,59\% (14.173 dari 14.231 \textit{node} hasil resolusi) terhadap \textit{node} pada graf yang sesungguhnya dibangun.
+
+\subsubsection{Tingkat Absorpsi (\textit{Absorption Rate})}
+Rincian kejadian resolusi berdasarkan jenis kata kekerabatan ditampilkan pada Tabel~\ref{tab:absorpsi-kekerabatan}.
+
+\begin{table}[H]
+\centering
+\caption{Rincian kejadian resolusi kata kekerabatan}
+\label{tab:absorpsi-kekerabatan}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Jenis Kata Kekerabatan} & \textbf{Jumlah Kejadian} & \textbf{Persentase} \\
+\hline
+\textit{Abihi} (ayahnya) & 93.066 & 91,1\% \\
+\hline
+\textit{Jaddihi} (kakeknya) & 7.287 & 7,1\% \\
+\hline
+\textit{Ummihi} (ibunya) & 1.004 & 1,0\% \\
+\hline
+\textit{Abiha} (ayahnya) & 425 & 0,4\% \\
+\hline
+\textit{Jaddatihi} (neneknya) & 234 & 0,2\% \\
+\hline
+\textit{Abaihi} (ayahnya) & 84 & 0,1\% \\
+\hline
+\textbf{Total} & \textbf{102.100} & \textbf{100\%} \\
+\hline
+\end{tabular}
+\end{table}
+
+Seluruh 102.100 kejadian tersebut menghasilkan 14.231 \textit{node} unik secara string, atau rata-rata 7,17 kejadian per \textit{node}, artinya secara rata-rata setiap nama hasil resolusi terbentuk berulang kali dari rantai sanad yang berbeda-beda. Angka ini sendiri belum tentu menandakan tabrakan identitas, sebab frekuensi tinggi dapat pula disebabkan oleh isnad kanonik yang dikutip identik oleh banyak kitab. Setelah diklasifikasikan berdasarkan spesifisitas nama acuannya, hanya 623 dari 14.231 \textit{node} (4,4\%) yang beranchor \textit{bare} (tanpa nasab pembeda), namun kelompok kecil ini mewakili 10.059 dari 102.100 kejadian (9,85\%), menunjukkan bahwa risiko tabrakan identitas terkonsentrasi pada sebagian kecil \textit{node} yang justru menyumbang porsi kejadian yang tidak sebanding. \textit{Node} kandidat tabrakan dengan jumlah kejadian tertinggi antara lain \textit{Abu Salim}, \textit{Abu Mu'tamir}, \textit{Abu Rajul}, \textit{Abu Sufyan}, \textit{Umm Al-Hasan}, \textit{Abu Ibrahim}, \textit{Abu Jaddi}, dan \textit{Abu Ahmad}.
+
+\subsubsection{Perbandingan Derajat Graf}
+Perbandingan derajat total (\textit{in-degree} ditambah \textit{out-degree}) antara \textit{node direct}, \textit{resolved} beranchor \textit{qualified}, dan \textit{resolved} beranchor \textit{bare} ditampilkan pada Tabel~\ref{tab:derajat-kekerabatan}.
+
+\begin{table}[H]
+\centering
+\caption{Perbandingan derajat graf antarkelompok \textit{node}}
+\label{tab:derajat-kekerabatan}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Kelompok} & \textbf{Jumlah \textit{Node}} & \textbf{Rata-rata Derajat} & \textbf{Median Derajat} \\
+\hline
+\textit{Direct} & 162.874 & 8,81 & 2 \\
+\hline
+\textit{Resolved} (anchor \textit{qualified}) & 13.552 & 5,66 & 2 \\
+\hline
+\textit{Resolved} (anchor \textit{bare}) & 621 & 66,71 & 4 \\
+\hline
+\end{tabular}
+\end{table}
+
+Perbandingan naif antara seluruh \textit{node resolved} terhadap \textit{node direct} tanpa pembedaan spesifisitas \textit{anchor} tidak menunjukkan perbedaan yang signifikan (rata-rata 8,33 berbanding 8,81; median 2 berbanding 2; uji \textit{Mann-Whitney U} $p=0,275$), sehingga secara sekilas dugaan awal bahwa resolusi kekerabatan menggembungkan derajat graf tampak tidak terbukti. Namun, setelah kelompok \textit{resolved} dipecah berdasarkan spesifisitas \textit{anchor} sebagaimana pada Tabel~\ref{tab:derajat-kekerabatan}, pola yang berbeda terungkap: \textit{node} beranchor \textit{bare} memiliki rata-rata derajat 66,71, jauh melampaui \textit{node direct} maupun \textit{resolved} beranchor \textit{qualified}, dengan perbedaan yang sangat signifikan secara statistik (masing-masing $p\approx4\times10^{-45}$ dan $p\approx7\times10^{-47}$). Sebaliknya, \textit{node resolved} beranchor \textit{qualified} justru sedikit lebih rendah derajatnya dibandingkan \textit{node direct} ($p=0,99$, arah berlawanan dari dugaan awal). Pola ini menjadi bukti konvergen bagi temuan pada Subbab sebelumnya, bahwa risiko penggabungan identitas benar-benar termanifestasi secara terukur pada graf, dan terkonsentrasi hampir seluruhnya pada kelompok \textit{node} beranchor \textit{bare}.
+
+\subsubsection{Pemeriksaan Sampel Manual}
+Pemeriksaan manual dilakukan pada beberapa \textit{node} dengan jumlah kejadian dan derajat tertinggi untuk menilai konteksnya secara langsung. \textit{Node} \textit{Abu Salim} (1.492 kejadian, derajat 625) didominasi oleh rantai ``\textit{Salim 'an abihi}'' melalui Az-Zuhri yang kemungkinan besar merujuk pada Salim bin Abdullah bin Umar, konsisten mengarah ke Umar bin Khattab pada elemen berikutnya; meski demikian, ditemukan pula ekor minoritas yang mengarah ke Hafshah, Zaid bin Tsabit, dan kemunculan nama \textit{Salim} lain, mengindikasikan kontaminasi parsial dari individu berbeda. \textit{Node} \textit{Abu Mu'tamir} (234 kejadian, derajat 126) menunjukkan sebaran elemen berikutnya yang jauh lebih heterogen (Qatadah, sebutan umum ``seorang laki-laki'', Hanasy, Abu Utsman, Anas, Al-Hadhrami, dan lainnya) tersebar pada sekitar 80 kitab berbeda, sehingga sinyal tabrakan identitasnya lebih kuat dibandingkan \textit{Abu Salim}. Sebagai pembanding, \textit{node} \textit{Abu Hisyam bin Urwah} (6.562 kejadian) yang beranchor \textit{qualified} (disertai nasab ``bin Urwah'') tetap konsisten merujuk satu individu meskipun frekuensi kemunculannya termasuk yang tertinggi, menegaskan bahwa frekuensi semata bukan indikator tabrakan identitas yang andal.
+
+\subsubsection{Sintesis Temuan}
+Ketiga hasil evaluasi di atas menunjukkan bahwa risiko ambiguitas resolusi kata kekerabatan bersifat terukur dan terkonsentrasi, bukan menyebar merata pada seluruh hasil resolusi. Dari 102.100 kejadian resolusi, hanya 9,85\% (10.059 kejadian, berasal dari 623 \textit{node} beranchor \textit{bare}) yang berisiko tinggi menggabungkan lebih dari satu individu berbeda ke dalam satu \textit{node}; sisanya (90,15\%) beranchor \textit{qualified} dan secara statistik berperilaku identik dengan \textit{node} nama langsung ($p=0,99$). Risiko tersebut turut termanifestasi secara signifikan pada derajat graf ($p<10^{-44}$), sehingga proporsi \textit{node} beranchor \textit{bare} (4,4\% dari seluruh \textit{node} hasil resolusi) dapat dilaporkan sebagai batas atas (\textit{upper-bound}) perkiraan risiko tabrakan identitas akibat resolusi kata kekerabatan pada penelitian ini, alih-alih klaim tanpa bukti bahwa seluruh hasil resolusi berpotensi ambigu.
+
+\subsection{Hubungan Guru--Murid}
 Setiap relasi dalam graf direpresentasikan sebagai tripel (Murid, meriwayatkan-dari, Guru) yang dilengkapi atribut bobot, yaitu \textit{Weight} (frekuensi relasi) dan \textit{Inverse Weight} (kebalikan bobot untuk perhitungan jarak). Relasi guru--murid dengan bobot tertinggi ditampilkan pada Tabel~\ref{tab:relasi-terkuat}.
 
 \begin{table}[H]
@@ -155,7 +289,7 @@ Metrik \textit{in-degree centrality}, \textit{out-degree centrality}, dan \texti
 Penggunaan subset untuk \textit{closeness} dan \textit{betweenness} tetap representatif karena 50.000 relasi dengan bobot tertinggi mewakili jalur-jalur periwayatan utama yang paling sering muncul dalam korpus, sehingga perawi-perawi sentral tetap dapat teridentifikasi dengan baik.
 
 \begin{enumerate}
-	\item \textbf{In Degree Centrality}
+	\item \textbf{\textit{In-Degree Centrality}}
 
 	\textit{In-degree centrality} mengukur jumlah murid yang meriwayatkan dari seorang perawi, sehingga menunjukkan perannya sebagai sumber riwayat (guru). Sepuluh perawi dengan nilai tertinggi ditampilkan pada Gambar~\ref{fig:top-indegree}.
 
@@ -168,7 +302,7 @@ Penggunaan subset untuk \textit{closeness} dan \textit{betweenness} tetap repres
 
 	Berdasarkan Gambar~\ref{fig:top-indegree}, Abu Hurairah menempati posisi tertinggi dengan nilai \textit{in-degree centrality} sebesar 0,0199, diikuti oleh Ibnu Abbas (0,0150) dan Aisyah (0,0132). Nilai \textit{in-degree} yang tinggi menunjukkan bahwa perawi tersebut memiliki jumlah murid terbanyak, yaitu paling banyak menjadi sumber periwayatan bagi perawi lain dalam jaringan. Nilai sentralitas menurun secara bertahap dari peringkat pertama hingga peringkat kesepuluh yang bernilai 0,0089, dengan selisih yang cukup mencolok antara Abu Hurairah dan perawi-perawi di bawahnya. Pola ini menunjukkan bahwa peran sebagai sumber riwayat dominan terkonsentrasi pada sejumlah kecil perawi yang berada di puncak jaringan.
 
-	\item \textbf{Out Degree Centrality}
+	\item \textbf{\textit{Out-Degree Centrality}}
 
 	\textit{Out-degree centrality} mengukur jumlah guru yang menjadi sumber riwayat bagi seorang perawi, sehingga menunjukkan perannya sebagai penerima riwayat (murid) yang aktif. Sepuluh perawi dengan nilai tertinggi ditampilkan pada Gambar~\ref{fig:top-outdegree}.
 
@@ -181,7 +315,7 @@ Penggunaan subset untuk \textit{closeness} dan \textit{betweenness} tetap repres
 
 	Berdasarkan Gambar~\ref{fig:top-outdegree}, Sufyan menempati posisi tertinggi dengan nilai \textit{out-degree centrality} sebesar 0,0135, diikuti oleh Abu Abdullah Al-Hafizh (0,0127) dan Syu'bah (0,0124). Nilai \textit{out-degree} yang tinggi menunjukkan bahwa perawi tersebut meriwayatkan dari banyak guru yang berbeda, sehingga berperan sebagai penerima riwayat yang aktif dalam jaringan. Nilai sentralitas menurun dari peringkat pertama hingga peringkat kesepuluh yang bernilai 0,0073. Susunan perawi pada metrik ini berbeda dari \textit{in-degree centrality}, yang menandakan bahwa perawi yang dominan sebagai sumber riwayat tidak selalu sama dengan perawi yang dominan sebagai penerima riwayat.
 
-	\item \textbf{Eigenvector Centrality}
+	\item \textbf{\textit{Eigenvector Centrality}}
 
 	\textit{Eigenvector centrality} mengukur pengaruh seorang perawi berdasarkan kualitas koneksinya, yaitu keterhubungan dengan perawi-perawi lain yang juga berpengaruh. Sepuluh perawi dengan nilai tertinggi ditampilkan pada Gambar~\ref{fig:top-eigenvector}.
 
@@ -194,7 +328,7 @@ Penggunaan subset untuk \textit{closeness} dan \textit{betweenness} tetap repres
 
 	Berdasarkan Gambar~\ref{fig:top-eigenvector}, Abu Hurairah menempati posisi tertinggi dengan nilai \textit{eigenvector centrality} sebesar 0,5195, diikuti oleh Aisyah (0,4836) dan Ibnu Umar (0,3821). Nilai yang tinggi menunjukkan bahwa perawi tersebut terhubung dengan perawi-perawi lain yang juga memiliki pengaruh tinggi dalam jaringan. Terlihat adanya penurunan nilai yang tajam setelah empat peringkat teratas, yaitu dari 0,2659 (Ibnu Abbas) menjadi 0,1723 (Anas) dan seterusnya hingga 0,1149 pada peringkat kesepuluh. Pola ini menunjukkan bahwa pengaruh dalam jaringan terkonsentrasi pada sejumlah kecil perawi yang saling terhubung erat di pusat jaringan.
 
-	\item \textbf{Closeness Centrality}
+	\item \textbf{\textit{Closeness Centrality}}
 
 	\textit{Closeness centrality} mengukur kedekatan seorang perawi terhadap seluruh perawi lain berdasarkan rata-rata jarak terpendek. Metrik ini dihitung pada subgraf berisi 14.695 simpul dengan bobot relasi tertinggi. Sepuluh perawi dengan nilai tertinggi ditampilkan pada Gambar~\ref{fig:top-closeness}.
 
@@ -207,7 +341,7 @@ Penggunaan subset untuk \textit{closeness} dan \textit{betweenness} tetap repres
 
 	Berdasarkan Gambar~\ref{fig:top-closeness}, Abu Hurairah menempati posisi tertinggi dengan nilai \textit{closeness centrality} sebesar 1,0000, diikuti oleh Aisyah (0,9965) dan Ibnu Abbas (0,9864). Nilai kesepuluh perawi teratas sangat tinggi dan saling berdekatan, yaitu berada pada rentang 0,9630 hingga 1,0000. Kedekatan nilai ini menunjukkan bahwa pada subgraf relasi terkuat, perawi-perawi teratas dapat menjangkau perawi lain melalui jalur periwayatan yang sangat pendek, sehingga menempati posisi yang sentral dalam penyebaran riwayat.
 
-	\item \textbf{Betweenness Centrality}
+	\item \textbf{\textit{Betweenness Centrality}}
 
 	\textit{Betweenness centrality} mengukur seberapa sering seorang perawi berada pada jalur terpendek antara pasangan perawi lain, sehingga menunjukkan perannya sebagai penghubung dalam jaringan. Metrik ini juga dihitung pada subgraf berisi 14.695 simpul dengan bobot relasi tertinggi. Sepuluh perawi dengan nilai tertinggi ditampilkan pada Gambar~\ref{fig:top-betweenness}.
 
@@ -220,6 +354,15 @@ Penggunaan subset untuk \textit{closeness} dan \textit{betweenness} tetap repres
 
 	Berdasarkan Gambar~\ref{fig:top-betweenness}, Abu Hurairah menempati posisi tertinggi dengan nilai \textit{betweenness centrality} sebesar 0,0500, diikuti oleh Syu'bah (0,0445) dan Sufyan (0,0384). Nilai yang tinggi menunjukkan bahwa perawi tersebut sering menjadi titik perlintasan pada jalur terpendek antar-perawi, sehingga berperan sebagai penghubung dalam jaringan. Nilai sentralitas menurun secara bertahap hingga 0,0200 pada peringkat kesepuluh. Peringkat teratas pada metrik ini memuat perawi yang juga muncul pada metrik lain, seperti Abu Hurairah, Syu'bah, dan Sufyan, yang menandakan peran ganda mereka baik sebagai simpul berpengaruh maupun sebagai penghubung antar-bagian jaringan.
 \end{enumerate}
+
+\subsection{Interpretasi Historis atas Dominasi Sentralitas Abu Hurairah dan Sufyan}
+\label{subsec:pembahasan-dominasi-struktural}
+
+Kelima metrik sentralitas menunjukkan pola dominasi yang konsisten: Abu Hurairah menempati peringkat pertama pada empat dari lima metrik (\textit{in-degree}, \textit{eigenvector}, \textit{closeness}, \textit{betweenness}), sedangkan Sufyan hanya teratas pada \textit{out-degree centrality}, meski turut hadir pada peringkat ketiga \textit{betweenness} tanpa menjadi teratas di sana. Dominasi Abu Hurairah selaras dengan catatan historis mengenai volume periwayatannya: Nawawi \cite{Nawawi2024} mencatat ia meriwayatkan 5.374 hadis, tertinggi di antara seluruh sahabat Nabi, jauh melampaui Abdullah bin Umar (2.630) maupun Aisyah (2.210). Volume ini dijelaskan oleh dua faktor historis, yaitu curahan waktu penuh menyertai Nabi tanpa disibukkan urusan duniawi sebagai bagian dari \textit{Ashabu al-Suffah}, dan kapasitas hafalan yang oleh riwayat klasik dikaitkan dengan doa khusus Nabi \cite{Nawawi2024}, sehingga secara struktural terjelma sebagai simpul dengan jumlah murid penerima riwayat terbanyak sekaligus keterhubungan luas dengan perawi berpengaruh lain.
+
+Sebaliknya, dominasi Sufyan yang terbatas pada \textit{out-degree centrality}, yaitu metrik yang mengukur jumlah guru berbeda sebagai sumber riwayat, konsisten dengan reputasi historisnya sebagai penerima riwayat (murid) yang unggul, bukan pusat pengajaran. Merujuk penilaian ulama klasik yang dihimpun Rokhibi \textit{et al.} \cite{Rokhibi2025}, Yahya bin Ma'in menyatakan tidak ada yang lebih mengetahui hadis Al-A'masy selain Sufyan al-Thawri, sementara Ibnu Abi Khaitsamah mengutip penilaian ayahnya bahwa Sufyan al-Thawri adalah murid Al-A'masy yang paling \textit{ahfaz} dan paling mengetahui hadis-hadisnya. Ketokohan Sufyan dalam tradisi periwayatan dengan demikian dibangun dari sisi menerima riwayat dengan presisi tinggi, bukan menjadi rujukan bagi banyak murid, sehingga secara struktural ia unggul pada \textit{out-degree} namun tidak pada metrik lain. Identifikasi ini merujuk pada Sufyan al-Thawri sebagai figur ``Sufyan'' paling menonjol dalam periwayatan hadis klasik, mengingat dataset tidak menyertakan nasab lengkap untuk memastikan identitas tunggalnya.
+
+Secara teologis-historis, kedua pola ini menegaskan prinsip dalam ilmu hadis bahwa peran perawi tidak dapat direduksi menjadi satu angka tunggal, melainkan dipahami melalui konteksnya dalam rantai periwayatan, sebagaimana tradisional dikaji melalui kitab-kitab \textit{rijal} dan \textit{tabaqat}. Pendekatan SNA berbasis graf berarah pada penelitian ini, dengan membedakan arah relasi guru--murid melalui \textit{in-degree} dan \textit{out-degree}, mereproduksi secara kuantitatif dan berskala penuh pada 177.047 perawi pembedaan peran yang secara historis telah dipetakan secara kualitatif oleh ulama hadis klasik.
 
 \section{Hasil Penyimpanan Data ke Supabase}
 Hasil analisis yang telah diekspor menjadi berkas CSV selanjutnya diunggah ke basis data Supabase. Data disusun ke dalam dua tabel relasional, yaitu tabel Sentralitas yang memuat data perawi beserta nilai metriknya dan tabel Edge yang memuat data relasi periwayatan. Hasil penyimpanan kedua tabel pada \textit{Table Editor} Supabase ditunjukkan pada Gambar~\ref{fig:supabase-sentralitas} dan Gambar~\ref{fig:supabase-edge}.
@@ -256,7 +399,7 @@ Sebelum simulasi dijalankan, setiap node diberi posisi awal berdasarkan peringka
 
 \item \textbf{Algoritma Simulasi Gaya}
 
-Tata letak akhir node ditentukan melalui simulasi fisika yang dijalankan secara berulang pada setiap \textit{frame} animasi (menggunakan \texttt{requestAnimationFrame}). Pada setiap iterasi, posisi node diperbarui berdasarkan resultan dari tiga jenis gaya. Pertama, \textbf{gaya tolak} (\textit{repulsion}) yang bekerja antar pasangan node agar tidak saling menumpuk; gaya ini hanya berlaku ketika jarak antar node cukup dekat, dengan besar gaya berbanding terbalik terhadap kuadrat jarak, mengikuti analogi gaya Coulomb. Kedua, \textbf{gaya pegas} (\textit{spring}) yang bekerja pada setiap edge untuk menjaga jarak ideal antar perawi yang berelasi, mengikuti analogi hukum Hooke; gaya ini menarik node yang terlalu jauh dan mendorong node yang terlalu dekat menuju jarak ideal. Ketiga, \textbf{gaya radial} (\textit{radial constraint}) yang merupakan komponen utama pembeda visualisasi ini, yaitu menarik setiap node menuju jari-jari cincin targetnya sesuai peringkat sentralitas, sehingga perawi paling berpengaruh selalu cenderung berada di pusat jaringan.
+Tata letak akhir node ditentukan melalui simulasi fisika yang dijalankan secara berulang pada setiap \textit{frame} animasi (menggunakan \texttt{requestAnimation}\allowbreak\texttt{Frame}). Pada setiap iterasi, posisi node diperbarui berdasarkan resultan dari tiga jenis gaya. Pertama, \textbf{gaya tolak} (\textit{repulsion}) yang bekerja antar pasangan node agar tidak saling menumpuk; gaya ini hanya berlaku ketika jarak antar node cukup dekat, dengan besar gaya berbanding terbalik terhadap kuadrat jarak, mengikuti analogi gaya Coulomb. Kedua, \textbf{gaya pegas} (\textit{spring}) yang bekerja pada setiap edge untuk menjaga jarak ideal antar perawi yang berelasi, mengikuti analogi hukum Hooke; gaya ini menarik node yang terlalu jauh dan mendorong node yang terlalu dekat menuju jarak ideal. Ketiga, \textbf{gaya radial} (\textit{radial constraint}) yang merupakan komponen utama pembeda visualisasi ini, yaitu menarik setiap node menuju jari-jari cincin targetnya sesuai peringkat sentralitas, sehingga perawi paling berpengaruh selalu cenderung berada di pusat jaringan.
 
 Setelah ketiga gaya dijumlahkan, kecepatan tiap node diperbarui lalu diredam dengan faktor peredam (\textit{damping}) agar simulasi konvergen dan stabil, serta dibatasi pada nilai maksimum tertentu untuk mencegah pergerakan yang tidak terkendali. Proses ini berulang pada setiap \textit{frame}, yaitu menghitung ketiga gaya untuk seluruh node dan edge, memperbarui kecepatan dan posisi tiap node, lalu merender ulang seluruh node dan edge ke Canvas hingga tata letak jaringan stabil. Persamaan matematis ketiga gaya beserta nilai parameternya dirumuskan sebagai berikut.
 
@@ -305,7 +448,7 @@ Visualisasi dilengkapi sejumlah fitur interaktif untuk eksplorasi jaringan, yait
 	Halaman ini menampilkan visualisasi graf jaringan sanad secara interaktif yang dirender menggunakan HTML5 Canvas dengan tata letak \textit{force-directed}. Berikut diuraikan penerapan halaman ini untuk masing-masing dari kelima metrik sentralitas.
 
 	\begin{enumerate}
-	\item \textbf{In Degree Centrality}
+	\item \textbf{\textit{In-Degree Centrality}}
 
 	Pada contoh berikut, metrik yang dipilih adalah \textit{In Degree Centrality}, yang menjadi dasar pewarnaan dan ukuran node. Tampilan awal halaman ditunjukkan pada Gambar~\ref{fig:graf-utama}.
 
@@ -357,7 +500,7 @@ Visualisasi dilengkapi sejumlah fitur interaktif untuk eksplorasi jaringan, yait
 
 	Visualisasi yang sama juga berlaku untuk keempat metrik sentralitas lainnya, yaitu \textit{Out Degree}, \textit{Eigenvector}, \textit{Closeness}, dan \textit{Betweenness Centrality}. Pengguna cukup memilih metrik yang diinginkan pada panel filter, dan pewarnaan serta ukuran node akan menyesuaikan dengan nilai metrik yang dipilih. Sebagai ilustrasi, keempat metrik tersebut diterapkan pada node perawi yang sama, yaitu Syu'bah, yang pada Subbab~\ref{subsec:analisis-sentralitas} telah disebutkan sebagai salah satu perawi dengan nilai \textit{out-degree} (peringkat ke-3, 0,0124) dan \textit{betweenness centrality} (peringkat ke-2, 0,0445) tertinggi. Setiap kali metrik pada panel filter berpindah, kartu informasi di sisi tengah (pojok kiri atas) turut berubah menampilkan nama metrik, deskripsi peran perawi yang diukurnya, serta rumus perhitungannya sebagaimana didefinisikan pada Subbab~\ref{subsec:sentralitas}, sementara panel detail di sisi kanan memperbarui nilai dan peringkat Syu'bah sesuai metrik yang aktif.
 
-	\item \textbf{Out Degree Centrality}
+	\item \textbf{\textit{Out-Degree Centrality}}
 
 	\begin{figure}[H]
 	\centering
@@ -368,7 +511,7 @@ Visualisasi dilengkapi sejumlah fitur interaktif untuk eksplorasi jaringan, yait
 
 	Pada Gambar~\ref{fig:graf-outdegree}, kartu informasi menampilkan rumus \textit{out-degree centrality} beserta keterangan bahwa metrik ini mengukur peran perawi sebagai murid, yaitu banyaknya guru yang meriwayatkan kepada perawi tersebut. Panel detail di sisi kanan menunjukkan Syu'bah berada pada peringkat ke-3 dengan nilai 0,012, sejalan dengan nilai yang telah dibahas pada Subbab~\ref{subsec:analisis-sentralitas}.
 
-	\item \textbf{Eigenvector Centrality}
+	\item \textbf{\textit{Eigenvector Centrality}}
 
 	\begin{figure}[H]
 	\centering
@@ -379,7 +522,7 @@ Visualisasi dilengkapi sejumlah fitur interaktif untuk eksplorasi jaringan, yait
 
 	Pada Gambar~\ref{fig:graf-eigenvector}, kartu informasi berganti menampilkan rumus \textit{eigenvector centrality} yang mengukur pengaruh perawi berdasarkan kualitas koneksinya, yaitu keterhubungan dengan perawi lain yang juga berpengaruh besar. Berbeda dari peringkatnya pada \textit{out-degree}, panel detail menunjukkan Syu'bah turun ke peringkat ke-24 dengan nilai 0,056, yang menandakan bahwa perawi ini banyak meriwayatkan dari berbagai guru, tetapi tidak semua guru tersebut tergolong perawi paling berpengaruh dalam jaringan.
 
-	\item \textbf{Closeness Centrality}
+	\item \textbf{\textit{Closeness Centrality}}
 
 	\begin{figure}[H]
 	\centering
@@ -390,7 +533,7 @@ Visualisasi dilengkapi sejumlah fitur interaktif untuk eksplorasi jaringan, yait
 
 	Pada Gambar~\ref{fig:graf-closeness}, kartu informasi menampilkan rumus \textit{closeness centrality} yang mengukur kedekatan perawi terhadap seluruh perawi lain dalam jaringan berdasarkan jarak terpendek. Syu'bah berada pada peringkat ke-28 dengan nilai 0,954, yang menunjukkan bahwa perawi ini tetap dapat menjangkau sebagian besar perawi lain melalui jalur periwayatan yang relatif pendek meskipun tidak menempati posisi puncak.
 
-	\item \textbf{Betweenness Centrality}
+	\item \textbf{\textit{Betweenness Centrality}}
 
 	\begin{figure}[H]
 	\centering
@@ -413,7 +556,7 @@ Visualisasi dilengkapi sejumlah fitur interaktif untuk eksplorasi jaringan, yait
 	\label{fig:halaman-statistik}
 	\end{figure}
 
-	Bagian atas halaman menampilkan judul \textit{Statistik Perawi} beserta deskripsi singkat \textit{Analisis statistik jaringan sanad hadis dan distribusi data perawi}, diikuti oleh dua kartu indikator yang berdampingan. Kartu pertama menampilkan Total Perawi sebanyak 177.047 dengan keterangan \textit{Jaringan sanad hadis}, sedangkan kartu kedua menampilkan Total Relasi sebanyak 776.798 dengan keterangan \textit{Hubungan guru-murid}, sebagaimana ditunjukkan pada Gambar~\ref{fig:halaman-statistik}. Kedua kartu ini memberikan gambaran umum mengenai skala jaringan sanad secara keseluruhan sebelum pengguna menelusuri statistik yang lebih rinci pada bagian di bawahnya.
+	Bagian atas halaman menampilkan judul \textit{Statistik Perawi} beserta deskripsi singkat \textit{Analisis statistik jaringan sanad hadis dan distribusi data perawi}, diikuti oleh dua kartu indikator yang berdampingan. Kartu pertama menampilkan Total Perawi sebanyak 177.047 dengan keterangan \textit{Jaringan sanad hadis}, sedangkan kartu kedua menampilkan Total Relasi sebanyak 776.798 dengan keterangan \textit{Hubungan guru--murid}, sebagaimana ditunjukkan pada Gambar~\ref{fig:halaman-statistik}. Kedua kartu ini memberikan gambaran umum mengenai skala jaringan sanad secara keseluruhan sebelum pengguna menelusuri statistik yang lebih rinci pada bagian di bawahnya.
 
 	Di bawah kedua kartu indikator, halaman ini menampilkan lima panel diagram batang yang disusun dalam dua baris, yaitu baris pertama berisi dua panel besar untuk metrik \textit{In Degree Centrality} dan \textit{Out Degree Centrality}, serta baris kedua berisi tiga panel untuk metrik \textit{Eigenvector}, \textit{Closeness}, dan \textit{Betweenness Centrality}. Setiap panel dilengkapi judul metrik beserta deskripsi singkat perannya, misalnya panel \textit{In Degree Centrality} disertai keterangan ``Peran perawi sebagai guru: perawi dengan jumlah murid terbanyak dalam jaringan'', sedangkan panel \textit{Out Degree Centrality} disertai keterangan ``Peran perawi sebagai murid: perawi yang belajar dari banyak guru dalam jaringan''. Setiap panel menampilkan sepuluh batang yang mewakili sepuluh perawi dengan nilai tertinggi pada metrik tersebut, dengan warna hijau untuk peringkat 1--3, biru untuk peringkat 4--7, dan abu-abu untuk peringkat 8--10, sehingga kelompok perawi paling berpengaruh dapat dikenali secara visual tanpa perlu membaca nilai secara langsung. Diagram juga bersifat interaktif, di mana mengarahkan kursor (\textit{hover}) ke salah satu batang memunculkan kotak keterangan (\textit{tooltip}) berisi nama perawi beserta nilai metrik yang tepat, seperti dicontohkan pada batang Abdullah dengan nilai \textit{Out Degree Centrality} sebesar 0,0077 pada Gambar~\ref{fig:halaman-statistik}.
 
@@ -468,6 +611,7 @@ Visualisasi dilengkapi sejumlah fitur interaktif untuk eksplorasi jaringan, yait
 	Pada Gambar~\ref{fig:tabel-sentralitas-cari}, pencarian dengan kata kunci ``Ibnu Abbas'' menyaring tabel sehingga hanya menampilkan perawi yang namanya mengandung kata kunci tersebut, yaitu sebanyak 65 perawi beserta nilai sentralitas masing-masing. Dengan fitur ini, pengguna dapat dengan cepat menemukan dan membandingkan nilai sentralitas perawi tertentu.
 
 \section{Pengujian Sistem}
+\label{sec:pengujian-sistem-blackbox}
 Pengujian dilakukan dengan metode \textit{black-box} terhadap seluruh fitur \textit{dashboard} yang telah diimplementasikan. Selain fitur utama, terdapat pula beberapa fitur tambahan yang juga diuji, yaitu fitur interaksi pada graf, seperti \textit{zoom}, \textit{drag}, dan \textit{reset} tampilan, serta fitur paginasi dan pengurutan pada tabel, sehingga diperoleh 14 skenario pengujian. Hasil pengujian terhadap seluruh fitur tersebut disajikan pada Tabel~\ref{tab:hasil-pengujian}.
 
 \begin{table}[H]
@@ -520,8 +664,214 @@ Keempat belas skenario tersebut mencakup tiga kelompok fungsi utama \textit{dash
 
 Keberhasilan seluruh skenario pengujian ini menunjukkan bahwa \textit{dashboard} tidak memerlukan iterasi perbaikan pada tahap perancangan dan pembangunan, sebagaimana digambarkan pada diagram alir pelaksanaan tugas akhir (Gambar~\ref{fig:alur-tugas-akhir} Bab III). Dengan demikian, dapat disimpulkan bahwa \textit{dashboard} jaringan sanad hadis telah berfungsi dengan baik sesuai dengan rancangan dan kebutuhan sistem, sehingga layak digunakan oleh pengguna untuk mengeksplorasi jaringan periwayatan hadis beserta hasil analisis sentralitasnya.
 
+\section{Pengujian Validitas Hasil Keluaran Sistem}
+\label{sec:validitas-keluaran}
+Pengujian \textit{black-box} pada Subbab~\ref{sec:pengujian-sistem-blackbox} memastikan setiap fitur berfungsi sesuai rancangan, yaitu tombol bekerja, halaman berpindah, dan data tampil. Namun, memastikan sebuah fitur menampilkan data tidak sama dengan memastikan data yang ditampilkan tersebut sahih. Oleh karena itu, validitas hasil keluaran sistem, yaitu kebenaran nilai sentralitas dan relasi periwayatan yang disajikan \textit{dashboard}, diperiksa melalui tiga lapis bukti yang saling melengkapi.
+
+Pertama, dari sisi validitas masukan, keluaran sistem hanya dapat sahih apabila setiap simpul benar-benar merepresentasikan satu perawi unik. Tahap normalisasi nama (Subbab~\ref{sec:hasil-pra-pemrosesan}) memastikan satu perawi tidak terpecah menjadi beberapa simpul akibat variasi penulisan, sementara risiko kebalikannya, yaitu tergabungnya lebih dari satu perawi ke dalam satu simpul akibat resolusi kata kekerabatan, telah dievaluasi secara kuantitatif dan terukur pada sekitar 9,85\% kejadian resolusi (Subbab~\ref{subsec:evaluasi-kekerabatan-hasil}). Dengan demikian, batas ketidakpastian pada masukan yang memengaruhi keluaran telah diukur, bukan diasumsikan sempurna.
+
+Kedua, dari sisi konsistensi penyajian, \textit{dashboard} tidak menghitung ulang metrik sentralitas di sisi klien, melainkan membaca langsung nilai hasil komputasi yang telah tersimpan pada basis data Supabase (Subbab~\ref{subsec:analisis-sentralitas}). Skenario pemuatan data pada pengujian \textit{black-box} (Tabel~\ref{tab:hasil-pengujian}) telah memverifikasi bahwa data yang tampil sesuai dengan isi basis data, sehingga nilai yang dilihat pengguna dipastikan identik dengan nilai hasil perhitungan, bukan angka yang berbeda akibat pemrosesan ulang di antarmuka.
+
+Ketiga, dari sisi validitas eksternal, kebenaran hasil analisis diperiksa dengan membandingkan perawi yang teridentifikasi paling sentral oleh sistem terhadap temuan penelitian terdahulu yang secara independen menyebut tokoh sentral periwayatan (Subbab~\ref{sec:perbandingan-terdahulu}). Sistem menempatkan Abu Hurairah pada peringkat pertama empat dari lima metrik dan mendeteksi posisi struktural Az-Zuhri, keduanya konsisten dengan penelusuran manual pada penelitian terdahulu. Kesesuaian ini menunjukkan bahwa keluaran sistem tidak hanya konsisten secara internal, tetapi juga selaras dengan pengetahuan yang telah mapan dalam kajian hadis, sehingga hasil keluaran sistem dapat dinyatakan valid.
+
+\section{Hasil Pengujian Performa dan Kualitas Non-Fungsional Sistem}
+\label{sec:hasil-pengujian-performa}
+\begin{sloppypar}
+Selain pengujian fungsional pada Subbab~\ref{sec:pengujian-sistem-blackbox}, dilakukan tiga pengujian non-fungsional sesuai metode pada Subbab~\ref{subsec:pengujian-performa} untuk mengevaluasi performa visualisasi graf di sisi klien dan ketahanan API Supabase. Hasil dari tiap pengujian diuraikan sebagai berikut.
+\end{sloppypar}
+
+\subsection{\textit{Frame Rate} (FPS)}
+Pengujian FPS dilakukan pada interaksi \textit{zoom in/out} sebagai fokus utama, dengan interaksi \textit{pan} dan \textit{drag node} turut diukur sebagai pembanding. Hasil pengukuran ditampilkan pada Tabel~\ref{tab:fps}.
+
+\begin{table}[H]
+\centering
+\caption{Hasil pengujian \textit{frame rate} (FPS)}
+\label{tab:fps}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|c|c|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Skenario}} & \multicolumn{1}{c|}{\textbf{FPS Rata-rata}} & \multicolumn{1}{c|}{\textbf{FPS Minimum}} \\
+\hline
+Saat \textit{zoom in/out} (\textit{scroll wheel}) & 57,0 & 51 \\
+\hline
+Saat \textit{pan} kanvas & 61,0 & 60 \\
+\hline
+Saat \textit{drag} 1 \textit{node} & 60,7 & 60 \\
+\hline
+\end{tabular}
+\end{table}
+
+Tabel~\ref{tab:fps} menunjukkan bahwa interaksi \textit{zoom in/out} mencatat FPS rata-rata 57,0 dengan minimum 51, sedikit lebih rendah dibandingkan interaksi \textit{pan} (61,0) maupun \textit{drag node} (60,7), namun seluruhnya tetap jauh di atas ambang minimum 30 FPS sehingga belum menimbulkan \textit{jank} yang terasa oleh pengguna. Selisih ini konsisten dengan sifat interaksi \textit{zoom} yang, selain tetap menanggung beban penuh perhitungan simulasi fisika dan \textit{render} pada setiap \textit{frame} seperti skenario lain, juga menghitung ulang posisi dan skala tampilan (\textit{transform}) pada setiap peristiwa \textit{scroll wheel} yang diterima, berbeda dengan \textit{pan} maupun \textit{drag} yang hanya mengubah posisi tanpa mengubah skala render. Tambahan komputasi inilah yang menjelaskan mengapa \textit{zoom in/out} sedikit lebih membebani dibandingkan interaksi geser murni, meskipun dampaknya terhadap kelancaran animasi masih tergolong kecil.
+
+\subsection{Penggunaan Memori \textit{Browser}}
+Pengujian dilakukan dengan mengukur ukuran \textit{JavaScript heap} saat visualisasi graf memuat data pada beberapa jumlah \textit{node} (N) yang divariasikan mendekati skala penuh jaringan sanad (177.047 perawi). Hasil pengukuran ditampilkan pada Tabel~\ref{tab:memori}.
+
+\begin{table}[H]
+\centering
+\caption{Hasil pengujian penggunaan memori \textit{browser} terhadap jumlah \textit{node} (N)}
+\label{tab:memori}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{N (\textit{node} diminta)} & \textbf{\textit{Node} Diterima} & \textbf{Penggunaan Memori (\textit{Heap})} \\
+\hline
+50 & 50 & 8,8 MB \\
+\hline
+100 & 100 & 11,1 MB \\
+\hline
+250 & 250 & 10,1 MB \\
+\hline
+500 & 500 & 10,3 MB \\
+\hline
+1.000 & Gagal total & -- \\
+\hline
+\end{tabular}
+\end{table}
+
+Tabel~\ref{tab:memori} menunjukkan bahwa penggunaan memori \textit{browser} tidak meningkat secara proporsional terhadap N pada rentang yang berhasil diuji, tetap berada pada kisaran 8,8--11,1 MB untuk N=50 hingga N=500 tanpa kecenderungan pertumbuhan yang jelas. Namun, pengujian pada N=1.000, yang masih jauh di bawah 1\% dari total 177.047 perawi dalam jaringan sanad, mengalami kegagalan total, yaitu permintaan data tidak pernah selesai dimuat dalam batas waktu pengamatan. Dengan demikian, penggunaan memori \textit{browser} saat merender graf mendekati skala penuh 177.047 \textit{node} tidak dapat diukur secara empiris pada arsitektur \textit{dashboard} saat ini, karena sistem sudah gagal memuat data jauh sebelum mencapai skala tersebut. Temuan ini menegaskan bahwa keputusan desain untuk menampilkan subset representatif (50 \textit{node} teratas) alih-alih keseluruhan jaringan bukan sekadar pertimbangan keterbacaan visual, melainkan juga selaras dengan batas kemampuan arsitektur pengambilan data saat ini.
+
+\subsection{\textit{Load Testing} API}
+Pengujian dilakukan dengan skenario \textit{ramping virtual users} (VU) 0$\rightarrow$10$\rightarrow$50\allowbreak$\rightarrow$100$\rightarrow$0 selama 95 detik, serta pengujian tambahan pada tiap tahap VU tetap selama 20 detik untuk memperoleh perincian yang lebih jelas. Hasil pengujian ditampilkan pada Tabel~\ref{tab:load-testing} dan Tabel~\ref{tab:load-testing-vu}.
+
+\begin{table}[H]
+\centering
+\caption{Hasil \textit{load testing} skenario \textit{ramping} (0--100 VU)}
+\label{tab:load-testing}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|p{4.5cm}|p{9.5cm}|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Kriteria}} & \multicolumn{1}{c|}{\textbf{Hasil}} \\
+\hline
+\textit{Threshold} p(95) $<$ 1.000 ms & Gagal, p(95) aktual 4,68 detik (rata-rata 1,31 detik, maks 12,72 detik) \\
+\hline
+\textit{Threshold} tingkat kegagalan $<$ 1\% & Lolos, 0\% permintaan gagal (2.300/2.300 \textit{check} sukses) \\
+\hline
+\textit{Throughput} rata-rata & 23,9 permintaan/detik \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Hasil \textit{load testing} per tahap VU tetap (20 detik)}
+\label{tab:load-testing-vu}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{VU} & \textbf{\textit{Throughput} (req/s)} & \textbf{P95 Latency} & \textbf{Maks Latency} & \textbf{Tingkat Kegagalan} \\
+\hline
+10 & 12,6 & 595 ms & 1,11 detik & 0\% \\
+\hline
+50 & 29,1 & 2,76 detik & 7,43 detik & 0\% \\
+\hline
+100 & 27,7 & 7,63 detik & 15,29 detik & 0\% \\
+\hline
+\end{tabular}
+\end{table}
+
+Tabel~\ref{tab:load-testing} menunjukkan bahwa sistem hanya lolos ambang batas latensi 1 detik pada beban 10 pengguna virtual bersamaan (Tabel~\ref{tab:load-testing-vu}); pada 50 VU, latensi P95 telah mencapai 2,76 detik, melampaui ambang yang ditetapkan. Pada 100 VU, \textit{throughput} justru menurun dari 29,1 menjadi 27,7 permintaan/detik dibandingkan pada 50 VU, sementara latensi P95 meningkat tajam menjadi 7,63 detik, pola yang mengindikasikan saturasi: server menerima lebih banyak permintaan daripada yang dapat diproses sehingga permintaan mengantre alih-alih ditolak (tingkat kegagalan tetap 0\%, bukan kode kegagalan 429). Dengan demikian, titik jenuh (\textit{breaking point}) praktis sistem berada di antara 10 dan 50 pengguna bersamaan pada konfigurasi Supabase yang digunakan saat pengujian.
+
+Ketiga pengujian di atas dilaksanakan dengan jumlah pengulangan yang dipersingkat untuk kebutuhan verifikasi awal, sehingga angka-angka performa pada subbab ini merepresentasikan hasil pengujian awal yang valid namun tetap memerlukan pengulangan dengan jumlah sampel lebih besar sebagai penguatan sebelum dijadikan angka final dalam pelaporan performa sistem secara menyeluruh.
+
+\section{Hasil Evaluasi Kebermanfaatan \textit{Dashboard}}
+\label{sec:hasil-evaluasi-sus}
+Evaluasi kebermanfaatan \textit{dashboard} dilakukan sesuai metode pada Subbab~\ref{subsec:metode-sus} Bab III, menggunakan kuesioner daring yang mengadaptasi \textit{System Usability Scale} (SUS) dan diisi oleh 18 responden.
+
+\subsection{Karakteristik Responden}
+Profil responden ditampilkan pada Tabel~\ref{tab:profil-responden}.
+
+\begin{table}[H]
+\centering
+\caption{Karakteristik responden}
+\label{tab:profil-responden}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|l|c|c|}
+\hline
+\textbf{Karakteristik} & \textbf{Kategori} & \textbf{Jumlah} & \textbf{Persentase} \\
+\hline
+Usia & 20--25 tahun & 18 & 100\% \\
+\hline
+Jenis kelamin & Laki-laki & 18 & 100\% \\
+\hline
+Latar belakang akademis/ & Ya & 1 & 5,6\% \\
+profesional ilmu hadis & Tidak & 17 & 94,4\% \\
+\hline
+Frekuensi penggunaan & Sering & 2 & 11,1\% \\
+aplikasi visualisasi & Kadang-kadang & 2 & 11,1\% \\
+graf sejenis & Jarang & 10 & 55,6\% \\
+ & Tidak pernah & 4 & 22,2\% \\
+\hline
+\end{tabular}
+\end{table}
+
+Hanya 1 dari 18 responden (5,6\%) yang memiliki latar belakang ilmu hadis, padahal pengguna sasaran utama pada Subbab~\ref{subsubsec:kebutuhan-pengguna} Bab III adalah mahasiswa \textbf{dan peneliti ilmu hadis}. Hasil evaluasi ini karenanya lebih mencerminkan persepsi pengguna umum, bukan representasi pengguna sasaran utama, sehingga perlu dibaca sebagai indikasi awal.
+
+\subsection{Tabel Skor Setiap Pertanyaan}
+Rata-rata nilai jawaban (skala Likert 1--5) untuk tiap pernyataan ditampilkan pada Tabel~\ref{tab:skor-pertanyaan}.
+
+\begin{table}[H]
+\centering
+\caption{Rata-rata skor tiap pernyataan kuesioner}
+\label{tab:skor-pertanyaan}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|c|p{9.5cm}|c|c|}
+\hline
+\textbf{No} & \textbf{Pernyataan} & \textbf{Muatan} & \textbf{Rata-rata} \\
+\hline
+1 & Saya berpikir saya akan sering menggunakan aplikasi ini. & (+) & 3,33 \\
+\hline
+2 & Saya merasa aplikasi ini rumit digunakan tanpa alasan yang jelas. & ($-$) & 2,39 \\
+\hline
+3 & Saya merasa aplikasi ini mudah digunakan. & (+) & 4,22 \\
+\hline
+4 & Saya merasa membutuhkan bantuan teknis untuk menggunakan aplikasi ini. & ($-$) & 2,39 \\
+\hline
+5 & Saya merasa berbagai fitur aplikasi ini terintegrasi dengan baik. & (+) & 4,33 \\
+\hline
+6 & Saya merasa ada terlalu banyak ketidakkonsistenan dalam aplikasi ini. & ($-$) & 2,06 \\
+\hline
+7 & Saya membayangkan kebanyakan orang bisa mempelajari aplikasi ini dengan cepat. & (+) & 3,89 \\
+\hline
+\end{tabular}
+\end{table}
+
+Nilai tertinggi ada pada pernyataan positif seputar integrasi fitur (P5, 4,33) dan kemudahan penggunaan (P3, 4,22), sedangkan nilai terendah ada pada pernyataan negatif seputar inkonsistensi (P6, 2,06) yang berarti sebagian besar responden \textit{tidak} merasakan banyak inkonsistensi, sebuah hasil positif.
+
+\subsection{Hasil Rata-rata SUS}
+Statistik skor SUS teradaptasi ditampilkan pada Tabel~\ref{tab:skor-sus}.
+
+\begin{table}[H]
+\centering
+\caption{Hasil skor SUS teradaptasi (7 item)}
+\label{tab:skor-sus}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Statistik} & \textbf{Nilai} \\
+\hline
+Jumlah responden (n) & 18 \\
+\hline
+Rata-rata & 71,23 \\
+\hline
+Median & 73,22 \\
+\hline
+Standar deviasi & 15,85 \\
+\hline
+Nilai minimum & 35,71 \\
+\hline
+Nilai maksimum & 92,86 \\
+\hline
+\end{tabular}
+\end{table}
+
+Skor rata-rata 71,23 dari skala 0--100 berada di atas titik tengah skala, menunjukkan persepsi yang secara umum positif namun bervariasi (standar deviasi 15,85). Mengingat keterbatasan instrumen 7-item dan profil responden pada Tabel~\ref{tab:profil-responden}, skor ini paling tepat dibaca sebagai indikasi awal dari perspektif pengguna umum, bukan ukuran baku yang representatif bagi pengguna sasaran utama.
+
+\subsection{Umpan Balik Kualitatif}
+Hal yang paling disukai: tampilan antarmuka yang menarik, kemudahan menelusuri relasi guru--murid melalui graf, serta fitur pencarian dan klik-telusur \textit{node}. Kendala yang paling sering disebut: kurangnya panduan penggunaan (\textit{onboarding}) dan ketidakpahaman makna metrik sentralitas, disusul label graf yang sulit dibaca saat data padat. Saran perbaikan sejalan dengan kendala tersebut: tambahkan panduan/\textit{tooltip} penjelasan metrik, serta optimasi tampilan agar label tidak bertumpuk.
+
 \section{Perbandingan Hasil Penelitian dengan Hasil Terdahulu}
-Untuk menempatkan hasil penelitian ini dalam konteks kajian sejenis, pada bagian ini dilakukan perbandingan dengan beberapa penelitian terdahulu yang menganalisis jaringan perawi hadis secara komputasional. Penelitian terdahulu pada umumnya telah berhasil memodelkan dan menganalisis jaringan perawi dalam skala besar, namun luaran yang dihasilkan cenderung bersifat statis dan bergantung pada perangkat lunak jaringan berbasis \textit{desktop} seperti Gephi dan Cytoscape, sehingga sulit diakses oleh kalangan yang lebih luas \cite{FAROOQI2024110439, Shuaib2022}. Perbandingan penelitian ini dengan penelitian terdahulu disajikan pada Tabel~\ref{tab:perbandingan}.
+\label{sec:perbandingan-terdahulu}
+Untuk menempatkan hasil penelitian ini dalam konteks kajian sejenis, pada bagian ini dilakukan perbandingan dengan beberapa penelitian terdahulu yang menganalisis jaringan perawi hadis secara komputasional. Penelitian terdahulu pada umumnya telah berhasil memodelkan dan menganalisis jaringan perawi dalam skala besar, namun luaran yang dihasilkan cenderung bersifat statis dan bergantung pada perangkat lunak jaringan berbasis \textit{desktop} seperti Gephi dan Cytoscape, sehingga sulit diakses oleh kalangan yang lebih luas \cite{FAROOQI2024110439, Shuaib2022}. Selain aspek representasi dan aksesibilitas, perbandingan juga mencakup efisiensi komputasi terhadap dua pendekatan berbasis \textit{graph database} yang paling relevan, yaitu Neo4j pada penelitian Farooqi \textit{et al.} \cite{FAROOQI2024110439} dan NarratorsKG pada penelitian Mahmoud \textit{et al.} \cite{Mahmoud2024}. Perbandingan penelitian ini dengan penelitian terdahulu disajikan pada Tabel~\ref{tab:perbandingan}.
 
 \begin{table}[H]
 \centering
@@ -545,9 +895,21 @@ Aksesibilitas & Memerlukan instalasi perangkat lunak khusus & Dapat diakses publ
 \hline
 Fitur eksplorasi & Terbatas & Pencarian perawi, filter metrik, paginasi, pengurutan, dan detail relasi guru--murid \\
 \hline
+Waktu pembangunan graf & Tidak dilaporkan pada publikasi Farooqi \textit{et al.} \cite{FAROOQI2024110439} (Neo4j) maupun Mahmoud \textit{et al.} \cite{Mahmoud2024} (NarratorsKG) & Graf penuh (177.047 simpul, 776.798 sisi) terbangun dalam $\approx$13 detik untuk seluruh tahap pemuatan data hingga metrik sentralitas berbasis \textit{degree} dan \textit{eigenvector} (Tabel~\ref{tab:performa-komputasi-kg}) \\
+\hline
+Latensi akses data & Tidak dilaporkan pada kedua publikasi tersebut & P95 latensi API Supabase 595~ms pada beban 10 pengguna bersamaan, meningkat menjadi 7,63 detik pada 100 pengguna bersamaan (Tabel~\ref{tab:load-testing-vu}) \\
+\hline
 \end{tabular}
 \end{table}
 
 Berdasarkan Tabel~\ref{tab:perbandingan}, kelebihan utama penelitian ini terletak pada penyajian hasil analisis jaringan sanad dalam bentuk \textit{dashboard} web yang interaktif dan dapat diakses secara publik tanpa memerlukan instalasi perangkat lunak khusus. Hal ini menjawab keterbatasan penelitian terdahulu yang luarannya cenderung statis dan bergantung pada perangkat lunak \textit{desktop}, sehingga hasil analisis dapat dimanfaatkan oleh kalangan yang lebih luas, mulai dari pelajar, peneliti, hingga masyarakat umum.
 
-Meskipun demikian, penelitian ini memiliki beberapa keterbatasan. Metrik \textit{closeness} dan \textit{betweenness} dihitung pada subset graf terkuat, bukan pada graf penuh, karena keterbatasan komputasi. Selain itu, data yang digunakan bersifat statis dan belum diperbarui secara otomatis, serta analisis difokuskan pada struktur jaringan periwayatan tanpa menilai derajat kesahihan sanad secara ilmu hadis.
+Pada aspek efisiensi komputasi, perbandingan langsung secara angka terhadap Neo4j \cite{FAROOQI2024110439} maupun NarratorsKG \cite{Mahmoud2024} tidak dapat dilakukan karena kedua publikasi tersebut berfokus pada konstruksi \textit{dataset} dan akurasi disambiguasi perawi (Farooqi \textit{et al.} melaporkan cakupan graf 2.092 simpul dan 77.797 sisi; Mahmoud \textit{et al.} melaporkan akurasi 95,2\% dan \textit{sanad error rate} 23,2\% pada disambiguasi narator), tanpa mengukur maupun melaporkan waktu pemrosesan, latensi kueri, atau metrik efisiensi komputasi lain untuk sistem graf yang mereka bangun. Penelitian ini melengkapi kesenjangan tersebut dengan mengukur secara empiris waktu pembangunan graf dan latensi akses data pada skala 177.047 perawi, sehingga selain menjawab kebutuhan analisis sentralitas berskala penuh, penelitian ini turut menyediakan tolok ukur efisiensi komputasi yang belum tersedia pada kedua penelitian pembanding tersebut.
+
+Selain perbedaan dari sisi metode dan platform, hasil analisis sentralitas pada penelitian ini juga dapat diperiksa validitasnya dengan membandingkan perawi yang teridentifikasi paling berpengaruh terhadap temuan penelitian terdahulu yang secara spesifik menyebut nama perawi tertentu sebagai tokoh sentral dalam jaringan periwayatan hadis. Mufid dan Sattar \cite{mufid2023track}, melalui studi kasus \textit{isnad-cum-matn} Harald Motzki pada satu hadis, menemukan bahwa Abu Hurairah membangun \textit{isnad bundle} yang jauh lebih luas dibandingkan Abu Sa'id al-Khudri sebagai sesama sahabat penerima hadis dari Nabi, dengan sejumlah murid langsung yang meneruskan periwayatan tersebut ke generasi berikutnya. Temuan kualitatif berskala kecil (satu hadis) ini konsisten dengan hasil kuantitatif berskala besar (177.047 perawi) pada penelitian ini, yang menempatkan Abu Hurairah pada peringkat pertama untuk empat dari lima metrik sentralitas, yaitu \textit{in-degree}, \textit{eigenvector}, \textit{closeness}, dan \textit{betweenness centrality} (Subbab~\ref{subsec:analisis-sentralitas}). Kesesuaian ini menunjukkan bahwa pendekatan SNA berskala besar pada penelitian ini mampu mereproduksi pola yang sebelumnya hanya teridentifikasi melalui penelusuran manual pada kasus hadis tertentu, sekaligus memberikan ukuran kuantitatif yang belum tersedia pada studi kasus tersebut.
+
+Pola serupa ditemukan pada perawi Ibnu Syihab Az-Zuhri, yang oleh Shuaib \textit{et al.} \cite{Shuaib2022} disebut sebagai kolektor dan penyebar hadis sistematis pertama yang berpengaruh besar dalam pembentukan jaringan periwayatan hadis. Pada jaringan hasil penelitian ini, Az-Zuhri tercatat memiliki relasi guru--murid dengan bobot tertinggi ketujuh secara keseluruhan (Az-Zuhri--Ma'mar, bobot 4.381; Tabel~\ref{tab:relasi-terkuat}), menunjukkan bahwa posisi sentralnya turut terdeteksi secara struktural oleh graf yang dibangun pada penelitian ini.
+
+Perbandingan ini juga menunjukkan bahwa penelitian ini menjawab kesenjangan yang secara eksplisit disebutkan oleh Farooqi \textit{et al.} \cite{FAROOQI2024110439}, yang menyatakan bahwa metrik SNA seperti \textit{degree}, \textit{betweenness}, dan \textit{eigenvector centrality} \textit{dapat diterapkan} untuk mengidentifikasi perawi berpengaruh pada \textit{dataset Multi-IsnadSet} yang mereka bangun, namun analisis tersebut belum mereka lakukan sendiri dan baru disebutkan sebagai arah penelitian lanjutan. Penelitian ini melaksanakan langsung analisis yang diusulkan tersebut pada skala penuh 177.047 perawi, sehingga rumusan masalah kedua penelitian ini, yaitu belum dikajinya peran dan pengaruh perawi secara kuantitatif, dapat dinyatakan terjawab dengan bukti hasil yang selaras dengan temuan kualitatif penelitian terdahulu maupun arah yang sebelumnya baru diusulkan sebagai potensi penelitian mendatang.
+
+Meskipun demikian, penelitian ini memiliki beberapa keterbatasan. Metrik \textit{closeness} dan \textit{betweenness} dihitung pada subset graf terkuat, bukan pada graf penuh, karena keterbatasan komputasi. Selain itu, data yang digunakan bersifat statis dan belum diperbarui secara otomatis, serta analisis difokuskan pada struktur jaringan periwayatan tanpa menilai derajat kesahihan sanad secara ilmu hadis. Dari sisi implementasi \textit{dashboard}, pengujian performa non-fungsional pada Subbab~\ref{sec:hasil-pengujian-performa} juga menemukan bahwa arsitektur pengambilan data saat ini belum mampu memuat graf mendekati skala penuh 177.047 perawi, sehingga tampilan \textit{dashboard} masih dibatasi pada subset representatif dan memerlukan perbaikan arsitektur lebih lanjut apabila skala tampilan hendak diperbesar.

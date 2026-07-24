@@ -189,7 +189,9 @@ Ibn Umar        & ---                                    & 0 & $0{,}0000$ \\
 \noindent\textbf{3. \textit{Betweenness Centrality}}
 
 \vspace{0.2cm}
-\noindent \textit{Betweenness centrality} mengukur seberapa sering suatu simpul $v$ berada pada lintasan terpendek antara dua simpul lainnya. Sesuai implementasi pada kode Python (\texttt{normalized=True}, \texttt{weight="Inverse\_weight"}), lintasan terpendek dihitung secara berbobot menggunakan \textit{Inverse Weight} sebagai biaya antar-perawi dan hasilnya ternormalisasi:
+\begin{sloppypar}
+\noindent \textit{Betweenness centrality} mengukur seberapa sering suatu simpul $v$ berada pada lintasan terpendek antara dua simpul lainnya. Sesuai implementasi pada kode Python (\allowbreak\texttt{normalized=True}, \texttt{weight="Inverse\_}\allowbreak\texttt{weight"}), lintasan terpendek dihitung secara berbobot menggunakan \textit{Inverse Weight} sebagai biaya antar-perawi dan hasilnya ternormalisasi:
+\end{sloppypar}
 $$C_B(v) = \frac{1}{(n-1)(n-2)} \sum_{s \neq v \neq t} \frac{\sigma_{st}(v)}{\sigma_{st}}$$
 dengan $\sigma_{st}$ = jumlah lintasan terpendek berbobot dari $s$ ke $t$, dan $\sigma_{st}(v)$ = jumlah di antaranya yang melewati $v$. Faktor normalisasi: $(n-1)(n-2) = 6 \times 5 = 30$.
 

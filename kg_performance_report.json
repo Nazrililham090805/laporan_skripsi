@@ -1,0 +1,149 @@
+{
+  "graph": {
+    "nodes": 177047,
+    "edges": 776798
+  },
+  "environment": {
+    "python_version": "3.13.13",
+    "networkx_version": "3.6.1",
+    "pandas_version": "3.0.2",
+    "os": "Windows-11-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
+    "cpu_count_logical": 12,
+    "cpu_count_physical": 6,
+    "total_ram_gb": 6.29
+  },
+  "sampling": {
+    "sample_size": 100,
+    "seed": 20260721,
+    "note": "Closeness & betweenness centrality dihitung pada sampel node acak (bukan seluruh 177.047 node), lalu dilaporkan sebagai statistik sebaran (min/max/mean/median). Betweenness memakai algoritma sampled resmi NetworkX (parameter k); closeness dihitung exact per node pada node-node sampel."
+  },
+  "computation_time_and_memory": [
+    {
+      "stage": "load_csv",
+      "duration_sec": 2.0709,
+      "rss_before_mb": 86.88,
+      "rss_after_mb": 259.51,
+      "rss_delta_mb": 172.63
+    },
+    {
+      "stage": "build_graph",
+      "duration_sec": 4.087,
+      "rss_before_mb": 259.52,
+      "rss_after_mb": 560.4,
+      "rss_delta_mb": 300.88
+    },
+    {
+      "stage": "remove_selfloops",
+      "duration_sec": 0.0551,
+      "rss_before_mb": 560.4,
+      "rss_after_mb": 560.41,
+      "rss_delta_mb": 0.0
+    },
+    {
+      "stage": "degree_weighted",
+      "duration_sec": 0.8558,
+      "rss_before_mb": 560.41,
+      "rss_after_mb": 562.25,
+      "rss_delta_mb": 1.84
+    },
+    {
+      "stage": "degree_centrality",
+      "duration_sec": 0.1887,
+      "rss_before_mb": 562.25,
+      "rss_after_mb": 563.63,
+      "rss_delta_mb": 1.38
+    },
+    {
+      "stage": "in_degree_centrality",
+      "duration_sec": 0.1565,
+      "rss_before_mb": 563.63,
+      "rss_after_mb": 563.63,
+      "rss_delta_mb": 0.01
+    },
+    {
+      "stage": "out_degree_centrality",
+      "duration_sec": 0.1502,
+      "rss_before_mb": 563.63,
+      "rss_after_mb": 563.64,
+      "rss_delta_mb": 0.0
+    },
+    {
+      "stage": "eigenvector_centrality",
+      "duration_sec": 5.105,
+      "rss_before_mb": 563.64,
+      "rss_after_mb": 570.98,
+      "rss_delta_mb": 7.34
+    },
+    {
+      "stage": "closeness_centrality (sampled, k=100)",
+      "duration_sec": 562.8264,
+      "rss_before_mb": 570.98,
+      "rss_after_mb": 534.63,
+      "rss_delta_mb": -36.35
+    },
+    {
+      "stage": "betweenness_centrality (sampled, k=100)",
+      "duration_sec": 228.5725,
+      "rss_before_mb": 534.97,
+      "rss_after_mb": 476.02,
+      "rss_delta_mb": -58.94
+    },
+    {
+      "stage": "weakly_connected_components",
+      "duration_sec": 0.6891,
+      "rss_before_mb": 478.49,
+      "rss_after_mb": 487.96,
+      "rss_delta_mb": 9.47
+    },
+    {
+      "stage": "strongly_connected_components",
+      "duration_sec": 1.4647,
+      "rss_before_mb": 487.96,
+      "rss_after_mb": 494.25,
+      "rss_delta_mb": 6.29
+    },
+    {
+      "stage": "density",
+      "duration_sec": 0.1005,
+      "rss_before_mb": 494.25,
+      "rss_after_mb": 494.25,
+      "rss_delta_mb": 0.0
+    },
+    {
+      "stage": "approx_diameter (largest weakly connected component)",
+      "duration_sec": 8.0093,
+      "rss_before_mb": 494.28,
+      "rss_after_mb": 701.42,
+      "rss_delta_mb": 207.13
+    }
+  ],
+  "structural_metrics": {
+    "nodes": 177047,
+    "edges": 776798,
+    "density": 2.47818e-05,
+    "average_degree": 8.775,
+    "weakly_connected_components": 51,
+    "largest_weakly_connected_component_size": 176891,
+    "largest_weakly_connected_component_share_percent": 99.91,
+    "strongly_connected_components": 47300,
+    "largest_strongly_connected_component_size": 129721,
+    "approx_diameter_largest_wcc": 28,
+    "diameter_method": "nx.approximation.diameter (2-sweep/2-dSweep heuristic, lower bound), pada largest weakly connected component sebagai graf tak berarah. Exact diameter (BFS dari tiap node) tidak feasible pada graf sebesar ini."
+  },
+  "closeness_centrality_sample_stats": {
+    "n_sampled": 100,
+    "min": 0.0,
+    "max": 0.74905976,
+    "mean": 0.35538359,
+    "median": 0.38914654
+  },
+  "betweenness_centrality_sample_stats": {
+    "n_sampled": 177047,
+    "min": 0.0,
+    "max": 0.27204869,
+    "mean": 3.638e-05,
+    "median": 0.0
+  },
+  "peak_rss_mb": 701.42
+}

@@ -19,7 +19,7 @@ Alat-alat yang digunakan dalam tugas akhir ini terdiri atas perangkat keras dan 
 \end{enumerate}
 
 \subsection{Bahan Tugas akhir}
-Bahan yang digunakan adalah data hadis dari studi Mghari \textit{et al} \cite{MGHARI2022108540}, bersifat statis dalam format CSV (\textit{Comma-Separated Values}), terdiri atas:
+Bahan yang digunakan adalah data hadis dari studi Mghari \textit{et al.} \cite{MGHARI2022108540}, bersifat statis dalam format CSV (\textit{Comma-Separated Values}), terdiri atas:
 
 \begin{itemize}
 	\item \texttt{sanadset.csv} memuat lebih dari 650.986 rekaman hadis yang bersumber dari 926 kitab hadis Arab klasik, dengan masing-masing rekaman terdiri atas 6 variabel yang mencakup informasi kitab asal, nomor hadis, teks hadis, Matn, daftar perawi, dan jumlah perawi.
@@ -47,8 +47,8 @@ Dari keempat file tersebut, \texttt{sanadset.csv} dipilih sebagai dataset utama 
 Secara teknis, penelitian ini mengolah data mentah \texttt{sanadset.csv} melalui serangkaian tahap pemrosesan data hingga menjadi \textit{dashboard}.
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=\textwidth,height=0.85\textheight,keepaspectratio]{contents/chapter-3/FlowchartAlurPengembangan.png}
-	\caption{Flowchart Alur Pengembangan Knowledge Graph}
+	\includegraphics[width=\textwidth,height=0.85\textheight,keepaspectratio]{contents/chapter-3/image.png}
+	\caption{Diagram Alir Proses Pembangunan Graf Jaringan Sanad, Perhitungan Sentralitas Perawi dan Integrasinya ke dalam \textit{Dashboard}}
 	\label{fig:flowchart-kg}
 \end{figure}
 
@@ -110,13 +110,13 @@ Untuk mengatasi hal ini, diterapkan algoritma sekuensial yang menelusuri setiap 
 \end{tabular}
 \end{table}
 
-Sebagai ilustrasi, rantai sanad [\textit{Muhammad}, \textit{Abihi}, \textit{Jaddihi}] setelah resolusi menjadi [\textit{Muhammad}, \textit{Abu Muhammad}, \textit{Jadd Muhammad}], sehingga setiap elemen memiliki identitas yang unik dan dapat dimodelkan sebagai \textit{node} tersendiri dalam graf jaringan sanad.
+Sebagai ilustrasi, rantai sanad [\textit{Muhammad}, \textit{Abihi}, \textit{Jaddihi}] setelah resolusi menjadi [\textit{Muhammad}, \textit{Abu Muhammad}, \textit{Jadd Muhammad}], sehingga setiap elemen dapat dimodelkan sebagai \textit{node} tersendiri dalam graf jaringan sanad. Perlu dicatat bahwa resolusi ini valid secara lokal di dalam satu rantai sanad, karena kata kekerabatan pasti merujuk pada perawi tepat sebelumnya; namun ketika \textit{node} hasil resolusi yang bernama sama (misalnya ``Abu Muhammad'') terbentuk dari rantai sanad yang berbeda-beda, kesamaan string tersebut tidak menjamin kesamaan individu, sehingga berpotensi menggabungkan beberapa perawi berbeda menjadi satu \textit{node} secara keliru. Risiko ambiguitas ini dievaluasi secara kuantitatif pada Subbab~\ref{subsubsec:evaluasi-kekerabatan}.
 
 \subsubsection{Penghapusan lafal periwayatan}
 Dalam teks hadis, rantai sanad tidak hanya memuat nama-nama perawi, tetapi juga diselingi oleh lafal periwayatan (sighat al-tahammul wa al-ada'), yaitu formula yang menunjukkan cara seorang perawi menerima dan menyampaikan hadis. Lafal-lafal seperti \textit{haddatsana}, \textit{akhbarana}, \textit{'an}, \textit{sami'tu}, dan \textit{tsana} merupakan penanda metode transmisi, bukan nama perawi, sehingga tidak boleh dimodelkan sebagai \textit{node} dalam graf. Apabila dibiarkan, lafal tersebut akan membentuk \textit{node} palsu yang tidak merepresentasikan perawi manapun dan berpotensi menghasilkan \textit{edge} yang tidak valid. Penghapusan lafal periwayatan dilakukan dalam tiga tahap bertingkat: pertama, menghapus lafal yang berdiri sendiri sebagai elemen \textit{list}; kedua, menghapus lafal yang melekat dalam \textit{string} nama menggunakan ekspresi reguler berbasis \textit{word-boundary}; dan ketiga, melakukan pemindaian ulang untuk memverifikasi bahwa tidak ada lafal yang tersisa. Dari keseluruhan data, ditemukan 185 sanad yang masih mengandung lafal periwayatan dan berhasil dibersihkan pada tahap lanjutan.
 
 \subsubsection{Normalisasi Variasi \textit{Abu}}
-Dalam bahasa Arab, kata \textit{Abu} yang umum digunakan sebagai bagian dari nama kunya perawi mengalami perubahan bentuk sesuai kedudukan gramatikal dalam kalimat, yaitu \textit{Abu} pada posisi nominatif, \textit{Aba} pada posisi akusatif, dan \textit{Abi} pada posisi genitif. Ketiga bentuk tersebut merujuk pada nama yang sama, namun secara komputasional diperlakukan sebagai string yang berbeda sehingga berpotensi memecah satu perawi menjadi beberapa node terpisah dalam graf. Untuk mengatasi hal ini, seluruh variasi bentuk diseragamkan menjadi bentuk nominatif \textit{Abu} menggunakan ekspresi reguler berbasis \textit{word-boundary}, sehingga hanya kata yang berdiri sendiri yang diubah tanpa memengaruhi kata-kata lain yang mengandung rangkaian huruf serupa.
+Dalam bahasa Arab, kata \textit{Abu} yang umum digunakan sebagai bagian dari nama \textit{kunyah} perawi mengalami perubahan bentuk sesuai kedudukan gramatikal dalam kalimat, yaitu \textit{Abu} pada posisi nominatif, \textit{Aba} pada posisi akusatif, dan \textit{Abi} pada posisi genitif. Ketiga bentuk tersebut merujuk pada nama yang sama, namun secara komputasional diperlakukan sebagai string yang berbeda sehingga berpotensi memecah satu perawi menjadi beberapa node terpisah dalam graf. Untuk mengatasi hal ini, seluruh variasi bentuk diseragamkan menjadi bentuk nominatif \textit{Abu} menggunakan ekspresi reguler berbasis \textit{word-boundary}, sehingga hanya kata yang berdiri sendiri yang diubah tanpa memengaruhi kata-kata lain yang mengandung rangkaian huruf serupa.
 \subsubsection{Menghapus Karakter Non Arab}
 Tahap terakhir pra-pemrosesan adalah validasi karakter untuk memastikan bahwa seluruh nama perawi dalam dataset hanya mengandung huruf Arab. Karakter non-Arab dapat masuk ke dalam data melalui berbagai sumber, antara lain sisa tag anotasi, karakter tersembunyi hasil konversi \textit{encoding}, angka Latin, maupun simbol tanda baca yang tidak tersaring pada tahap sebelumnya. Keberadaan karakter-karakter tersebut berpotensi menyebabkan dua nama perawi yang secara Arab identik diperlakukan sebagai entitas yang berbeda oleh sistem. Validasi dilakukan menggunakan ekspresi reguler yang mendeteksi karakter di luar rentang Unicode Arab (\texttt{\textbackslash u0600}--\texttt{\textbackslash u06FF}), diikuti penghapusan otomatis terhadap seluruh karakter yang tidak sesuai. Hasil pemeriksaan menunjukkan tidak ditemukan karakter non-Arab pada kolom \texttt{Sanad\_no\_harakat}, yang mengonfirmasi bahwa seluruh tahap pembersihan sebelumnya telah menghasilkan data yang bersih dan siap digunakan pada tahap pembangunan jaringan sanad.
 
@@ -179,9 +179,9 @@ Setiap tripel kemudian dimasukkan ke dalam graf sebagai satu sisi berarah dari s
 
 \subsubsection{Penghitungan Bobot \textit{Edge}}
 \label{subsubsec:bobot-edge}
-Tidak semua relasi guru-murid dalam jaringan sanad memiliki tingkat kekuatan yang sama. Beberapa pasangan perawi muncul berulang kali dalam ribuan rantai sanad yang berbeda, sementara pasangan lainnya hanya muncul satu kali. 
+Tidak semua relasi guru--murid dalam jaringan sanad memiliki tingkat kekuatan yang sama. Beberapa pasangan perawi muncul berulang kali dalam ribuan rantai sanad yang berbeda, sementara pasangan lainnya hanya muncul satu kali. 
 Untuk merepresentasikan perbedaan kekuatan relasi tersebut, setiap \textit{edge} dalam graf dilengkapi dengan dua atribut bobot, yaitu \textit{Weight} dan \textit{Inverse Weight}.
-Atribut \textit{Weight} merepresentasikan frekuensi kemunculan suatu pasangan guru-murid di seluruh \textit{dataset}, di mana semakin tinggi nilai \textit{Weight}, semakin sering relasi periwayatan tersebut muncul.
+Atribut \textit{Weight} merepresentasikan frekuensi kemunculan suatu pasangan guru--murid di seluruh \textit{dataset}, di mana semakin tinggi nilai \textit{Weight}, semakin sering relasi periwayatan tersebut muncul.
 Hal ini mengindikasikan hubungan transmisi yang lebih kuat dan lebih terpercaya antara dua perawi. Nilai \textit{Weight} diperoleh dengan menghitung jumlah kemunculan setiap pasangan (Guru, Murid) yang identik, kemudian pasangan-pasangan duplikat tersebut digabungkan menjadi satu \textit{edge} tunggal dengan bobot yang sesuai.
 Selanjutnya, atribut \textit{Inverse Weight} dihitung sebagai kebalikan dari \textit{Weight}, yaitu $\textit{Inverse Weight} = 1/\textit{Weight}$.
 Atribut ini digunakan dalam algoritma sentralitas berbasis jarak, khususnya \textit{Closeness Centrality}.
@@ -259,6 +259,52 @@ Perhitungan kelima metrik tersebut tidak dilakukan secara manual, melainkan meng
 \begin{sloppypar}
 Kelima metrik tersebut dihitung untuk seluruh simpul, sehingga setiap perawi memperoleh lima nilai sentralitas. Seluruh nilai itu kemudian dikumpulkan ke dalam satu tabel pada tingkat perawi (simpul), di mana setiap baris merepresentasikan satu perawi unik dalam jaringan. Nama perawi dalam aksara Arab diambil dari kolom \texttt{Sanad\_no\_harakat}, sedangkan padanan Latinnya diperoleh dari hasil transliterasi pada Subbab~\ref{subsubsec:transliterasi}, lalu digabungkan dengan kelima nilai metrik sentralitas masing-masing perawi. Tabel pada tingkat perawi inilah yang menjadi keluaran akhir tahap analisis dan membentuk berkas \texttt{sentralitas.csv}, yang nantinya menjadi masukan bagi tahap penyimpanan ke basis data.
 \end{sloppypar}
+
+\subsubsection{Pengujian Performa Komputasi \textit{Knowledge Graph}}
+\label{subsubsec:performa-komputasi-kg}
+\begin{sloppypar}
+Selain performa \textit{dashboard} pada sisi klien yang diuji pada Subbab~\ref{subsec:pengujian-performa}, dilakukan pula pengujian performa pada sisi lapisan pemrosesan data (\textit{data processing layer}), yaitu mengukur biaya komputasi berupa waktu eksekusi dan penggunaan memori dari tahapan pembangunan \textit{Knowledge Graph} dan perhitungan kelima metrik sentralitas menggunakan NetworkX pada graf penuh berskala 177.047 simpul dan 776.798 sisi. Pengujian ini penting karena performa \textit{dashboard} pada Subbab~\ref{subsec:pengujian-performa} hanya mencerminkan sisi penyajian data yang telah tersimpan, sedangkan biaya komputasi pembangunan graf dan analisis jaringan yang menghasilkan data tersebut belum tercakup di dalamnya.
+\end{sloppypar}
+
+Pengujian dilakukan menggunakan skrip Python (\texttt{scripts/}\allowbreak\texttt{benchmark\_kg.py}) yang menyisipkan pencatatan waktu eksekusi dan ukuran memori proses (\textit{Resident Set Size}/RSS) sebelum dan sesudah setiap tahap, meliputi pemuatan berkas CSV, pembangunan graf (\texttt{from\_pandas\_}\allowbreak\texttt{edgelist}), penghapusan \textit{self-loop}, perhitungan \textit{degree} berbobot, serta kelima metrik sentralitas. Pengujian dilaksanakan pada satu lingkungan komputasi dengan spesifikasi sebagaimana ditunjukkan pada Tabel~\ref{tab:lingkungan-benchmark}, agar hasil waktu eksekusi dapat dinilai kewajarannya dan direproduksi pada perangkat lain.
+
+\begin{table}[H]
+\centering
+\caption{Spesifikasi lingkungan pengujian performa komputasi \textit{Knowledge Graph}}
+\label{tab:lingkungan-benchmark}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Komponen} & \textbf{Spesifikasi} \\
+\hline
+Sistem operasi & Windows 11 (build 10.0.26200) \\
+\hline
+Prosesor & AMD64, 6 \textit{core} / 12 \textit{thread} \\
+\hline
+Memori (RAM) & 6,29 GB \\
+\hline
+Python & 3.13.13 \\
+\hline
+NetworkX & 3.6.1 \\
+\hline
+pandas & 3.0.2 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{sloppypar}
+Sebagaimana disinggung pada Subbab~\ref{subsubsec:metrik-sentralitas}, metrik \textit{closeness} dan \textit{betweenness centrality} memerlukan penelusuran jalur terpendek antar seluruh pasangan simpul (\textit{all-pairs shortest path}) yang berbiaya komputasi sangat tinggi. Untuk mengukur besaran biaya tersebut secara kuantitatif pada graf penuh, kedua metrik diuji menggunakan pendekatan \textit{sampling}: \textit{closeness centrality} dihitung secara \textit{exact} namun hanya pada 100 simpul yang dipilih acak (\textit{seed}=20260721) sebagai representasi sebaran nilai, sedangkan \textit{betweenness centrality} dihitung menggunakan parameter \textit{sampled} resmi NetworkX (\texttt{k}=100 simpul sumber), yang tetap menghasilkan estimasi untuk seluruh 177.047 simpul namun dengan jumlah lintasan sumber yang dibatasi. Pendekatan \textit{sampling} pada pengujian performa ini digunakan untuk mengukur biaya komputasi dalam batas waktu yang wajar, dan hasilnya menjadi dasar kuantitatif atas keputusan pembatasan cakupan data pada Subbab~\ref{subsubsec:metrik-sentralitas} dan Tabel~\ref{tab:cakupan-metrik} Bab IV, yang menghitung \textit{closeness} dan \textit{betweenness centrality} pada subgraf representatif alih-alih graf penuh untuk keperluan analisis substantif.
+\end{sloppypar}
+
+Selain biaya komputasi, pengujian ini turut mengukur karakteristik struktural graf yang terbentuk, meliputi kepadatan (\textit{density}), rata-rata derajat simpul, jumlah komponen terhubung (baik \textit{weakly connected component} maupun \textit{strongly connected component}), dan estimasi diameter graf menggunakan algoritma aproksimasi \texttt{nx.approximation.}\allowbreak\texttt{diameter} pada komponen terhubung terbesar, mengingat penghitungan diameter secara \textit{exact} melalui \textit{breadth-first search} dari tiap simpul tidak memungkinkan dilakukan pada graf berskala ratusan ribu simpul.
+
+\subsubsection{Evaluasi Risiko Ambiguitas Resolusi Kata Kekerabatan}
+\label{subsubsec:evaluasi-kekerabatan}
+\begin{sloppypar}
+Sebagaimana disinggung pada Subbab~\ref{subsec:pra-pemrosesan}, resolusi kata kekerabatan berbasis aturan berisiko menggabungkan beberapa perawi berbeda ke dalam satu \textit{node} apabila nama acuannya sama namun berasal dari rantai sanad yang berbeda. Untuk mengukur besaran risiko tersebut secara kuantitatif, dilakukan evaluasi menggunakan skrip Python (\texttt{scripts/analyze\_}\allowbreak\texttt{kinship\_absorption.py}) yang menjalankan ulang tahap pra-pemrosesan (penghapusan harakat, normalisasi huruf) sambil menyisipkan pencatatan (\textit{instrumentation}) pada setiap kejadian resolusi kata kekerabatan, mencakup kitab, nomor hadis, nama acuan, dan \textit{node} hasil resolusinya, alih-alih hanya mencatat keluaran akhir seperti pada alur produksi. Untuk memastikan replikasi ini benar-benar merepresentasikan graf yang sesungguhnya dibangun, nama \textit{node} hasil replikasi dibandingkan terhadap \textit{node} pada berkas \texttt{sentralitas.csv} yang sebenarnya, menghasilkan tingkat kecocokan 99,59\% (14.173 dari 14.231 \textit{node}).
+\end{sloppypar}
+
+Evaluasi dilakukan pada dua tingkat. Pertama, tingkat \textit{absorption rate}, yaitu mengelompokkan seluruh kejadian resolusi berdasarkan \textit{node} hasilnya untuk mengetahui berapa kali \textit{node} yang sama terbentuk dari rantai sanad yang berbeda-beda. Karena frekuensi kemunculan yang tinggi tidak selalu menandakan tabrakan identitas, sebab dapat pula disebabkan oleh isnad kanonik yang dikutip berulang secara identik oleh banyak kitab, setiap nama acuan diklasifikasikan berdasarkan spesifisitasnya menjadi \textit{bare anchor} (nama acuan hanya satu kata tanpa nasab pembeda, misalnya \textit{Muhammad}) yang berisiko tinggi menggabungkan individu berbeda, dan \textit{qualified anchor} (nama acuan disertai nasab, misalnya \textit{Hisyam bin Urwah}) yang secara praktis tetap merujuk satu individu. Kedua, tingkat perbandingan derajat (\textit{degree}) graf, yaitu membandingkan derajat total (\textit{in-degree} ditambah \textit{out-degree}) antara \textit{node} bertipe \textit{direct} (nama langsung dari data), \textit{node resolved} beranchor \textit{qualified}, dan \textit{node resolved} beranchor \textit{bare}, menggunakan uji \textit{Mann-Whitney U} untuk menilai signifikansi statistik perbedaan derajat antarkelompok. Logika di baliknya, \textit{node} yang menggabungkan relasi guru--murid dari beberapa individu berbeda akan menunjukkan derajat yang secara anomali lebih tinggi dibandingkan \textit{node} yang benar-benar merepresentasikan satu perawi. Sebagai pelengkap, dilakukan pula pemeriksaan manual pada beberapa \textit{node} dengan jumlah kejadian dan derajat tertinggi, dengan menelusuri sebaran elemen guru pada tiap kejadian resolusi untuk menilai konsistensi maupun heterogenitas konteksnya.
 
 \subsubsection{Penyimpanan Hasil Analisis ke Basis Data (Supabase)}
 \label{subsubsec:penyimpanan-basis-data}
@@ -532,7 +578,7 @@ Supabase (PostgreSQL) & -- & Layanan Backend as a Service berbasis PostgreSQL se
 
 Pemilihan React dengan TypeScript sebagai dasar pengembangan bertujuan agar antarmuka dapat dibangun secara modular dalam bentuk komponen yang dapat digunakan kembali (\textit{reusable}), sekaligus mengurangi potensi kesalahan melalui pemeriksaan tipe data. Vite digunakan sebagai \textit{build tool} karena menawarkan proses kompilasi yang cepat selama pengembangan. Untuk kebutuhan tampilan, TailwindCSS dipilih agar penataan antarmuka lebih efisien tanpa menulis berkas CSS terpisah dalam jumlah besar.
 
-Pada aspek visualisasi, penelitian ini menggunakan dua pendekatan yang berbeda sesuai kebutuhan. Recharts dimanfaatkan untuk menampilkan grafik statistik (diagram batang) secara cepat, sedangkan visualisasi graf jaringan sanad yang interaktif dirender menggunakan HTML5 Canvas secara langsung. Penggunaan Canvas dipilih karena mampu menggambar dan memperbarui ratusan node serta edge secara efisien, sekaligus memberikan keleluasaan dalam menerapkan algoritma tata letak graf secara mandiri.
+Pada aspek visualisasi, penelitian ini menggunakan dua pendekatan yang berbeda sesuai kebutuhan. Recharts dimanfaatkan untuk menampilkan grafik statistik (diagram batang) secara cepat, sedangkan visualisasi graf jaringan sanad yang interaktif dirender secara mandiri di atas HTML5 Canvas, bukan melalui pustaka siap pakai seperti Cytoscape.js, D3.js, atau Sigma.js (Subbab~\ref{subsec:teknologi-rendering-graf} Bab II). Pemilihan ini didasarkan pada kebutuhan kustomisasi penuh terhadap algoritma tata letak khusus penelitian ini, yaitu memposisikan \textit{node} dalam cincin konsentris berdasarkan peringkat sentralitas (Subbab~\ref{subsec:implementasi-visualisasi-graf} Bab IV), yang sulit dicapai melalui API pustaka siap pakai yang bersifat generik. Dibandingkan SVG, \textit{Canvas} juga lebih ringan untuk animasi karena memanipulasi piksel secara langsung tanpa keterlibatan \textit{Document Object Model} (DOM) \cite{Zhao2025}; sementara WebGL, meski terbukti lebih cepat pada skala data yang sangat besar \cite{Zhao2025}, tidak dipilih karena kompleksitas implementasinya tidak sebanding dengan manfaatnya pada skala tampilan \textit{dashboard} yang hanya memuat 50 perawi teratas sekaligus.
 
 \begin{sloppypar}
 Adapun pada sisi penyimpanan dan integrasi data, Supabase yang berbasis PostgreSQL digunakan sebagai basis data, dan \textit{dashboard} mengakses datanya melalui pustaka klien \texttt{@supabase/supabase-js}. Dengan kombinasi teknologi tersebut, \textit{dashboard} dapat berjalan sebagai aplikasi web yang ringan, interaktif, dan terhubung langsung dengan hasil analisis jaringan sanad.
@@ -573,6 +619,30 @@ Pengujian difokuskan pada fitur-fitur utama \textit{dashboard}, yaitu navigasi a
 \end{tabular}
 \end{table}
 
+\subsection{Pengujian Performa dan Kualitas Non-Fungsional}
+\label{subsec:pengujian-performa}
+
+Selain pengujian fungsional melalui metode \textit{black-box} pada Subbab~\ref{subsec:blackbox-testing}, dilakukan pula pengujian non-fungsional untuk mengevaluasi performa visualisasi graf di sisi klien (\textit{browser}) serta ketahanan API Supabase terhadap beban akses. Pengujian ini mengacu pada karakteristik \textit{Performance Efficiency} pada ISO/IEC 25010, sebagaimana diterapkan pada pengujian kualitas sistem informasi berbasis web oleh Rajata \textit{et al.} \cite{Rajata2026SPP}, mencakup subkarakteristik \textit{Time Behaviour} untuk kelancaran animasi graf, \textit{Resource Utilization} untuk penggunaan memori \textit{browser}, dan \textit{Capacity} untuk ketahanan sistem terhadap beban akses bersamaan. Tiga pengujian dilakukan untuk mencakup ketiga subkarakteristik tersebut, yaitu pengujian \textit{frame rate} (FPS), pengujian penggunaan memori \textit{browser}, dan \textit{load testing} API.
+
+\subsubsection{Pengujian \textit{Frame Rate} (FPS)}
+Pengujian ini bertujuan mengukur kelancaran animasi visualisasi graf di sisi klien, khususnya saat pengguna melakukan interaksi memperbesar dan memperkecil tampilan (\textit{zoom in/out}) melalui \textit{scroll wheel}, mengingat visualisasi graf dirender secara mandiri di atas HTML5 Canvas menggunakan simulasi fisika \textit{force-directed} yang dijalankan pada setiap \textit{frame} melalui \texttt{requestAnimationFrame} (rincian algoritmenya diuraikan pada Bab IV Subbab~\ref{subsec:implementasi-visualisasi-graf}). Penghitung \textit{frame} disisipkan ke dalam halaman melalui skrip Playwright tanpa mengubah kode aplikasi, kemudian jumlah \textit{frame} yang berhasil dirender disampel setiap detik saat interaksi \textit{zoom in/out}, dengan interaksi menggeser tampilan (\textit{pan}) dan menggeser satu \textit{node} (\textit{drag}) turut diukur sebagai pembanding. Dari tiap skenario dihitung FPS rata-rata dan FPS minimum, kemudian dinilai terhadap ambang umum kelancaran animasi, yaitu 60 FPS dianggap mulus, sedangkan di bawah 30 FPS mulai terasa tersendat (\textit{jank}) \cite{Zhao2025}.
+
+\subsubsection{Pengujian Penggunaan Memori \textit{Browser}}
+Pengujian ini bertujuan mengukur penggunaan memori (\textit{JavaScript heap}) \textit{browser} saat visualisasi graf memuat data dalam jumlah \textit{node} yang divariasikan mendekati skala penuh jaringan sanad yang berjumlah 177.047 perawi. Jumlah \textit{node} yang semula tetap pada 50 diparameterisasi sementara melalui parameter URL opsional agar dapat diubah tanpa memengaruhi perilaku aplikasi pada kondisi normal, kemudian diuji pada beberapa nilai N yang meningkat menggunakan Playwright. Pada tiap nilai N, ukuran \textit{JavaScript heap} yang aktif digunakan diukur melalui \textit{Chrome DevTools Protocol} (\texttt{Performance.getMetrics}), dengan \textit{garbage collection} dipaksa dijalankan sebelum setiap pengukuran agar angka yang diperoleh merepresentasikan memori yang benar-benar masih direferensikan, bukan sampah sementara.
+
+\subsubsection{\textit{Load Testing} API}
+Pengujian ini bertujuan menguji ketahanan API Supabase terhadap permintaan bersamaan (\textit{concurrent users}) untuk menemukan titik jenuh (\textit{breaking point}) sistem. Pengujian dilakukan menggunakan k6, yaitu perangkat \textit{load testing} berbasis skrip JavaScript, yang mengirim permintaan langsung ke \textit{REST API} Supabase merepresentasikan pola akses saat \textit{dashboard} memuat 50 perawi teratas beserta relasinya. Skenario pengujian menggunakan strategi \textit{ramping virtual users}, yaitu jumlah pengguna virtual (VU) dinaikkan secara bertahap, ditahan pada tiap tahap untuk mengamati kestabilan, lalu diturunkan kembali ke nol. Kriteria keberhasilan ditetapkan berupa latensi persentil ke-95 di bawah 1.000 milidetik dan tingkat kegagalan permintaan di bawah 1\%, mengacu pada ambang batas umum yang digunakan dalam evaluasi performa aplikasi web untuk operasi asinkron.
+
+\subsection{Evaluasi Kebermanfaatan \textit{Dashboard} (\textit{System Usability Scale})}
+\label{subsec:metode-sus}
+\begin{sloppypar}
+Selain pengujian fungsional dan performa teknis, dikumpulkan pula umpan balik pengguna nyata untuk mengukur persepsi kemudahan penggunaan \textit{dashboard} sebagaimana diuraikan pada Subbab~\ref{subsec:teori-sus} Bab II. Evaluasi dilakukan menggunakan kuesioner daring yang mengadaptasi tujuh dari sepuluh pernyataan baku \textit{System Usability Scale} (SUS) \cite{Brooke1996}, mencakup frekuensi penggunaan, kompleksitas, kemudahan penggunaan, kebutuhan bantuan teknis, integrasi fitur, konsistensi, dan kecepatan mempelajari sistem, sementara tiga pernyataan baku lainnya (mengenai kerepotan penggunaan, tingkat kepercayaan diri pengguna, dan kebutuhan mempelajari banyak hal sebelum dapat menggunakan sistem) tidak disertakan.
+\end{sloppypar}
+
+Karena perbedaan jumlah item tersebut, formula \textit{skoring} standar (kontribusi tiap item dikalikan 2,5) tidak dapat diterapkan langsung. Sebagai penyesuaian, kontribusi tiap pernyataan tetap dihitung dengan cara yang sama seperti SUS baku (pernyataan bermuatan positif dihitung sebagai nilai jawaban dikurangi 1, pernyataan bermuatan negatif dihitung sebagai 5 dikurangi nilai jawaban), kemudian jumlah kontribusi ketujuh pernyataan (berkisar 0--28) dikonversi ke skala 0--100 melalui perkalian dengan faktor $100/28$, sehingga hasilnya disebut skor SUS teradaptasi, bukan skor SUS baku.
+
+Kuesioner disebarkan secara daring dan diisi oleh 18 responden, disertai pertanyaan demografis (usia, jenis kelamin, latar belakang/profesi, pengalaman akademis atau profesional di bidang ilmu hadis, serta frekuensi penggunaan aplikasi visualisasi data sejenis sebelumnya) dan tiga pertanyaan terbuka mengenai hal yang paling disukai, kendala yang ditemui, serta saran perbaikan, untuk melengkapi skor kuantitatif dengan umpan balik kualitatif.
+
 \section{Alur Tugas Akhir}
 
 Secara keseluruhan, pelaksanaan tugas akhir ini mengikuti serangkaian tahapan yang saling berurutan, mulai dari studi literatur hingga penulisan laporan. Keseluruhan tahapan tersebut disajikan dalam bentuk diagram alir (\textit{flowchart}) pada Gambar~\ref{fig:alur-tugas-akhir}.
@@ -588,7 +658,7 @@ Penjelasan masing-masing tahapan pada diagram alir tersebut adalah sebagai berik
 
 \begin{enumerate}
 	\item \textbf{Studi Literatur.} Tahap awal berupa pengkajian referensi yang berkaitan dengan \textit{Knowledge Graph}, analisis jaringan sanad hadis, metrik sentralitas pada \textit{Social Network Analysis}, serta teknologi pengembangan \textit{front-end}, sebagai landasan teori penelitian.
-	\item \textbf{Persiapan Dataset.} Pengumpulan dan penyiapan data hadis dari studi Mghari \textit{et al}, khususnya berkas \texttt{sanadset.csv} yang memuat rantai sanad. Dataset ini menjadi sumber data utama yang diolah pada seluruh tahap selanjutnya.
+	\item \textbf{Persiapan Dataset.} Pengumpulan dan penyiapan data hadis dari studi Mghari \textit{et al.}, khususnya berkas \texttt{sanadset.csv} yang memuat rantai sanad. Dataset ini menjadi sumber data utama yang diolah pada seluruh tahap selanjutnya.
 	\item \textbf{Pra-Pemrosesan Data.} Pembersihan dan normalisasi nama perawi, meliputi penghapusan baris tanpa sanad, penghapusan harakat, normalisasi huruf dan kata, hingga validasi karakter. Tahap ini memastikan setiap nama perawi yang identik dikenali sebagai satu entitas sehingga graf yang terbentuk akurat.
 	\item \textbf{Pembangunan \textit{Knowledge Graph}.} Pemodelan rantai sanad menjadi graf berarah berisi simpul perawi dan sisi relasi periwayatan guru--murid. Graf inilah yang menjadi representasi utama jaringan periwayatan hadis dalam penelitian ini.
 	\item \textbf{Analisis Jaringan Sanad.} Perhitungan kelima metrik sentralitas menggunakan pustaka NetworkX untuk mengidentifikasi peran tiap perawi dalam jaringan. Nilai sentralitas tersebut menjadi dasar untuk menilai tingkat pengaruh dan posisi setiap perawi dalam jaringan.
